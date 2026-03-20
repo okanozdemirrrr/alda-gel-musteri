@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/app/musteri/lib/supabase'
+import { supabase } from '@/app/lib/supabase'
 import dynamic from 'next/dynamic'
 
 // Leaflet'i dinamik import et (SSR sorunlarını önlemek için)

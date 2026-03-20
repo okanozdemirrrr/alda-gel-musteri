@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/app/musteri/lib/supabase'
+import { supabase } from '@/app/lib/supabase'
 import { ArrowLeft, Edit2, Save, X } from 'lucide-react'
 import { motion } from 'framer-motion'
 

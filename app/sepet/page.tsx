@@ -1,6 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+export const dynamic = 'force-dynamic'
+
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { ArrowLeft, Trash2, Plus, Minus, MessageSquare } from 'lucide-react'
 
@@ -20,6 +22,7 @@ export default function SepetPage() {
   const [selectedItem, setSelectedItem] = useState<CartItem | null>(null)
   const [noteModalOpen, setNoteModalOpen] = useState(false)
   const [tempNote, setTempNote] = useState('')
+  const [customerAddress, setCustomerAddress] = useState('')
 
   // Örnek sepet verisi (gerçek uygulamada Context veya State Management kullanılmalı)
   const [cartItems, setCartItems] = useState<CartItem[]>([
@@ -27,6 +30,13 @@ export default function SepetPage() {
     { id: '2', name: 'Ekmek', price: 5.00, quantity: 3, unit: '1 Adet', image: '🍞' },
     { id: '16', name: 'Domates', price: 18.90, quantity: 1, unit: '1 Kg', image: '🍅' }
   ])
+
+  // Load address from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setCustomerAddress(localStorage.getItem('customer_address') || 'Adres seçilmedi')
+    }
+  }, [])
 
   const openNoteModal = (item: CartItem) => {
     setSelectedItem(item)
@@ -227,7 +237,7 @@ export default function SepetPage() {
             <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-4">
               <p className="text-sm font-semibold text-orange-900 mb-1">Teslimat Adresi</p>
               <p className="text-sm text-orange-700">
-                {localStorage.getItem('customer_address') || 'Adres seçilmedi'}
+                {customerAddress}
               </p>
             </div>
 

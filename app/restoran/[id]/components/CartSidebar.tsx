@@ -31,7 +31,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
 
   const openNoteModal = (item: any) => {
     setSelectedItem(item)
-    setTempNote(item.item_note || '')
+    setTempNote(item.note || '')
     setNoteModalOpen(true)
   }
 
@@ -142,7 +142,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
         product_name: item.product.name,
         quantity: item.quantity,
         price: item.product.price,
-        item_note: item.item_note || null
+        item_note: item.note || null
       }))
 
       // Siparişi veritabanına kaydet - KOORDİNATLARLA BİRLİKTE
@@ -248,10 +248,10 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                           {item.product.description}
                         </p>
                       )}
-                      {item.item_note && (
+                      {item.note && (
                         <div className="flex items-center gap-1 text-[12px] text-[#f59e0b] bg-orange-50 px-2 py-1 rounded-md inline-flex mt-1">
                           <span>💬</span>
-                          <span className="truncate max-w-[200px]">{item.item_note}</span>
+                          <span className="truncate max-w-[200px]">{item.note}</span>
                         </div>
                       )}
                     </div>

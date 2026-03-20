@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/app/musteri/lib/supabase'
+import { supabase } from '@/app/lib/supabase'
 import { Bell, X, CheckCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'

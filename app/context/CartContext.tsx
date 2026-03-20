@@ -44,12 +44,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
         // Ürün zaten sepette, miktarı artır
         return prevCart.map(item =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, item_note: note || item.item_note }
+            ? { ...item, quantity: item.quantity + quantity, note: note || item.note }
             : item
         )
       } else {
         // Yeni ürün ekle
-        return [...prevCart, { product, quantity, item_note: note }]
+        return [...prevCart, { product, quantity, note }]
       }
     })
   }
@@ -73,7 +73,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const updateNote = (productId: string, note: string) => {
     setCart(prevCart =>
       prevCart.map(item =>
-        item.product.id === productId ? { ...item, item_note: note } : item
+        item.product.id === productId ? { ...item, note: note } : item
       )
     )
   }

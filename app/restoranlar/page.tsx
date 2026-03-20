@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { supabase } from '@/app/musteri/lib/supabase'
+import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, FileText, User } from 'lucide-react'
-import { calculateDistance, formatDistance } from '@/app/musteri/lib/distanceUtils'
+import { calculateDistance, formatDistance } from '@/app/lib/distanceUtils'
 import AddressModal from '../components/AddressModal'
 import NotificationBell from '../components/NotificationBell'
 
