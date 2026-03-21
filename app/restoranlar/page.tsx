@@ -260,7 +260,7 @@ export default function RestoranlarPage() {
                     <button
                       onClick={() => {
                         setShowMenu(false)
-                        router.push('/musteri/siparislerim')
+                        router.push('/siparislerim')
                       }}
                       className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
                     >
@@ -270,7 +270,7 @@ export default function RestoranlarPage() {
                     <button
                       onClick={() => {
                         setShowMenu(false)
-                        router.push('/musteri/profil')
+                        router.push('/profil')
                       }}
                       className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
                     >
@@ -280,7 +280,7 @@ export default function RestoranlarPage() {
                     <button
                       onClick={() => {
                         setShowMenu(false)
-                        router.push('/musteri/yardim')
+                        router.push('/yardim')
                       }}
                       className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
                     >

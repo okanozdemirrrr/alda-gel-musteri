@@ -107,7 +107,7 @@ export default function SepetPage() {
             Market bölümünden ürün ekleyerek alışverişe başlayabilirsiniz
           </p>
           <button
-            onClick={() => router.push('/musteri/market')}
+            onClick={() => router.push('/market')}
             className="bg-orange-500 text-white px-8 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors"
           >
             Alışverişe Başla

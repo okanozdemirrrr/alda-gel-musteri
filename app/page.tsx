@@ -16,11 +16,11 @@ function SplitScreenSelector() {
   const router = useRouter()
 
   const handleYemekClick = () => {
-    router.push('/musteri/restoranlar')
+    router.push('/restoranlar')
   }
 
   const handleMarketClick = () => {
-    router.push('/musteri/market')
+    router.push('/market')
   }
 
   return (
@@ -289,7 +289,7 @@ export default function MusteriAnaSayfa() {
                 width={120} 
                 height={40}
                 className="cursor-pointer"
-                onClick={() => router.push('/musteri')}
+                onClick={() => router.push('/')}
               />
               
               <button
@@ -357,7 +357,7 @@ export default function MusteriAnaSayfa() {
                           <button
                             onClick={() => {
                               setShowMenu(false)
-                              router.push('/musteri/siparislerim')
+                              router.push('/siparislerim')
                             }}
                             className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
                           >
@@ -367,7 +367,7 @@ export default function MusteriAnaSayfa() {
                           <button
                             onClick={() => {
                               setShowMenu(false)
-                              router.push('/musteri/yardim')
+                              router.push('/yardim')
                             }}
                             className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
                           >
@@ -381,7 +381,7 @@ export default function MusteriAnaSayfa() {
                           <button
                             onClick={() => {
                               setShowMenu(false)
-                              router.push('/musteri/profil')
+                              router.push('/profil')
                             }}
                             className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
                           >

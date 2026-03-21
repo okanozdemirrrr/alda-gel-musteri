@@ -51,7 +51,7 @@ export default function MarketPage() {
 
           {/* Sepet */}
           <button
-            onClick={() => router.push('/musteri/sepet')}
+            onClick={() => router.push('/sepet')}
             className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <ShoppingCart size={24} className="text-gray-700" />

@@ -355,7 +355,7 @@ export default function NotificationBell() {
                 <button
                   onClick={() => {
                     setIsOpen(false)
-                    router.push('/musteri/bildirimler')
+                    router.push('/bildirimler')
                   }}
                   className="text-[12px] text-[#f59e0b] hover:text-[#d97706] font-semibold w-full text-center"
                 >
