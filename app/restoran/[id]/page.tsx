@@ -10,6 +10,7 @@ import CartSidebar from './components/CartSidebar'
 import AddressModal from '../../components/AddressModal'
 import ReviewsSection from './components/ReviewsSection'
 import UpsellModal from './components/UpsellModal'
+import { Clock, Wallet } from 'lucide-react'
 
 interface Restaurant {
   id: string
@@ -318,20 +319,37 @@ export default function RestaurantMenuPage() {
           
           <div className="flex items-start justify-between mb-3">
             <div>
-              <h1 className="text-[28px] font-bold text-[#3c4043] mb-2" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+              <h1 className="text-[28px] font-bold text-[#3c4043] mb-3" style={{ fontFamily: 'Open Sans, sans-serif' }}>
                 {restaurant.name}
               </h1>
-              <div className="flex items-center gap-3 text-[13px] text-[#6f6f6f]">
-                <span className="flex items-center gap-1">
+              
+              {/* Rating */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className="flex items-center gap-1 text-[14px]">
                   <span className="text-[#f59e0b]">⭐</span>
                   <span className="font-semibold text-[#3c4043]">
                     {averageRating ? averageRating.toFixed(1) : restaurant.rating}
                   </span>
                 </span>
-                <span>•</span>
-                <span>{restaurant.estimated_delivery_time}</span>
-                <span>•</span>
-                <span className="font-semibold">Min. {restaurant.minimum_order_value}₺</span>
+              </div>
+
+              {/* Badges: Teslimat Süresi ve Minimum Tutar */}
+              <div className="flex items-center gap-2">
+                {/* Teslimat Süresi Badge */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-full">
+                  <Clock size={14} className="text-orange-600" strokeWidth={2.5} />
+                  <span className="text-xs font-medium text-gray-700">
+                    {restaurant.estimated_delivery_time}
+                  </span>
+                </div>
+
+                {/* Minimum Tutar Badge */}
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full">
+                  <Wallet size={14} className="text-gray-600" strokeWidth={2.5} />
+                  <span className="text-xs font-medium text-gray-700">
+                    Min. {restaurant.minimum_order_value}₺
+                  </span>
+                </div>
               </div>
             </div>
             

@@ -5,7 +5,7 @@ import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, FileText, User } from 'lucide-react'
+import { Menu, FileText, User, Clock, Wallet } from 'lucide-react'
 import { calculateDistance, formatDistance } from '@/app/lib/distanceUtils'
 import AddressModal from '../components/AddressModal'
 import NotificationBell from '../components/NotificationBell'
@@ -570,12 +570,11 @@ function RestaurantCard({
           {restaurant.name}
         </h3>
 
-        <div className="flex items-center gap-2 text-[13px] text-[#6f6f6f] mb-2">
+        {/* Rating ve Mesafe */}
+        <div className="flex items-center gap-2 text-[13px] text-[#6f6f6f] mb-3">
           <span className="flex items-center gap-1">
             ⭐ {restaurant.rating?.toFixed(1) || '0.0'}
           </span>
-          <span>•</span>
-          <span>{restaurant.estimated_delivery_time || '20-30 dk'}</span>
           {restaurant.distance !== undefined && restaurant.distance > 0 && (
             <>
               <span>•</span>
@@ -584,16 +583,33 @@ function RestaurantCard({
           )}
         </div>
 
-        <div className="flex items-center justify-between text-[12px]">
-          <span className="text-[#6f6f6f]">
-            Min. {restaurant.min_order_amount || 0}₺
-          </span>
-          {restaurant.delivery_fee !== undefined && (
-            <span className="text-[#f59e0b] font-semibold">
-              {restaurant.delivery_fee === 0 ? 'Ücretsiz Teslimat' : `${restaurant.delivery_fee}₺ Teslimat`}
+        {/* Badges: Teslimat Süresi ve Minimum Tutar */}
+        <div className="flex items-center gap-2 mb-2">
+          {/* Teslimat Süresi Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 rounded-full">
+            <Clock size={12} className="text-orange-600" strokeWidth={2.5} />
+            <span className="text-xs font-medium text-gray-700">
+              {restaurant.estimated_delivery_time || '20-30 dk'}
             </span>
-          )}
+          </div>
+
+          {/* Minimum Tutar Badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 rounded-full">
+            <Wallet size={12} className="text-gray-600" strokeWidth={2.5} />
+            <span className="text-xs font-medium text-gray-700">
+              Min. {restaurant.min_order_amount || 0}₺
+            </span>
+          </div>
         </div>
+
+        {/* Teslimat Ücreti */}
+        {restaurant.delivery_fee !== undefined && (
+          <div className="text-[12px]">
+            <span className="text-[#f59e0b] font-semibold">
+              {restaurant.delivery_fee === 0 ? '🎉 Ücretsiz Teslimat' : `${restaurant.delivery_fee}₺ Teslimat`}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   )
