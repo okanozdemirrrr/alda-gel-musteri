@@ -31,18 +31,13 @@ export default function ReviewsSection({ restaurantId }: ReviewsSectionProps) {
 
   const loadReviews = async () => {
     try {
-      console.log('Loading reviews for restaurant:', restaurantId)
-      
       const { data, error } = await supabase
         .from('reviews')
         .select('*')
         .eq('restaurant_id', restaurantId)
         .order('created_at', { ascending: false })
 
-      console.log('Reviews query result:', { data, error })
-
       if (error) {
-        console.error('Reviews query error:', error)
         throw error
       }
 
@@ -57,7 +52,7 @@ export default function ReviewsSection({ restaurantId }: ReviewsSectionProps) {
         setAverageRating(avg)
       }
     } catch (error) {
-      console.error('Yorumlar yüklenemedi:', error)
+      // Hata durumunda sessizce devam et
     } finally {
       setLoading(false)
     }

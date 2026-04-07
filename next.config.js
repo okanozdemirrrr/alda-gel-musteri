@@ -4,14 +4,14 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['images.unsplash.com'],
-    unoptimized: true,
+    unoptimized: true, // Capacitor için gerekli
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
-  // Vercel için output ayarı
-  output: 'standalone',
-  // Tüm sayfaları export et
+  // Capacitor için export
+  output: 'export',
+  distDir: 'out',
   trailingSlash: false,
   // TypeScript ve ESLint hatalarını ignore etme (production build için)
   typescript: {

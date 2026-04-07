@@ -21,6 +21,7 @@ interface Restaurant {
   estimated_delivery_time?: string
   category?: string
   is_open?: boolean
+  is_active?: boolean
   has_campaign?: boolean
   latitude?: number
   longitude?: number
@@ -69,6 +70,13 @@ export default function RestoranlarPage() {
     // Müşteri koordinatlarını al
     fetchCustomerLocation(customerId)
     fetchRestaurants()
+
+    // 30 saniyelik polling - restoran durumlarını güncelle
+    const interval = setInterval(() => {
+      fetchRestaurants()
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [router])
 
   // Menü dışına tıklama kontrolü
@@ -171,9 +179,9 @@ export default function RestoranlarPage() {
       })
   }, [restaurants, customerLat, customerLng, selectedCategory])
 
-  // Açık ve kapalı restoranları ayır
-  const openRestaurants = filteredRestaurants.filter(r => r.is_open !== false)
-  const closedRestaurants = filteredRestaurants.filter(r => r.is_open === false)
+  // Açık ve kapalı restoranları ayır (is_active kontrolü de ekle)
+  const openRestaurants = filteredRestaurants.filter(r => r.is_open !== false && r.is_active !== false)
+  const closedRestaurants = filteredRestaurants.filter(r => r.is_open === false || r.is_active === false)
 
   const handleLogout = () => {
     localStorage.removeItem('customer_id')
@@ -397,7 +405,7 @@ function RestaurantCard({
 }) {
   return (
     <div
-      onClick={() => !isClosed && router.push(`/musteri/restoran/${restaurant.id}`)}
+      onClick={() => !isClosed && router.push(`/restoran/${restaurant.id}`)}
       className={`bg-white border border-[#e8e8e8] rounded-xl overflow-hidden hover:shadow-lg transition-all cursor-pointer ${
         isClosed ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#f59e0b]'
       }`}
@@ -427,7 +435,7 @@ function RestaurantCard({
         {isClosed && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
             <span className="bg-white text-[#3c4043] px-4 py-2 rounded-lg font-bold text-[14px]">
-              Kapalı
+              Şu an Kapalı
             </span>
           </div>
         )}

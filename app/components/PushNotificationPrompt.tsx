@@ -39,8 +39,6 @@ export default function PushNotificationPrompt() {
       localStorage.setItem('notification_permission_asked', 'true')
       
       if (result === 'granted') {
-        console.log('✅ Bildirim izni verildi')
-        
         // Test bildirimi gönder
         new Notification('🎉 Bildirimler Aktif!', {
           body: 'Artık kampanyalardan ve sipariş güncellemelerinden haberdar olacaksınız.',

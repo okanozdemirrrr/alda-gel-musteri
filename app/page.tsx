@@ -409,20 +409,34 @@ export default function MusteriAnaSayfa() {
         </header>
 
         {/* Main Content */}
-        <main className="max-w-7xl mx-auto px-4 py-8">
+        <main className="relative min-h-[calc(100vh-72px)]">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{
+                backgroundImage: 'url(/alda-gel-hero.png)',
+              }}
+            />
+            {/* Optional overlay for better text readability */}
+            <div className="absolute inset-0 bg-black/20" />
+          </div>
+
+          {/* Content */}
+          <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
           {!isLoggedIn || !selectedAddress ? (
             // Giriş yapmamış veya adres seçmemiş kullanıcılar için
             <div className="text-center py-20">
-              <h1 className="text-[48px] font-bold text-[#3c4043] mb-4" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+              <h1 className="text-[48px] font-bold text-white mb-4 drop-shadow-2xl" style={{ fontFamily: 'Open Sans, sans-serif' }}>
                 Alda Gel
               </h1>
-              <p className="text-[18px] text-[#6f6f6f] mb-8">
+              <p className="text-[18px] text-white mb-8 drop-shadow-lg">
                 Samsun 19 Mayıs'ta hızlı teslimat
               </p>
               
               <button
                 onClick={handleAddressClick}
-                className="px-8 py-4 text-[16px] font-bold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors"
+                className="px-8 py-4 text-[16px] font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-2xl"
                 style={{ fontFamily: 'Open Sans, sans-serif' }}
               >
                 {!isLoggedIn ? 'Giriş Yap ve Başla' : 'Adresini Seç ve Başla'}
@@ -432,6 +446,7 @@ export default function MusteriAnaSayfa() {
             // Giriş yapmış ve adres seçmiş kullanıcılar için Split Screen
             <SplitScreenSelector />
           )}
+          </div>
         </main>
       </div>
 

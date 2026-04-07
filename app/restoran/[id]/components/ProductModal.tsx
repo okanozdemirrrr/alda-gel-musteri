@@ -3,19 +3,60 @@
 import { useState } from 'react'
 import { Product } from '@/types/menu'
 import { useCart } from '@/app/context/CartContext'
+import { supabase } from '@/app/lib/supabase'
 
 interface ProductModalProps {
   product: Product
+  allProducts: Product[]
   onClose: () => void
+  onShowUpsell?: (product: Product, relatedProducts: Product[]) => void
 }
 
-export default function ProductModal({ product, onClose }: ProductModalProps) {
+export default function ProductModal({ product, allProducts, onClose, onShowUpsell }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1)
   const [note, setNote] = useState('')
-  const { addToCart } = useCart()
+  const { addToCart, cart } = useCart()
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
+    // Ürünü sepete ekle
     addToCart(product, quantity, note)
+    
+    // Yan ürünleri products tablosundaki upsell_product_ids array'inden kontrol et
+    if (onShowUpsell) {
+      try {
+        // Ürünün upsell_product_ids array'i var mı kontrol et
+        if (product.upsell_product_ids && product.upsell_product_ids.length > 0) {
+          // Yan ürünleri ID'lere göre çek
+          const { data: upsellProducts, error } = await supabase
+            .from('products')
+            .select('*')
+            .in('id', product.upsell_product_ids)
+            .eq('is_available', true)
+            .eq('is_visible', true)
+          
+          if (error) {
+            console.error('Yan ürünler yüklenemedi:', error)
+            onClose()
+            return
+          }
+          
+          // Sepette olmayan yan ürünleri filtrele
+          if (upsellProducts && upsellProducts.length > 0) {
+            const relatedProducts = upsellProducts.filter(p => 
+              !cart.some(item => item.product.id === p.id)
+            )
+            
+            if (relatedProducts.length > 0) {
+              onShowUpsell(product, relatedProducts)
+              return
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Yan ürün kontrolü başarısız:', error)
+      }
+    }
+    
     onClose()
   }
 

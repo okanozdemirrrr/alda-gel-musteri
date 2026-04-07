@@ -13,6 +13,7 @@ interface CartSidebarProps {
     name: string
     minimum_order_value: number
     delivery_fee: number
+    is_active?: boolean
   }
   onClose: () => void
 }
@@ -51,11 +52,33 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
   const remainingAmount = Math.max(0, minimumOrderValue - subtotal)
   const canCheckout = subtotal >= minimumOrderValue
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (!canCheckout) return
-    setShowPaymentModal(true)
-    setPhoneNumber('')
-    setPhoneError('')
+    
+    // Restoran durumunu tekrar kontrol et
+    try {
+      const { data: restaurantData, error } = await supabase
+        .from('restaurants')
+        .select('is_active')
+        .eq('id', restaurant.id)
+        .single()
+
+      if (error) throw error
+
+      if (restaurantData?.is_active === false) {
+        alert('⚠️ Üzgünüz, restoran az önce kapandı. Sipariş veremezsiniz.')
+        onClose()
+        return
+      }
+
+      // Restoran açıksa ödeme modalını aç
+      setShowPaymentModal(true)
+      setPhoneNumber('')
+      setPhoneError('')
+    } catch (error) {
+      console.error('Restoran durumu kontrol edilemedi:', error)
+      alert('Bir hata oluştu. Lütfen tekrar deneyin.')
+    }
   }
 
   const validatePhoneNumber = (phone: string): boolean => {
@@ -112,6 +135,23 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
     setIsProcessing(true)
 
     try {
+      // Ödeme aşamasında restoran durumunu tekrar kontrol et
+      const { data: restaurantCheck, error: checkError } = await supabase
+        .from('restaurants')
+        .select('is_active')
+        .eq('id', restaurant.id)
+        .single()
+
+      if (checkError) throw checkError
+
+      if (restaurantCheck?.is_active === false) {
+        setIsProcessing(false)
+        setShowPaymentModal(false)
+        alert('⚠️ Üzgünüz, restoran az önce kapandı. Sipariş veremezsiniz.')
+        onClose()
+        return
+      }
+
       // Müşteri bilgilerini al
       const customerId = localStorage.getItem('customer_id')
       const customerAddress = localStorage.getItem('customer_address')

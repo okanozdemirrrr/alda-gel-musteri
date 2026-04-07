@@ -9,6 +9,7 @@ import ProductModal from './components/ProductModal'
 import CartSidebar from './components/CartSidebar'
 import AddressModal from '../../components/AddressModal'
 import ReviewsSection from './components/ReviewsSection'
+import UpsellModal from './components/UpsellModal'
 
 interface Restaurant {
   id: string
@@ -19,6 +20,7 @@ interface Restaurant {
   estimated_delivery_time: string
   logo_url?: string
   cover_image_url?: string
+  is_active?: boolean
 }
 
 export const dynamic = 'force-dynamic'
@@ -38,8 +40,11 @@ export default function RestaurantMenuPage() {
   const [selectedAddress, setSelectedAddress] = useState('')
   const [activeTab, setActiveTab] = useState<'menu' | 'reviews'>('menu')
   const [averageRating, setAverageRating] = useState<number | null>(null)
+  const [showUpsell, setShowUpsell] = useState(false)
+  const [upsellMainProduct, setUpsellMainProduct] = useState<Product | null>(null)
+  const [upsellRelatedProducts, setUpsellRelatedProducts] = useState<Product[]>([])
   
-  const { addToCart, getCartItemCount } = useCart()
+  const { addToCart, getCartItemCount, cart } = useCart()
 
   useEffect(() => {
     fetchRestaurantData()
@@ -50,6 +55,13 @@ export default function RestaurantMenuPage() {
     if (address) {
       setSelectedAddress(address)
     }
+
+    // 30 saniyelik polling - restoran durumunu güncelle
+    const interval = setInterval(() => {
+      fetchRestaurantData()
+    }, 30000)
+
+    return () => clearInterval(interval)
   }, [restaurantId])
 
   const fetchAverageRating = async () => {
@@ -111,12 +123,76 @@ export default function RestaurantMenuPage() {
     }
   }
 
-  const handleQuickAdd = (product: Product) => {
+  const handleQuickAdd = async (product: Product) => {
+    // Restoran kapalıysa ekleme yapma
+    if (restaurant?.is_active === false) {
+      alert('Üzgünüz, restoran şu an sipariş almıyor')
+      return
+    }
+    
+    // Ürünü sepete ekle
     addToCart(product, 1)
+    
+    // Yan ürünleri products tablosundaki upsell_product_ids array'inden kontrol et
+    try {
+      // Ürünün upsell_product_ids array'i var mı kontrol et
+      if (product.upsell_product_ids && product.upsell_product_ids.length > 0) {
+        // Yan ürünleri ID'lere göre çek
+        const { data: upsellProducts, error } = await supabase
+          .from('products')
+          .select('*')
+          .in('id', product.upsell_product_ids)
+          .eq('is_available', true)
+          .eq('is_visible', true)
+        
+        if (error) {
+          console.error('Yan ürünler yüklenemedi:', error)
+          return
+        }
+        
+        // Sepette olmayan yan ürünleri filtrele
+        if (upsellProducts && upsellProducts.length > 0) {
+          const relatedProducts = upsellProducts.filter(p => 
+            !cart.some(item => item.product.id === p.id)
+          )
+          
+          if (relatedProducts.length > 0) {
+            setUpsellMainProduct(product)
+            setUpsellRelatedProducts(relatedProducts)
+            setShowUpsell(true)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Yan ürün kontrolü başarısız:', error)
+    }
   }
 
   const handleProductClick = (product: Product) => {
+    // Restoran kapalıysa modal açma
+    if (restaurant?.is_active === false) {
+      alert('Üzgünüz, restoran şu an sipariş almıyor')
+      return
+    }
     setSelectedProduct(product)
+  }
+
+  const handleShowUpsell = (mainProduct: Product, relatedProducts: Product[]) => {
+    setSelectedProduct(null)
+    setUpsellMainProduct(mainProduct)
+    setUpsellRelatedProducts(relatedProducts)
+    setShowUpsell(true)
+  }
+
+  const handleUpsellClose = () => {
+    setShowUpsell(false)
+    setUpsellMainProduct(null)
+    setUpsellRelatedProducts([])
+  }
+
+  const handleUpsellContinue = () => {
+    handleUpsellClose()
+    setShowCart(true)
   }
 
   const handleAddressSelect = (address: string) => {
@@ -170,6 +246,17 @@ export default function RestaurantMenuPage() {
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
         
+        {/* Kapalı Overlay */}
+        {restaurant.is_active === false && (
+          <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
+            <div className="text-center">
+              <span className="bg-white text-[#3c4043] px-6 py-3 rounded-xl font-bold text-[18px] shadow-2xl">
+                🔒 Restoran Şu An Kapalı
+              </span>
+            </div>
+          </div>
+        )}
+        
         {/* Back Button */}
         <button
           onClick={() => router.back()}
@@ -218,6 +305,17 @@ export default function RestaurantMenuPage() {
       {/* Restaurant Info */}
       <div className="bg-white border-b border-[#e8e8e8] pt-16 pb-4">
         <div className="max-w-7xl mx-auto px-6">
+          {/* Kapalı Uyarısı */}
+          {restaurant.is_active === false && (
+            <div className="mb-4 p-4 bg-red-50 border-2 border-red-500 rounded-xl flex items-center gap-3">
+              <span className="text-2xl">⚠️</span>
+              <div>
+                <p className="text-[15px] font-bold text-red-900">Restoran Şu An Sipariş Almıyor</p>
+                <p className="text-[13px] text-red-700">Lütfen daha sonra tekrar deneyin</p>
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-start justify-between mb-3">
             <div>
               <h1 className="text-[28px] font-bold text-[#3c4043] mb-2" style={{ fontFamily: 'Open Sans, sans-serif' }}>
@@ -327,8 +425,12 @@ export default function RestaurantMenuPage() {
                 {categoryProducts.map(product => (
                   <div
                     key={product.id}
-                    onClick={() => handleProductClick(product)}
-                    className="bg-white border border-[#e8e8e8] rounded-lg overflow-hidden hover:shadow-lg hover:border-[#f59e0b] transition-all cursor-pointer group"
+                    onClick={() => restaurant?.is_active !== false && handleProductClick(product)}
+                    className={`bg-white border border-[#e8e8e8] rounded-lg overflow-hidden transition-all ${
+                      restaurant?.is_active === false
+                        ? 'opacity-60 cursor-not-allowed'
+                        : 'hover:shadow-lg hover:border-[#f59e0b] cursor-pointer group'
+                    }`}
                   >
                     {/* Ürün Görseli - Üst */}
                     <div className="relative w-full h-32 bg-gradient-to-br from-[#fef3c7] to-[#fde68a]">
@@ -371,14 +473,19 @@ export default function RestaurantMenuPage() {
                             e.stopPropagation()
                             handleQuickAdd(product)
                           }}
-                          className="px-3 py-1.5 bg-[#f59e0b] text-white rounded-md font-semibold text-[11px] hover:bg-[#d97706] transition-all hover:scale-105 flex items-center gap-1"
+                          disabled={restaurant?.is_active === false}
+                          className={`px-3 py-1.5 rounded-md font-semibold text-[11px] transition-all flex items-center gap-1 ${
+                            restaurant?.is_active === false
+                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                              : 'bg-[#f59e0b] text-white hover:bg-[#d97706] hover:scale-105'
+                          }`}
                           style={{ fontFamily: 'Open Sans, sans-serif' }}
                         >
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
                           </svg>
-                          Ekle
+                          {restaurant?.is_active === false ? 'Kapalı' : 'Ekle'}
                         </button>
                       </div>
                     </div>
@@ -410,7 +517,19 @@ export default function RestaurantMenuPage() {
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
+          allProducts={products}
           onClose={() => setSelectedProduct(null)}
+          onShowUpsell={handleShowUpsell}
+        />
+      )}
+
+      {/* Upsell Modal */}
+      {showUpsell && upsellMainProduct && (
+        <UpsellModal
+          mainProduct={upsellMainProduct}
+          relatedProducts={upsellRelatedProducts}
+          onClose={handleUpsellClose}
+          onContinue={handleUpsellContinue}
         />
       )}
 

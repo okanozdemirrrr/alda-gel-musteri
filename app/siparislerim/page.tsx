@@ -130,7 +130,6 @@ export default function SiparislerimPage() {
         }])
 
       if (error) {
-        console.error('Supabase Error:', error)
         throw error
       }
 
@@ -141,8 +140,7 @@ export default function SiparislerimPage() {
       setComment('')
       await loadOrders()
     } catch (error: any) {
-      console.error('Değerlendirme gönderilemedi:', error)
-      alert('Değerlendirme gönderilirken hata oluştu: ' + error.message)
+      alert('Değerlendirme gönderilirken hata oluştu. Lütfen tekrar deneyin.')
     } finally {
       setSubmittingReview(false)
     }

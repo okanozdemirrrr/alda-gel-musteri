@@ -86,7 +86,6 @@ export default function NotificationBell() {
               filter: `customer_id=eq.${customerId}`
             },
             (payload) => {
-              console.log('🔔 Yeni bildirim geldi!', payload.new)
               const newNotification = payload.new as Notification
               
               setNotifications(prev => [newNotification, ...prev])
@@ -110,36 +109,24 @@ export default function NotificationBell() {
           })
         })
 
-        console.log('📡 Bildirim subscription durumu:', status)
-
         if (status === 'SUBSCRIBED') {
-          console.log('✅ Bildirim Realtime bağlantısı başarılı!')
-          
           // Başarılı bağlantıda timer'ı temizle
           if (reconnectTimer) {
             clearTimeout(reconnectTimer)
             reconnectTimer = null
           }
         } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-          console.warn(`⚠️ Bildirim Realtime bağlantı hatası: ${status}`)
-          
           // Sessiz yeniden bağlanma (3 saniye sonra)
           reconnectTimer = setTimeout(() => {
-            console.log('🔄 Bildirim Realtime yeniden bağlanılıyor...')
             setupRealtimeWithRetry(retryCount + 1)
           }, 3000)
         }
       } catch (error) {
-        console.error('❌ Bildirim Realtime subscription hatası:', error)
-        
         // Hata durumunda da yeniden bağlanmayı dene (maksimum 10 deneme)
         if (retryCount < 10) {
           reconnectTimer = setTimeout(() => {
-            console.log(`🔄 Hata sonrası yeniden bağlanılıyor (Deneme: ${retryCount + 1})`)
             setupRealtimeWithRetry(retryCount + 1)
           }, 3000)
-        } else {
-          console.error('❌ Maksimum yeniden bağlanma denemesi aşıldı')
         }
       }
     }
@@ -147,7 +134,6 @@ export default function NotificationBell() {
     setupRealtimeWithRetry()
 
     return () => {
-      console.log('🔌 Bildirim Realtime subscription kapatılıyor...')
       if (reconnectTimer) {
         clearTimeout(reconnectTimer)
       }

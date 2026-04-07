@@ -8,6 +8,9 @@ export interface Product {
   category_id?: string
   restaurant_id?: string
   is_visible?: boolean
+  is_available?: boolean
+  related_products?: string[] // Eski alan (deprecated)
+  upsell_product_ids?: string[] // Yan ürün ID'leri (restoran panelinden kaydedilen)
 }
 
 export interface Category {

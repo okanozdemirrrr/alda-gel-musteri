@@ -39,24 +39,18 @@ export default function ProfilPage() {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError || !user) {
-        console.error('Auth error:', authError)
         localStorage.clear()
         router.push('/musteri')
         return
       }
 
-      console.log('✅ Auth OK - User ID:', user.id)
-
       // 2. LocalStorage'dan customer_id al
       const customerId = localStorage.getItem('customer_id')
       
       if (!customerId) {
-        console.error('❌ No customer_id in localStorage')
         router.push('/musteri')
         return
       }
-
-      console.log('📋 Loading profile for customer:', customerId)
 
       // 3. Veritabanı sorgusu - maybeSingle() kullan
       const { data, error } = await supabase
@@ -65,27 +59,14 @@ export default function ProfilPage() {
         .eq('id', customerId)
         .maybeSingle()
 
-      console.log('📊 Profile query result:', { data, error })
-
       if (error) {
-        console.error('❌ Profile query error:', error)
-        console.error('Error details:', {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint
-        })
         throw error
       }
 
-      if (!data) {
-        console.error('❌ No customer data found for ID:', customerId)
-        setError('Müşteri kaydı bulunamadı')
+      if (!data) {        setError('Müşteri kaydı bulunamadı')
         setLoading(false)
         return
       }
-
-      console.log('✅ Profile loaded successfully')
       
       // 4. Name/surname fallback - eğer yoksa full_name'den ayır
       let firstName = data.name || ''
@@ -95,7 +76,6 @@ export default function ProfilPage() {
         const nameParts = data.full_name.split(' ')
         firstName = nameParts[0] || ''
         lastName = nameParts.slice(1).join(' ') || ''
-        console.log('⚠️ Using full_name fallback:', { firstName, lastName })
       }
       
       setProfile({
@@ -113,14 +93,7 @@ export default function ProfilPage() {
         phone: data.phone || ''
       })
     } catch (error: any) {
-      console.error('💥 Profil yüklenemedi:', error)
-      console.error('Detaylı Hata:', {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details,
-        hint: error?.hint
-      })
-      setError('Profil bilgileri yüklenemedi: ' + (error?.message || 'Bilinmeyen hata'))
+      setError('Profil yüklenirken bir hata oluştu')
     } finally {
       setLoading(false)
     }
@@ -146,13 +119,6 @@ export default function ProfilPage() {
         return
       }
 
-      console.log('💾 Updating profile:', {
-        name: editedProfile.name,
-        surname: editedProfile.surname,
-        email: editedProfile.email,
-        phone: phoneDigits
-      })
-
       // full_name'i de güncelle (trigger varsa otomatik olur ama yine de ekleyelim)
       const fullName = `${editedProfile.name.trim()} ${editedProfile.surname.trim()}`.trim()
 
@@ -168,11 +134,8 @@ export default function ProfilPage() {
         .eq('id', profile?.id)
 
       if (updateError) {
-        console.error('❌ Update error:', updateError)
         throw updateError
       }
-
-      console.log('✅ Profile updated successfully')
 
       // LocalStorage güncelle
       localStorage.setItem('customer_name', fullName)
@@ -181,13 +144,6 @@ export default function ProfilPage() {
       await loadProfile()
       setEditing(false)
     } catch (error: any) {
-      console.error('💥 Profil güncellenemedi:', error)
-      console.error('Detaylı Hata:', {
-        message: error?.message,
-        code: error?.code,
-        details: error?.details
-      })
-      
       if (error.code === '23505') {
         if (error.message.includes('phone')) {
           setError('Bu telefon numarası zaten kayıtlı')
@@ -197,7 +153,7 @@ export default function ProfilPage() {
           setError('Bu bilgiler zaten kayıtlı')
         }
       } else {
-        setError('Profil güncellenirken bir hata oluştu: ' + (error?.message || 'Bilinmeyen hata'))
+        setError('Profil güncellenirken bir hata oluştu')
       }
     } finally {
       setSaving(false)

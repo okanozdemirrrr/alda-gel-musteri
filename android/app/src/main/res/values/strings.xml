@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Alda Gel</string>
+    <string name="title_activity_main">Alda Gel</string>
+    <string name="package_name">com.mergen.aldagel</string>
+    <string name="custom_url_scheme">com.mergen.aldagel</string>
+</resources>
