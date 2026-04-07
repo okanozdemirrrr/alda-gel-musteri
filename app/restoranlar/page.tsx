@@ -584,18 +584,18 @@ function RestaurantCard({
         </div>
 
         {/* Badges: Teslimat Süresi ve Minimum Tutar */}
-        <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
           {/* Teslimat Süresi Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 rounded-full">
-            <Clock size={12} className="text-orange-600" strokeWidth={2.5} />
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 rounded-full whitespace-nowrap">
+            <Clock size={12} className="text-orange-600 flex-shrink-0" strokeWidth={2.5} />
             <span className="text-xs font-medium text-gray-700">
               {restaurant.estimated_delivery_time || '20-30 dk'}
             </span>
           </div>
 
           {/* Minimum Tutar Badge */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 rounded-full">
-            <Wallet size={12} className="text-gray-600" strokeWidth={2.5} />
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 rounded-full whitespace-nowrap">
+            <Wallet size={12} className="text-gray-600 flex-shrink-0" strokeWidth={2.5} />
             <span className="text-xs font-medium text-gray-700">
               Min. {restaurant.min_order_amount || 0}₺
             </span>

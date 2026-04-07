@@ -336,16 +336,16 @@ export default function RestaurantMenuPage() {
               {/* Badges: Teslimat Süresi ve Minimum Tutar */}
               <div className="flex items-center gap-2">
                 {/* Teslimat Süresi Badge */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-full">
-                  <Clock size={14} className="text-orange-600" strokeWidth={2.5} />
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-full whitespace-nowrap">
+                  <Clock size={14} className="text-orange-600 flex-shrink-0" strokeWidth={2.5} />
                   <span className="text-xs font-medium text-gray-700">
                     {restaurant.estimated_delivery_time}
                   </span>
                 </div>
 
                 {/* Minimum Tutar Badge */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full">
-                  <Wallet size={14} className="text-gray-600" strokeWidth={2.5} />
+                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full whitespace-nowrap">
+                  <Wallet size={14} className="text-gray-600 flex-shrink-0" strokeWidth={2.5} />
                   <span className="text-xs font-medium text-gray-700">
                     Min. {restaurant.minimum_order_value}₺
                   </span>
