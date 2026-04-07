@@ -28,10 +28,20 @@ function SplitScreenSelector() {
     <>
       {/* SLOGAN - Headline */}
       <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ 
+          delay: 0.3, // Veri yüklenmesine zaman tanı
+          duration: 0.5, 
+          ease: 'easeOut' 
+        }}
         className="text-center mb-6 px-4"
+        style={{
+          // GPU hızlandırma + Layout shift önleme
+          transform: 'translateZ(0)',
+          willChange: 'opacity',
+          minHeight: '120px' // Yer rezervasyonu
+        }}
       >
         <h1 
           className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight"
@@ -42,6 +52,7 @@ function SplitScreenSelector() {
             WebkitTextFillColor: 'transparent',
             backgroundClip: 'text',
             filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+            transform: 'translateZ(0)' // GPU hızlandırma
           }}
         >
           <span className="block sm:inline">Komisyonu Sildik, Fiyatları İndirdik!</span>
@@ -57,12 +68,17 @@ function SplitScreenSelector() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="relative overflow-hidden group cursor-pointer"
+          style={{
+            transform: 'translateZ(0)', // GPU hızlandırma
+            willChange: 'transform'
+          }}
         >
           {/* Background Image */}
           <div 
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
             style={{
               backgroundImage: 'url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80)',
+              transform: 'translateZ(0)' // GPU hızlandırma
             }}
           />
           
@@ -72,29 +88,43 @@ function SplitScreenSelector() {
           {/* Content */}
           <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.5, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="mb-4"
+              style={{ transform: 'translateZ(0)' }}
             >
               <UtensilsCrossed size={60} strokeWidth={1.5} className="md:w-20 md:h-20" />
             </motion.div>
             
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.6, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
-              style={{ fontFamily: 'Open Sans, sans-serif' }}
+              style={{ 
+                fontFamily: 'Open Sans, sans-serif',
+                transform: 'translateZ(0)' // GPU hızlandırma
+              }}
             >
               YEMEK
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.7, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
+              style={{ transform: 'translateZ(0)' }}
             >
               Restoranlardan sipariş ver
             </motion.p>
@@ -122,12 +152,17 @@ function SplitScreenSelector() {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           className="relative overflow-hidden group cursor-pointer"
+          style={{
+            transform: 'translateZ(0)', // GPU hızlandırma
+            willChange: 'transform'
+          }}
         >
           {/* Background Image */}
           <div 
             className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
             style={{
               backgroundImage: 'url(https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&q=80)',
+              transform: 'translateZ(0)' // GPU hızlandırma
             }}
           />
           
@@ -137,29 +172,43 @@ function SplitScreenSelector() {
           {/* Content */}
           <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
             <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.5, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="mb-4"
+              style={{ transform: 'translateZ(0)' }}
             >
               <ShoppingCart size={60} strokeWidth={1.5} className="md:w-20 md:h-20" />
             </motion.div>
             
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.6, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
-              style={{ fontFamily: 'Open Sans, sans-serif' }}
+              style={{ 
+                fontFamily: 'Open Sans, sans-serif',
+                transform: 'translateZ(0)' // GPU hızlandırma
+              }}
             >
               MARKET
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ 
+                delay: 0.7, // Gecikme artırıldı
+                duration: 0.3 
+              }}
               className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
+              style={{ transform: 'translateZ(0)' }}
             >
               Marketlerden alışveriş yap
             </motion.p>
