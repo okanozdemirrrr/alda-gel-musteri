@@ -6,7 +6,8 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://musteri-nine.vercel.app',
-    cleartext: true
+    cleartext: true,
+    allowNavigation: ['*']
   }
 };
 

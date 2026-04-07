@@ -10,6 +10,7 @@ import AddressModal from './components/AddressModal'
 import WelcomeSplash from './components/WelcomeSplash'
 import NotificationBell from './components/NotificationBell'
 import PushNotificationPrompt from './components/PushNotificationPrompt'
+import { isMobile } from './lib/platform'
 
 // Split Screen Selector Component
 function SplitScreenSelector() {
@@ -279,62 +280,73 @@ export default function MusteriAnaSayfa() {
 
       <div className="min-h-screen bg-white">
         {/* Header */}
-        <header className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40">
-          <div className="max-w-7xl mx-auto px-4 h-[72px] flex items-center justify-between">
+        <header 
+          className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40"
+          style={{
+            paddingTop: isMobile() ? 'env(safe-area-inset-top)' : '0'
+          }}
+        >
+          <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between ${isMobile() ? 'h-[56px]' : 'h-[72px]'}`}>
             {/* Sol: Logo + Adres */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
               <Image 
                 src="/logo.png" 
                 alt="Alda Gel" 
-                width={120} 
-                height={40}
+                width={isMobile() ? 80 : 120} 
+                height={isMobile() ? 27 : 40}
                 className="cursor-pointer"
                 onClick={() => router.push('/')}
               />
               
-              <button
-                onClick={handleAddressClick}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                  {selectedAddress || 'Adresini Seç'}
-                </span>
-              </button>
+              {!isMobile() && (
+                <button
+                  onClick={handleAddressClick}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                    {selectedAddress || 'Adresini Seç'}
+                  </span>
+                </button>
+              )}
             </div>
 
             {/* Sağ: Auth Buttons veya User Info */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               {!isLoggedIn ? (
                 <>
+                  {!isMobile() && (
+                    <button
+                      onClick={() => setShowAuthModal(true)}
+                      className="px-6 py-2 text-[14px] font-semibold text-[#3c4043] hover:bg-[#f7f7f7] rounded-lg transition-colors"
+                      style={{ fontFamily: 'Open Sans, sans-serif' }}
+                    >
+                      Giriş Yap
+                    </button>
+                  )}
                   <button
                     onClick={() => setShowAuthModal(true)}
-                    className="px-6 py-2 text-[14px] font-semibold text-[#3c4043] hover:bg-[#f7f7f7] rounded-lg transition-colors"
+                    className={`${isMobile() ? 'px-4 py-1.5 text-[13px]' : 'px-6 py-2 text-[14px]'} font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors`}
                     style={{ fontFamily: 'Open Sans, sans-serif' }}
                   >
-                    Giriş Yap
-                  </button>
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    className="px-6 py-2 text-[14px] font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors"
-                    style={{ fontFamily: 'Open Sans, sans-serif' }}
-                  >
-                    Kayıt Ol
+                    {isMobile() ? 'Giriş' : 'Kayıt Ol'}
                   </button>
                 </>
               ) : (
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
-                      {customerName.charAt(0).toUpperCase()}
+                <div className="flex items-center gap-2">
+                  {!isMobile() && (
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
+                        {customerName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                        {customerName}
+                      </span>
                     </div>
-                    <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                      {customerName}
-                    </span>
-                  </div>
+                  )}
                   
                   {/* Hamburger Menu */}
                   <div className="relative" ref={menuRef}>
@@ -342,7 +354,7 @@ export default function MusteriAnaSayfa() {
                       onClick={() => setShowMenu(!showMenu)}
                       className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
                     >
-                      <Menu size={20} />
+                      <Menu size={isMobile() ? 22 : 20} />
                     </button>
 
                     <AnimatePresence>
@@ -393,15 +405,17 @@ export default function MusteriAnaSayfa() {
                     </AnimatePresence>
                   </div>
                   
-                  {/* Notification Bell - Hamburger ile Çıkış arasında */}
+                  {/* Notification Bell */}
                   <NotificationBell />
                   
-                  <button
-                    onClick={handleLogout}
-                    className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
-                  >
-                    Çıkış
-                  </button>
+                  {!isMobile() && (
+                    <button
+                      onClick={handleLogout}
+                      className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
+                    >
+                      Çıkış
+                    </button>
+                  )}
                 </div>
               )}
             </div>
