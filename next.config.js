@@ -9,9 +9,6 @@ const nextConfig = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
-  // Capacitor için export (Vercel deploy için kapalı)
-  // output: 'export',
-  // distDir: 'out',
   trailingSlash: false,
   // TypeScript ve ESLint hatalarını ignore etme (production build için)
   typescript: {
