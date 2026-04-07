@@ -218,18 +218,133 @@ export default function RestoranlarPage() {
           paddingTop: isMobile() ? 'env(safe-area-inset-top)' : '0'
         }}
       >
-        <div className={`max-w-7xl mx-auto px-4 flex items-center justify-between ${isMobile() ? 'h-[56px]' : 'h-[72px]'}`}>
-          <div className="flex items-center gap-2">
-            <Image 
-              src="/logo.png" 
-              alt="Alda Gel" 
-              width={isMobile() ? 80 : 120} 
-              height={isMobile() ? 27 : 40}
-              className="cursor-pointer"
-              onClick={() => router.push('/musteri')}
-            />
-            
-            {!isMobile() && (
+        {isMobile() ? (
+          // Mobil Header - İki satırlı kompakt tasarım
+          <div className="px-3 py-2">
+            {/* Üst Satır: Adres + Kullanıcı */}
+            <div className="flex items-center justify-between mb-2">
+              <button
+                onClick={() => setShowAddressModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors max-w-[60%]"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span className="text-[12px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                  {selectedAddress || 'Adresini Seç'}
+                </span>
+              </button>
+
+              <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 bg-orange-50 px-2.5 py-1.5 rounded-lg">
+                  <div className="w-6 h-6 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[11px]">
+                    {customerName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-[12px] font-semibold text-[#3c4043] max-w-[80px] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                    {customerName}
+                  </span>
+                </div>
+                
+                <div className="relative" ref={menuRef}>
+                  <button
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="p-1.5 text-gray-400 hover:text-[#f59e0b] transition-colors"
+                  >
+                    <Menu size={20} />
+                  </button>
+
+                  <AnimatePresence>
+                    {showMenu && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
+                      >
+                        <button
+                          onClick={() => {
+                            setShowMenu(false)
+                            router.push('/siparislerim')
+                          }}
+                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                        >
+                          <FileText size={18} />
+                          <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false)
+                            router.push('/profil')
+                          }}
+                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                        >
+                          <User size={18} />
+                          <span className="text-[14px] font-medium">👤 Profilim</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false)
+                            router.push('/yardim')
+                          }}
+                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                          </svg>
+                          <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowMenu(false)
+                            handleLogout()
+                          }}
+                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                        >
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                          </svg>
+                          <span className="text-[14px] font-medium">🚪 Çıkış Yap</span>
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <NotificationBell />
+              </div>
+            </div>
+
+            {/* Alt Satır: Logo */}
+            <div className="flex items-center justify-center">
+              <Image 
+                src="/logo.png" 
+                alt="Alda Gel" 
+                width={100} 
+                height={33}
+                className="cursor-pointer"
+                onClick={() => router.push('/musteri')}
+              />
+            </div>
+          </div>
+        ) : (
+          // Web Header - Orijinal tasarım
+          <div className="max-w-7xl mx-auto px-4 h-[72px] flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <Image 
+                src="/logo.png" 
+                alt="Alda Gel" 
+                width={120} 
+                height={40}
+                className="cursor-pointer"
+                onClick={() => router.push('/musteri')}
+              />
+              
               <button
                 onClick={() => setShowAddressModal(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
@@ -242,93 +357,87 @@ export default function RestoranlarPage() {
                   {selectedAddress || 'Adresini Seç'}
                 </span>
               </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2">
-            {!isMobile() && (
-              <>
-                <div className="text-[14px] text-[#6f6f6f]">
-                  Hoş geldin, <span className="font-semibold text-[#3c4043]">{customerName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
-                    {customerName.charAt(0).toUpperCase()}
-                  </div>
-                </div>
-              </>
-            )}
-            
-            {/* Hamburger Menu */}
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
-              >
-                <Menu size={isMobile() ? 22 : 20} />
-              </button>
-
-              <AnimatePresence>
-                {showMenu && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
-                  >
-                    <button
-                      onClick={() => {
-                        setShowMenu(false)
-                        router.push('/siparislerim')
-                      }}
-                      className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                    >
-                      <FileText size={18} />
-                      <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowMenu(false)
-                        router.push('/profil')
-                      }}
-                      className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                    >
-                      <User size={18} />
-                      <span className="text-[14px] font-medium">👤 Profilim</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowMenu(false)
-                        router.push('/yardim')
-                      }}
-                      className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                      </svg>
-                      <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
-                    </button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
-            
-            {/* Notification Bell */}
-            <NotificationBell />
-            
-            {!isMobile() && (
+
+            <div className="flex items-center gap-3">
+              <div className="text-[14px] text-[#6f6f6f]">
+                Hoş geldin, <span className="font-semibold text-[#3c4043]">{customerName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
+                  {customerName.charAt(0).toUpperCase()}
+                </div>
+              </div>
+              
+              {/* Hamburger Menu */}
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
+                >
+                  <Menu size={20} />
+                </button>
+
+                <AnimatePresence>
+                  {showMenu && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
+                    >
+                      <button
+                        onClick={() => {
+                          setShowMenu(false)
+                          router.push('/siparislerim')
+                        }}
+                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                      >
+                        <FileText size={18} />
+                        <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false)
+                          router.push('/profil')
+                        }}
+                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                      >
+                        <User size={18} />
+                        <span className="text-[14px] font-medium">👤 Profilim</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowMenu(false)
+                          router.push('/yardim')
+                        }}
+                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <circle cx="12" cy="12" r="10"></circle>
+                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              
+              {/* Notification Bell */}
+              <NotificationBell />
+              
               <button
                 onClick={handleLogout}
                 className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
               >
                 Çıkış
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
       </header>
 
       {/* Main Content */}
