@@ -327,24 +327,26 @@ export default function MusteriAnaSayfa() {
         />
       )}
 
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white overflow-x-hidden">
         {/* Header */}
         <header 
-          className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40"
+          className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40 overflow-x-hidden"
           style={{
-            paddingTop: isMobile() ? 'env(safe-area-inset-top)' : '0'
+            paddingTop: isMobile() ? 'max(env(safe-area-inset-top), 8px)' : '0',
+            paddingLeft: isMobile() ? 'max(env(safe-area-inset-left), 12px)' : '0',
+            paddingRight: isMobile() ? 'max(env(safe-area-inset-right), 12px)' : '0'
           }}
         >
           {isMobile() ? (
             // Mobil Header - İki satırlı kompakt tasarım
-            <div className="px-3 py-2">
+            <div className="px-4 py-2 max-w-full">
               {/* Üst Satır: Adres + Kullanıcı */}
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between gap-2 mb-2 w-full">
                 <button
                   onClick={handleAddressClick}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors max-w-[60%]"
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors flex-1 min-w-0 max-w-[55%]"
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" className="flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
@@ -354,12 +356,12 @@ export default function MusteriAnaSayfa() {
                 </button>
 
                 {isLoggedIn && (
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-1.5 bg-orange-50 px-2.5 py-1.5 rounded-lg">
-                      <div className="w-6 h-6 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[11px]">
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    <div className="flex items-center gap-1.5 bg-orange-50 px-2.5 py-1.5 rounded-lg max-w-[120px]">
+                      <div className="w-6 h-6 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0">
                         {customerName.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-[12px] font-semibold text-[#3c4043] max-w-[80px] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                      <span className="text-[12px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
                         {customerName}
                       </span>
                     </div>
@@ -367,7 +369,7 @@ export default function MusteriAnaSayfa() {
                     <div className="relative" ref={menuRef}>
                       <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-1.5 text-gray-400 hover:text-[#f59e0b] transition-colors"
+                        className="p-1.5 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
                       >
                         <Menu size={20} />
                       </button>
