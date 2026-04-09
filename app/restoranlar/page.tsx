@@ -542,6 +542,8 @@ function RestaurantCard({
             src={restaurant.cover_image_url} 
             alt={restaurant.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-6xl">

@@ -12,6 +12,9 @@ import NotificationBell from './components/NotificationBell'
 import PushNotificationPrompt from './components/PushNotificationPrompt'
 import { isMobile } from './lib/platform'
 
+// Mobil için animasyon devre dışı
+const shouldAnimate = !isMobile()
+
 // Split Screen Selector Component
 function SplitScreenSelector() {
   const router = useRouter()
@@ -28,19 +31,18 @@ function SplitScreenSelector() {
     <>
       {/* SLOGAN - Headline */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ 
-          delay: 0.3, // Veri yüklenmesine zaman tanı
+        initial={shouldAnimate ? { opacity: 0 } : false}
+        animate={shouldAnimate ? { opacity: 1 } : false}
+        transition={shouldAnimate ? { 
+          delay: 0.3,
           duration: 0.5, 
           ease: 'easeOut' 
-        }}
+        } : { duration: 0 }}
         className="text-center mb-6 px-4"
         style={{
-          // GPU hızlandırma + Layout shift önleme
           transform: 'translateZ(0)',
-          willChange: 'opacity',
-          minHeight: '120px' // Yer rezervasyonu
+          willChange: shouldAnimate ? 'opacity' : 'auto',
+          minHeight: '120px'
         }}
       >
         <h1 
@@ -65,12 +67,12 @@ function SplitScreenSelector() {
         {/* YEMEK Section */}
         <motion.button
           onClick={handleYemekClick}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={shouldAnimate ? { scale: 1.02 } : {}}
+          whileTap={shouldAnimate ? { scale: 0.98 } : {}}
           className="relative overflow-hidden group cursor-pointer"
           style={{
-            transform: 'translateZ(0)', // GPU hızlandırma
-            willChange: 'transform'
+            transform: 'translateZ(0)',
+            willChange: shouldAnimate ? 'transform' : 'auto'
           }}
         >
           {/* Background Image */}
@@ -88,12 +90,12 @@ function SplitScreenSelector() {
           {/* Content */}
           <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.5, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.5,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="mb-4"
               style={{ transform: 'translateZ(0)' }}
             >
@@ -101,28 +103,28 @@ function SplitScreenSelector() {
             </motion.div>
             
             <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.6, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.6,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
               style={{ 
                 fontFamily: 'Open Sans, sans-serif',
-                transform: 'translateZ(0)' // GPU hızlandırma
+                transform: 'translateZ(0)'
               }}
             >
               YEMEK
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.7, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.7,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
               style={{ transform: 'translateZ(0)' }}
             >
@@ -149,12 +151,12 @@ function SplitScreenSelector() {
         {/* MARKET Section */}
         <motion.button
           onClick={handleMarketClick}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          whileHover={shouldAnimate ? { scale: 1.02 } : {}}
+          whileTap={shouldAnimate ? { scale: 0.98 } : {}}
           className="relative overflow-hidden group cursor-pointer"
           style={{
-            transform: 'translateZ(0)', // GPU hızlandırma
-            willChange: 'transform'
+            transform: 'translateZ(0)',
+            willChange: shouldAnimate ? 'transform' : 'auto'
           }}
         >
           {/* Background Image */}
@@ -172,12 +174,12 @@ function SplitScreenSelector() {
           {/* Content */}
           <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.5, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.5,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="mb-4"
               style={{ transform: 'translateZ(0)' }}
             >
@@ -185,28 +187,28 @@ function SplitScreenSelector() {
             </motion.div>
             
             <motion.h2
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.6, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.6,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
               style={{ 
                 fontFamily: 'Open Sans, sans-serif',
-                transform: 'translateZ(0)' // GPU hızlandırma
+                transform: 'translateZ(0)'
               }}
             >
               MARKET
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ 
-                delay: 0.7, // Gecikme artırıldı
+              initial={shouldAnimate ? { opacity: 0 } : false}
+              animate={shouldAnimate ? { opacity: 1 } : false}
+              transition={shouldAnimate ? { 
+                delay: 0.7,
                 duration: 0.3 
-              }}
+              } : { duration: 0 }}
               className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
               style={{ transform: 'translateZ(0)' }}
             >
