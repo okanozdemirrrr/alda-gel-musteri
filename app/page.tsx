@@ -340,40 +340,39 @@ export default function MusteriAnaSayfa() {
           }}
         >
           {isMobile() ? (
-            // Mobil Header - İki satırlı kompakt tasarım
-            <div className="px-4 py-2 max-w-full">
-              {/* Üst Satır: Adres + Kullanıcı */}
-              <div className="flex items-center justify-between gap-2 mb-2 w-full">
+            // Mobil Header - Tek satır ultra kompakt
+            <div className="w-full px-3 py-2">
+              <div className="flex items-center justify-between gap-1.5 w-full">
+                {/* Sol: Adres */}
                 <button
                   onClick={handleAddressClick}
-                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors flex-1 min-w-0 max-w-[55%]"
+                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors min-w-0 flex-shrink overflow-hidden"
+                  style={{ maxWidth: 'calc(100vw - 200px)' }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2" className="flex-shrink-0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" className="flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
-                  <span className="text-[12px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                    {selectedAddress || 'Adresini Seç'}
+                  <span className="text-[11px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                    {selectedAddress || 'Adres Seç'}
                   </span>
                 </button>
 
+                {/* Sağ: Kullanıcı + Menü + Bildirim */}
                 {isLoggedIn && (
-                  <div className="flex items-center gap-1.5 flex-shrink-0">
-                    <div className="flex items-center gap-1.5 bg-orange-50 px-2.5 py-1.5 rounded-lg max-w-[120px]">
-                      <div className="w-6 h-6 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[11px] flex-shrink-0">
-                        {customerName.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-[12px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                        {customerName}
-                      </span>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {/* Kullanıcı Avatar */}
+                    <div className="w-7 h-7 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                      {customerName.charAt(0).toUpperCase()}
                     </div>
                     
+                    {/* Hamburger Menu */}
                     <div className="relative" ref={menuRef}>
                       <button
                         onClick={() => setShowMenu(!showMenu)}
-                        className="p-1.5 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
+                        className="p-1 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
                       >
-                        <Menu size={20} />
+                        <Menu size={18} />
                       </button>
 
                       <AnimatePresence>
@@ -438,6 +437,7 @@ export default function MusteriAnaSayfa() {
                       </AnimatePresence>
                     </div>
                     
+                    {/* Notification Bell */}
                     <NotificationBell />
                   </div>
                 )}
@@ -445,24 +445,12 @@ export default function MusteriAnaSayfa() {
                 {!isLoggedIn && (
                   <button
                     onClick={() => setShowAuthModal(true)}
-                    className="px-4 py-1.5 text-[12px] font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors"
+                    className="px-3 py-1 text-[11px] font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors flex-shrink-0"
                     style={{ fontFamily: 'Open Sans, sans-serif' }}
                   >
                     Giriş
                   </button>
                 )}
-              </div>
-
-              {/* Alt Satır: Logo */}
-              <div className="flex items-center justify-center">
-                <Image 
-                  src="/logo.png" 
-                  alt="Alda Gel" 
-                  width={100} 
-                  height={33}
-                  className="cursor-pointer"
-                  onClick={() => router.push('/')}
-                />
               </div>
             </div>
           ) : (
