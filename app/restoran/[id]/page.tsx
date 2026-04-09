@@ -11,6 +11,7 @@ import AddressModal from '../../components/AddressModal'
 import ReviewsSection from './components/ReviewsSection'
 import UpsellModal from './components/UpsellModal'
 import { Clock, Wallet } from 'lucide-react'
+import { isMobile } from '@/app/lib/platform'
 
 interface Restaurant {
   id: string
@@ -229,17 +230,19 @@ export default function RestaurantMenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7] pb-32">
+    <div className="min-h-screen bg-[#f7f7f7] pb-32 overflow-x-hidden">
       {/* Hero Section - Cover Image + Logo */}
-      <div className="relative w-full h-[280px] bg-gradient-to-br from-[#fef3c7] to-[#fde68a]">
+      <div className={`relative w-full ${isMobile() ? 'h-[200px]' : 'h-[280px]'} bg-gradient-to-br from-[#fef3c7] to-[#fde68a]`}>
         {restaurant.cover_image_url ? (
           <img 
             src={restaurant.cover_image_url} 
             alt={restaurant.name}
             className="w-full h-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-8xl">
+          <div className={`w-full h-full flex items-center justify-center ${isMobile() ? 'text-6xl' : 'text-8xl'}`}>
             🍽️
           </div>
         )}
@@ -250,8 +253,8 @@ export default function RestaurantMenuPage() {
         {/* Kapalı Overlay */}
         {restaurant.is_active === false && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center">
-            <div className="text-center">
-              <span className="bg-white text-[#3c4043] px-6 py-3 rounded-xl font-bold text-[18px] shadow-2xl">
+            <div className="text-center px-4">
+              <span className={`bg-white text-[#3c4043] ${isMobile() ? 'px-4 py-2 text-[14px]' : 'px-6 py-3 text-[18px]'} rounded-xl font-bold shadow-2xl`}>
                 🔒 Restoran Şu An Kapalı
               </span>
             </div>
@@ -261,9 +264,10 @@ export default function RestaurantMenuPage() {
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-4 left-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#3c4043] hover:bg-white transition-all shadow-lg"
+          className={`absolute ${isMobile() ? 'top-2 left-2 w-9 h-9' : 'top-4 left-4 w-10 h-10'} bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#3c4043] hover:bg-white transition-all shadow-lg`}
+          style={{ paddingLeft: isMobile() ? 'max(8px, env(safe-area-inset-left))' : undefined }}
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <svg width={isMobile() ? '18' : '20'} height={isMobile() ? '18' : '20'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <path d="M19 12H5M12 19l-7-7 7-7"/>
           </svg>
         </button>
@@ -271,31 +275,34 @@ export default function RestaurantMenuPage() {
         {/* Cart Button - Fixed Floating */}
         <button
           onClick={() => setShowCart(true)}
-          className="fixed top-4 right-4 z-50 px-5 py-2.5 bg-[#f59e0b] text-white rounded-full font-bold text-[14px] hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-2"
+          className={`fixed ${isMobile() ? 'top-2 right-2 px-3 py-2 text-[12px]' : 'top-4 right-4 px-5 py-2.5 text-[14px]'} z-50 bg-[#f59e0b] text-white rounded-full font-bold hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-1.5`}
+          style={{ paddingRight: isMobile() ? 'max(12px, env(safe-area-inset-right))' : undefined }}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <svg width={isMobile() ? '16' : '18'} height={isMobile() ? '16' : '18'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
             <circle cx="9" cy="21" r="1"/>
             <circle cx="20" cy="21" r="1"/>
             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
           </svg>
           {getCartItemCount() > 0 && (
-            <span className="bg-white text-[#f59e0b] text-[11px] font-bold px-2 py-0.5 rounded-full">
+            <span className={`bg-white text-[#f59e0b] ${isMobile() ? 'text-[10px] px-1.5 py-0.5' : 'text-[11px] px-2 py-0.5'} font-bold rounded-full`}>
               {getCartItemCount()}
             </span>
           )}
         </button>
         
         {/* Logo Overlap */}
-        <div className="absolute -bottom-12 left-6">
-          <div className="w-24 h-24 bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden">
+        <div className={`absolute ${isMobile() ? '-bottom-8 left-3' : '-bottom-12 left-6'}`}>
+          <div className={`${isMobile() ? 'w-16 h-16' : 'w-24 h-24'} bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden`}>
             {restaurant.logo_url ? (
               <img 
                 src={restaurant.logo_url} 
                 alt={restaurant.name}
                 className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#f59e0b] to-[#d97706] flex items-center justify-center text-white text-3xl font-bold">
+              <div className={`w-full h-full bg-gradient-to-br from-[#f59e0b] to-[#d97706] flex items-center justify-center text-white ${isMobile() ? 'text-xl' : 'text-3xl'} font-bold`}>
                 {restaurant.name.charAt(0)}
               </div>
             )}
@@ -304,79 +311,79 @@ export default function RestaurantMenuPage() {
       </div>
 
       {/* Restaurant Info */}
-      <div className="bg-white border-b border-[#e8e8e8] pt-16 pb-4">
-        <div className="max-w-7xl mx-auto px-6">
+      <div className={`bg-white border-b border-[#e8e8e8] ${isMobile() ? 'pt-10 pb-2' : 'pt-16 pb-4'}`}>
+        <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-3' : 'px-6'}`}>
           {/* Kapalı Uyarısı */}
           {restaurant.is_active === false && (
-            <div className="mb-4 p-4 bg-red-50 border-2 border-red-500 rounded-xl flex items-center gap-3">
-              <span className="text-2xl">⚠️</span>
+            <div className={`mb-2 ${isMobile() ? 'p-2' : 'p-3'} bg-red-50 border-2 border-red-500 rounded-xl flex items-center gap-2`}>
+              <span className={isMobile() ? 'text-lg' : 'text-xl'}>⚠️</span>
               <div>
-                <p className="text-[15px] font-bold text-red-900">Restoran Şu An Sipariş Almıyor</p>
-                <p className="text-[13px] text-red-700">Lütfen daha sonra tekrar deneyin</p>
+                <p className={`${isMobile() ? 'text-[11px]' : 'text-[15px]'} font-bold text-red-900`}>Restoran Şu An Sipariş Almıyor</p>
+                <p className={`${isMobile() ? 'text-[10px]' : 'text-[13px]'} text-red-700`}>Lütfen daha sonra tekrar deneyin</p>
               </div>
             </div>
           )}
           
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h1 className="text-[28px] font-bold text-[#3c4043] mb-3" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+          <div className={`flex items-start ${isMobile() ? 'flex-col gap-1.5' : 'justify-between'} mb-2`}>
+            <div className="flex-1 min-w-0 w-full">
+              <h1 className={`${isMobile() ? 'text-[17px] mb-1.5' : 'text-[28px] mb-2'} font-bold text-[#3c4043] truncate`} style={{ fontFamily: 'Open Sans, sans-serif' }}>
                 {restaurant.name}
               </h1>
               
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-3">
-                <span className="flex items-center gap-1 text-[14px]">
+              {/* Rating + Badges - Tek satırda */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Rating */}
+                <span className={`flex items-center gap-1 ${isMobile() ? 'text-[11px]' : 'text-[13px]'}`}>
                   <span className="text-[#f59e0b]">⭐</span>
                   <span className="font-semibold text-[#3c4043]">
                     {averageRating ? averageRating.toFixed(1) : restaurant.rating}
                   </span>
                 </span>
-              </div>
 
-              {/* Badges: Teslimat Süresi ve Minimum Tutar */}
-              <div className="flex items-center gap-2">
                 {/* Teslimat Süresi Badge */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 rounded-full whitespace-nowrap">
-                  <Clock size={14} className="text-orange-600 flex-shrink-0" strokeWidth={2.5} />
-                  <span className="text-xs font-medium text-gray-700">
+                <div className={`flex items-center gap-1 ${isMobile() ? 'px-1.5 py-0.5' : 'px-2 py-1'} bg-orange-50 rounded-full whitespace-nowrap`}>
+                  <Clock size={isMobile() ? 10 : 12} className="text-orange-600 flex-shrink-0" strokeWidth={2.5} />
+                  <span className={`${isMobile() ? 'text-[9px]' : 'text-[10px]'} font-medium text-gray-700`}>
                     {restaurant.estimated_delivery_time}
                   </span>
                 </div>
 
                 {/* Minimum Tutar Badge */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 rounded-full whitespace-nowrap">
-                  <Wallet size={14} className="text-gray-600 flex-shrink-0" strokeWidth={2.5} />
-                  <span className="text-xs font-medium text-gray-700">
+                <div className={`flex items-center gap-1 ${isMobile() ? 'px-1.5 py-0.5' : 'px-2 py-1'} bg-gray-100 rounded-full whitespace-nowrap`}>
+                  <Wallet size={isMobile() ? 10 : 12} className="text-gray-600 flex-shrink-0" strokeWidth={2.5} />
+                  <span className={`${isMobile() ? 'text-[9px]' : 'text-[10px]'} font-medium text-gray-700`}>
                     Min. {restaurant.minimum_order_value}₺
                   </span>
                 </div>
               </div>
             </div>
             
-            <button
-              onClick={() => setShowAddressModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                <circle cx="12" cy="10" r="3"/>
-              </svg>
-              <span className="text-[12px] font-semibold text-[#3c4043] max-w-[200px] truncate">
-                {selectedAddress || 'Adresini Seç'}
-              </span>
-            </button>
+            {!isMobile() && (
+              <button
+                onClick={() => setShowAddressModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                  <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span className="text-[12px] font-semibold text-[#3c4043] max-w-[200px] truncate">
+                  {selectedAddress || 'Adresini Seç'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
       {/* Sticky Category Navigation */}
-      <div className="sticky top-0 z-30 bg-white border-b border-[#e8e8e8] shadow-sm">
+      <div className="sticky top-0 z-30 bg-white border-b border-[#e8e8e8] shadow-sm overflow-x-hidden">
         {/* Tab Navigation */}
-        <div className="max-w-7xl mx-auto px-6 border-b border-[#e8e8e8]">
-          <div className="flex gap-6">
+        <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-2' : 'px-6'} border-b border-[#e8e8e8]`}>
+          <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('menu')}
-              className={`py-3 px-2 font-semibold text-[14px] border-b-2 transition-colors ${
+              className={`${isMobile() ? 'py-2 px-2 text-[11px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'menu'
                   ? 'border-[#f59e0b] text-[#f59e0b]'
                   : 'border-transparent text-[#6f6f6f] hover:text-[#3c4043]'
@@ -386,7 +393,7 @@ export default function RestaurantMenuPage() {
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`py-3 px-2 font-semibold text-[14px] border-b-2 transition-colors ${
+              className={`${isMobile() ? 'py-2 px-2 text-[11px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'reviews'
                   ? 'border-[#f59e0b] text-[#f59e0b]'
                   : 'border-transparent text-[#6f6f6f] hover:text-[#3c4043]'
@@ -399,7 +406,7 @@ export default function RestaurantMenuPage() {
 
         {/* Category Bar (only show on menu tab) */}
         {activeTab === 'menu' && (
-          <div className="max-w-7xl mx-auto px-6 py-3 overflow-x-auto scrollbar-hide">
+          <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-2 py-2' : 'px-6 py-3'} overflow-x-auto scrollbar-hide`}>
             <div className="flex gap-2">
               {categories.map(category => {
                 const categoryProducts = products.filter(p => p.category_id === category.id)
@@ -412,7 +419,7 @@ export default function RestaurantMenuPage() {
                       const element = document.getElementById(`category-${category.id}`)
                       element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                     }}
-                    className="flex-shrink-0 px-4 py-2 bg-[#f7f7f7] hover:bg-[#f59e0b] hover:text-white rounded-full text-[13px] font-semibold text-[#3c4043] transition-all"
+                    className={`flex-shrink-0 ${isMobile() ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2 text-[13px]'} bg-[#f7f7f7] hover:bg-[#f59e0b] hover:text-white rounded-full font-semibold text-[#3c4043] transition-all`}
                   >
                     {category.icon_url && <span className="mr-1">{category.icon_url}</span>}
                     {category.name}
@@ -426,20 +433,20 @@ export default function RestaurantMenuPage() {
 
       {/* Main Content */}
       {activeTab === 'menu' ? (
-        <main className="max-w-7xl mx-auto px-6 py-6">
+        <main className={`max-w-7xl mx-auto ${isMobile() ? 'px-2 py-3' : 'px-6 py-6'}`}>
         {categories.map(category => {
           const categoryProducts = products.filter(p => p.category_id === category.id && p.is_visible !== false)
           
           if (categoryProducts.length === 0) return null
 
           return (
-            <div key={category.id} id={`category-${category.id}`} className="mb-12 scroll-mt-24">
-              <h2 className="text-[24px] font-bold text-[#3c4043] mb-6" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+            <div key={category.id} id={`category-${category.id}`} className={`${isMobile() ? 'mb-6' : 'mb-12'} scroll-mt-24`}>
+              <h2 className={`${isMobile() ? 'text-[16px] mb-3 px-1' : 'text-[24px] mb-6'} font-bold text-[#3c4043]`} style={{ fontFamily: 'Open Sans, sans-serif' }}>
                 {category.name}
               </h2>
 
-              {/* Grid Yapısı - 4x5 Düzeni */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {/* Grid Yapısı - Mobilde 2 kolon, masaüstünde 4 */}
+              <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${isMobile() ? 'gap-2' : 'gap-3'}`}>
                 {categoryProducts.map(product => (
                   <div
                     key={product.id}
@@ -451,38 +458,39 @@ export default function RestaurantMenuPage() {
                     }`}
                   >
                     {/* Ürün Görseli - Üst */}
-                    <div className="relative w-full h-32 bg-gradient-to-br from-[#fef3c7] to-[#fde68a]">
+                    <div className={`relative w-full ${isMobile() ? 'h-24' : 'h-32'} bg-gradient-to-br from-[#fef3c7] to-[#fde68a]`}>
                       {product.image_url ? (
                         <img 
                           src={product.image_url} 
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                           loading="lazy"
+                          decoding="async"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-4xl">
+                        <div className={`w-full h-full flex items-center justify-center ${isMobile() ? 'text-2xl' : 'text-4xl'}`}>
                           🍽️
                         </div>
                       )}
                     </div>
 
                     {/* Ürün Bilgileri - Alt */}
-                    <div className="p-3">
+                    <div className={`${isMobile() ? 'p-2' : 'p-3'}`}>
                       {/* Ürün Adı - Maksimum 2 satır */}
-                      <h3 className="text-[13px] font-bold text-[#3c4043] mb-1 line-clamp-2 leading-tight group-hover:text-[#f59e0b] transition-colors min-h-[32px]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                      <h3 className={`${isMobile() ? 'text-[11px] mb-0.5 min-h-[28px]' : 'text-[13px] mb-1 min-h-[32px]'} font-bold text-[#3c4043] line-clamp-2 leading-tight group-hover:text-[#f59e0b] transition-colors`} style={{ fontFamily: 'Open Sans, sans-serif' }}>
                         {product.name}
                       </h3>
 
-                      {/* Açıklama - Çok küçük, hover ile göster */}
-                      {product.description && (
+                      {/* Açıklama - Sadece masaüstünde göster */}
+                      {!isMobile() && product.description && (
                         <p className="text-[10px] text-[#9e9e9e] mb-2 line-clamp-1 leading-tight">
                           {product.description}
                         </p>
                       )}
 
                       {/* Fiyat ve Ekle Butonu */}
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-[16px] font-bold text-[#f59e0b]">
+                      <div className={`flex items-center justify-between ${isMobile() ? 'mt-1' : 'mt-2'}`}>
+                        <span className={`${isMobile() ? 'text-[14px]' : 'text-[16px]'} font-bold text-[#f59e0b]`}>
                           {product.price}₺
                         </span>
                         
@@ -492,14 +500,14 @@ export default function RestaurantMenuPage() {
                             handleQuickAdd(product)
                           }}
                           disabled={restaurant?.is_active === false}
-                          className={`px-3 py-1.5 rounded-md font-semibold text-[11px] transition-all flex items-center gap-1 ${
+                          className={`${isMobile() ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-[11px]'} rounded-md font-semibold transition-all flex items-center gap-1 ${
                             restaurant?.is_active === false
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-[#f59e0b] text-white hover:bg-[#d97706] hover:scale-105'
                           }`}
                           style={{ fontFamily: 'Open Sans, sans-serif' }}
                         >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                          <svg width={isMobile() ? '10' : '12'} height={isMobile() ? '10' : '12'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
                           </svg>
