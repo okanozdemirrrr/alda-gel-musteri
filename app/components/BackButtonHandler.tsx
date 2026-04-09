@@ -9,26 +9,34 @@ export default function BackButtonHandler() {
   const pathname = usePathname()
 
   useEffect(() => {
-    // Android geri tuşu için listener
-    const backButtonListener = App.addListener('backButton', ({ canGoBack }) => {
-      // Ana sayfadaysa uygulamadan çık
-      if (pathname === '/' || pathname === '/musteri') {
-        App.exitApp()
-        return
-      }
+    let listenerHandle: any = null
 
-      // Diğer sayfalarda geri git
-      if (canGoBack) {
-        router.back()
-      } else {
-        // Geri gidecek sayfa yoksa ana sayfaya yönlendir
-        router.push('/')
-      }
-    })
+    // Android geri tuşu için listener
+    const setupListener = async () => {
+      listenerHandle = await App.addListener('backButton', ({ canGoBack }) => {
+        // Ana sayfadaysa uygulamadan çık
+        if (pathname === '/' || pathname === '/musteri') {
+          App.exitApp()
+          return
+        }
+
+        // Diğer sayfalarda geri git
+        if (canGoBack) {
+          router.back()
+        } else {
+          // Geri gidecek sayfa yoksa ana sayfaya yönlendir
+          router.push('/')
+        }
+      })
+    }
+
+    setupListener()
 
     // Cleanup
     return () => {
-      backButtonListener.remove()
+      if (listenerHandle) {
+        listenerHandle.remove()
+      }
     }
   }, [pathname, router])
 
