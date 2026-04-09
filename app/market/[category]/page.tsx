@@ -34,6 +34,13 @@ const categoryNames: { [key: string]: { name: string; icon: string } } = {
   dondurulmus: { name: 'Dondurulmuş Ürünler', icon: '🧊' }
 }
 
+// Static export için gerekli
+export function generateStaticParams() {
+  return Object.keys(categoryNames).map((category) => ({
+    category: category,
+  }))
+}
+
 export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
   const resolvedParams = use(params)
   const router = useRouter()
