@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { ArrowLeft, Trash2, AlertTriangle, CheckCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/app/lib/supabase'
 
 export default function HesapSil() {
   const router = useRouter()
