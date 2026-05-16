@@ -4,13 +4,12 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['images.unsplash.com'],
-    unoptimized: true, // Static export için gerekli
+    unoptimized: true,
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
   },
   trailingSlash: false,
-  // TypeScript ve ESLint hatalarını ignore etme (production build için)
   typescript: {
     ignoreBuildErrors: false,
   },

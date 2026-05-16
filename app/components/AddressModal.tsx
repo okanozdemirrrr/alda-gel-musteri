@@ -70,6 +70,39 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   const [doorNumber, setDoorNumber] = useState('')
   const [notes, setNotes] = useState('')
   const [shouldFlyToLocation, setShouldFlyToLocation] = useState(false) // FlyTo kontrolü
+  const [autoLocating, setAutoLocating] = useState(false)
+  const hasAutoLocated = useRef(false)
+
+  // ═══ OTOmatik KONUM BULMA (Map step'e geçince) ═══
+  useEffect(() => {
+    if (step === 'map' && !selectedQuickLocation && !hasAutoLocated.current) {
+      hasAutoLocated.current = true
+      autoLocateOnMap()
+    }
+  }, [step, selectedQuickLocation])
+
+  const autoLocateOnMap = () => {
+    if (!navigator.geolocation) return
+
+    setAutoLocating(true)
+    setError('')
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude: lat, longitude: lng } = position.coords
+        setLatitude(lat)
+        setLongitude(lng)
+        setShouldFlyToLocation(true)
+        setAutoLocating(false)
+      },
+      (err) => {
+        // İzin reddedildi / GPS kapalı / zaman aşımı → sessizce fallback
+        setAutoLocating(false)
+        // Varsayılan koordinatlarda kal, müşteri eliyle kaydırabilir
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    )
+  }
 
   const handleFindMyLocation = () => {
     if (!navigator.geolocation) {
@@ -204,25 +237,25 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-[800px] max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#e8e8e8] sticky top-0 bg-white z-10">
-          <h2 className="text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8] sticky top-0 bg-white z-10">
+          <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
             {step === 'quick' && 'Adres Seç'}
             {step === 'map' && 'Konumunu Doğrula'}
             {step === 'details' && 'Adres Detayları'}
           </h2>
           <button
             onClick={onClose}
-            className="text-[#6f6f6f] hover:text-[#3c4043] text-[24px] leading-none"
+            className="text-[#6f6f6f] hover:text-[#3c4043] text-[28px] leading-none min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             ×
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {/* Error Message */}
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -257,7 +290,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 <button
                   key={location.name}
                   onClick={() => handleQuickLocationSelect(location)}
-                  className="w-full p-4 bg-white border border-[#e8e8e8] rounded-lg text-left hover:border-[#f59e0b] hover:bg-[#fef3c7] transition-colors"
+                  className="w-full p-4 bg-white border border-[#e8e8e8] rounded-lg text-left hover:border-[#f59e0b] hover:bg-[#fef3c7] transition-colors min-h-[48px]"
                 >
                   <div className="flex items-center gap-3">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2">
@@ -277,7 +310,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                   setShouldFlyToLocation(false) // FlyTo YOK, kullanıcı kendisi seçecek
                   setStep('map')
                 }}
-                className="w-full p-4 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg text-center hover:bg-[#e8e8e8] transition-colors"
+                className="w-full p-4 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg text-center hover:bg-[#e8e8e8] transition-colors min-h-[48px]"
               >
                 <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
                   📍 Haritadan Seç
@@ -286,7 +319,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
 
               <button
                 onClick={handleFindMyLocation}
-                className="w-full p-4 bg-gradient-to-r from-[#f59e0b] to-[#d97706] border border-[#f59e0b] rounded-lg text-center hover:from-[#d97706] hover:to-[#b45309] transition-all shadow-md"
+                className="w-full p-4 bg-gradient-to-r from-[#f59e0b] to-[#d97706] border border-[#f59e0b] rounded-lg text-center hover:from-[#d97706] hover:to-[#b45309] transition-all shadow-md min-h-[48px]"
               >
                 <span className="text-[14px] font-semibold text-white flex items-center justify-center gap-2" style={{ fontFamily: 'Open Sans, sans-serif' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -305,7 +338,17 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
 
           {/* Step 2: Map Selection */}
           {step === 'map' && (
-            <div className="space-y-4">
+            <div className="space-y-4 relative">
+              {/* Otomatik Konum Arama Spinnerı */}
+              {autoLocating && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-600 flex-shrink-0"></div>
+                  <p className="text-sm font-medium text-amber-800">
+                    Konumunuz bulunuyor...
+                  </p>
+                </div>
+              )}
+
               {/* Bilgilendirme Mesajı */}
               {selectedQuickLocation && (
                 <div className="bg-[#fef3c7] border border-[#f59e0b] rounded-lg p-4">
@@ -333,7 +376,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 Haritayı hareket ettirerek tam konumunuzu belirleyin
               </p>
 
-              <div className="h-[400px] rounded-lg overflow-hidden border border-[#e8e8e8]">
+              <div className="h-[280px] sm:h-[400px] rounded-lg overflow-hidden border border-[#e8e8e8]">
                 <MapComponent
                   center={[latitude, longitude]}
                   onLocationChange={(lat, lng) => {
@@ -355,14 +398,14 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
               <div className="flex gap-3">
                 <button
                   onClick={() => setStep('quick')}
-                  className="flex-1 h-[48px] bg-white border border-[#e8e8e8] text-[#3c4043] rounded-lg font-semibold text-[14px] hover:bg-[#f7f7f7] transition-colors"
+                  className="flex-1 min-h-[48px] bg-white border border-[#e8e8e8] text-[#3c4043] rounded-lg font-semibold text-[14px] hover:bg-[#f7f7f7] transition-colors"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                 >
                   Geri
                 </button>
                 <button
                   onClick={() => handleMapConfirm(latitude, longitude)}
-                  className="flex-1 h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors"
+                  className="flex-1 min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                 >
                   Konumu Onayla
@@ -516,7 +559,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 <button
                   type="button"
                   onClick={() => setStep('map')}
-                  className="flex-1 h-[48px] bg-white border border-[#e8e8e8] text-[#3c4043] rounded-lg font-semibold text-[14px] hover:bg-[#f7f7f7] transition-colors"
+                  className="flex-1 min-h-[48px] bg-white border border-[#e8e8e8] text-[#3c4043] rounded-lg font-semibold text-[14px] hover:bg-[#f7f7f7] transition-colors"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                 >
                   Geri
@@ -524,7 +567,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
+                  className="flex-1 min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                 >
                   {loading ? 'Kaydediliyor...' : 'Adresimi Kaydet'}

@@ -205,7 +205,7 @@ export default function ProfilPage() {
                 setLoading(true)
                 loadProfile()
               }}
-              className="w-full py-3 bg-[#f59e0b] text-white rounded-lg font-semibold hover:bg-[#d97706] transition-colors"
+              className="w-full py-3 min-h-[44px] bg-[#f59e0b] text-white rounded-lg font-semibold hover:bg-[#d97706] transition-colors"
             >
               Tekrar Dene
             </button>
@@ -214,7 +214,7 @@ export default function ProfilPage() {
                 localStorage.clear()
                 router.push('/musteri')
               }}
-              className="w-full py-3 bg-gray-100 text-[#3c4043] rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+              className="w-full py-3 min-h-[44px] bg-gray-100 text-[#3c4043] rounded-lg font-semibold hover:bg-gray-200 transition-colors"
             >
               Giriş Sayfasına Dön
             </button>
@@ -233,15 +233,15 @@ export default function ProfilPage() {
     <div className="min-h-screen bg-[#f7f7f7]">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
-        <div className="max-w-[600px] mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+        <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => router.back()}
-              className="p-2 hover:bg-[#f7f7f7] rounded-lg transition-colors"
+              className="p-2 hover:bg-[#f7f7f7] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
             >
-              <ArrowLeft size={24} className="text-[#3c4043]" />
+              <ArrowLeft size={22} className="text-[#3c4043]" />
             </button>
-            <h1 className="text-[20px] font-bold text-[#3c4043]">
+            <h1 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]">
               Profilim
             </h1>
           </div>
@@ -249,7 +249,7 @@ export default function ProfilPage() {
           {!editing && (
             <button
               onClick={() => setEditing(true)}
-              className="flex items-center gap-2 px-4 py-2 text-[#f59e0b] hover:bg-orange-50 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 text-[#f59e0b] hover:bg-orange-50 rounded-lg transition-colors min-h-[44px]"
             >
               <Edit2 size={18} />
               <span className="text-[14px] font-semibold">Düzenle</span>
@@ -259,11 +259,11 @@ export default function ProfilPage() {
       </div>
 
       {/* Profile Content */}
-      <div className="max-w-[600px] mx-auto px-4 py-6">
+      <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-xl p-6 border border-[#e8e8e8]"
+          className="bg-white rounded-xl p-4 sm:p-6 border border-[#e8e8e8]"
         >
           {/* Avatar */}
           <div className="flex justify-center mb-6">
@@ -376,7 +376,7 @@ export default function ProfilPage() {
             <div className="flex gap-3 mt-6">
               <button
                 onClick={handleCancel}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-[#3c4043] rounded-lg hover:bg-gray-200 transition-colors font-semibold"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-gray-100 text-[#3c4043] rounded-lg hover:bg-gray-200 transition-colors font-semibold"
               >
                 <X size={18} />
                 İptal
@@ -384,7 +384,7 @@ export default function ProfilPage() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors font-semibold disabled:opacity-50"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 min-h-[44px] bg-[#f59e0b] text-white rounded-lg hover:bg-[#d97706] transition-colors font-semibold disabled:opacity-50"
               >
                 {saving ? (
                   <>

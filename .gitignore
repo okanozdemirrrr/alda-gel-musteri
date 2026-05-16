@@ -27,6 +27,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# keystore
+*.jks
+*.keystore
+
 # vercel
 .vercel
 

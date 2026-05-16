@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, FileText, User, ShoppingCart, UtensilsCrossed } from 'lucide-react'
+import { Menu, FileText, User, ShoppingCart, UtensilsCrossed, ChevronRight, MapPin } from 'lucide-react'
 import AuthModal from './components/AuthModal'
 import AddressModal from './components/AddressModal'
 import WelcomeSplash from './components/WelcomeSplash'
@@ -15,237 +15,84 @@ import { isMobile } from './lib/platform'
 // Mobil için animasyon devre dışı
 const shouldAnimate = !isMobile()
 
-// Split Screen Selector Component
+// ─── YEMEK / MARKET SEÇİM KARTLARI ──────────────────────────────
 function SplitScreenSelector() {
   const router = useRouter()
 
-  const handleYemekClick = () => {
-    router.push('/restoranlar')
-  }
-
-  const handleMarketClick = () => {
-    router.push('/market')
-  }
+  const cards = [
+    {
+      label: 'YEMEK',
+      sub: 'Restoranlardan sipariş ver',
+      icon: UtensilsCrossed,
+      route: '/restoranlar',
+      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80',
+      from: 'from-amber-500',
+      to: 'to-orange-600',
+      hoverFrom: 'group-hover:from-amber-400',
+      hoverTo: 'group-hover:to-orange-500',
+    },
+    {
+      label: 'MARKET',
+      sub: 'Marketlerden alışveriş yap',
+      icon: ShoppingCart,
+      route: '/market',
+      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
+      from: 'from-emerald-500',
+      to: 'to-teal-600',
+      hoverFrom: 'group-hover:from-emerald-400',
+      hoverTo: 'group-hover:to-teal-500',
+    },
+  ]
 
   return (
-    <>
-      {/* SLOGAN - Headline */}
-      <motion.div
-        initial={shouldAnimate ? { opacity: 0 } : false}
-        animate={shouldAnimate ? { opacity: 1 } : false}
-        transition={shouldAnimate ? { 
-          delay: 0.3,
-          duration: 0.5, 
-          ease: 'easeOut' 
-        } : { duration: 0 }}
-        className="text-center mb-6 px-4"
-        style={{
-          transform: 'translateZ(0)',
-          willChange: shouldAnimate ? 'opacity' : 'auto',
-          minHeight: '120px'
-        }}
-      >
-        <h1 
-          className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black leading-tight"
-          style={{ 
-            fontFamily: 'Open Sans, sans-serif',
-            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 50%, #dc2626 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
-            transform: 'translateZ(0)' // GPU hızlandırma
-          }}
-        >
-          <span className="block sm:inline">Komisyonu Sildik, Fiyatları İndirdik!</span>
-          <br className="hidden sm:block" />
-          <span className="block sm:inline mt-2 sm:mt-0"> Alda Gel: Senin İlçen, Senin Uygulaman.</span>
-        </h1>
-      </motion.div>
+    <div className="w-full max-w-5xl mx-auto px-4 pt-6 pb-12">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {cards.map((card) => {
+          const Icon = card.icon
+          return (
+            <motion.button
+              key={card.label}
+              onClick={() => router.push(card.route)}
+              whileHover={shouldAnimate ? { scale: 1.02 } : {}}
+              whileTap={shouldAnimate ? { scale: 0.98 } : {}}
+              className="relative overflow-hidden rounded-3xl h-64 md:h-72 group cursor-pointer shadow-lg"
+            >
+              {/* Arka plan fotoğraf */}
+              <div
+                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+                style={{ backgroundImage: `url(${card.image})` }}
+              />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0 h-[calc(100vh-300px)] md:h-[calc(100vh-280px)] min-h-[400px] max-h-[600px]">
-        {/* YEMEK Section */}
-        <motion.button
-          onClick={handleYemekClick}
-          whileHover={shouldAnimate ? { scale: 1.02 } : {}}
-          whileTap={shouldAnimate ? { scale: 0.98 } : {}}
-          className="relative overflow-hidden group cursor-pointer"
-          style={{
-            transform: 'translateZ(0)',
-            willChange: shouldAnimate ? 'transform' : 'auto'
-          }}
-        >
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-            style={{
-              backgroundImage: 'url(https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&q=80)',
-              transform: 'translateZ(0)' // GPU hızlandırma
-            }}
-          />
-          
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-600/80 to-orange-800/90 group-hover:from-orange-500/85 group-hover:to-orange-700/95 transition-all duration-300" />
-          
-          {/* Content */}
-          <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.5,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="mb-4"
-              style={{ transform: 'translateZ(0)' }}
-            >
-              <UtensilsCrossed size={60} strokeWidth={1.5} className="md:w-20 md:h-20" />
-            </motion.div>
-            
-            <motion.h2
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.6,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
-              style={{ 
-                fontFamily: 'Open Sans, sans-serif',
-                transform: 'translateZ(0)'
-              }}
-            >
-              YEMEK
-            </motion.h2>
-            
-            <motion.p
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.7,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
-              style={{ transform: 'translateZ(0)' }}
-            >
-              Restoranlardan sipariş ver
-            </motion.p>
+              {/* Gradient overlay */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${card.from}/80 ${card.to}/90 transition-all duration-300 ${card.hoverFrom} ${card.hoverTo}`}
+              />
 
-            {/* Hover Arrow */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1, x: 10 }}
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 hidden md:block"
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </motion.div>
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-        </motion.button>
-
-        {/* MARKET Section */}
-        <motion.button
-          onClick={handleMarketClick}
-          whileHover={shouldAnimate ? { scale: 1.02 } : {}}
-          whileTap={shouldAnimate ? { scale: 0.98 } : {}}
-          className="relative overflow-hidden group cursor-pointer"
-          style={{
-            transform: 'translateZ(0)',
-            willChange: shouldAnimate ? 'transform' : 'auto'
-          }}
-        >
-          {/* Background Image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-            style={{
-              backgroundImage: 'url(https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=800&q=80)',
-              transform: 'translateZ(0)' // GPU hızlandırma
-            }}
-          />
-          
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-green-600/80 to-green-800/90 group-hover:from-green-500/85 group-hover:to-green-700/95 transition-all duration-300" />
-          
-          {/* Content */}
-          <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
-            <motion.div
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.5,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="mb-4"
-              style={{ transform: 'translateZ(0)' }}
-            >
-              <ShoppingCart size={60} strokeWidth={1.5} className="md:w-20 md:h-20" />
-            </motion.div>
-            
-            <motion.h2
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.6,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-3"
-              style={{ 
-                fontFamily: 'Open Sans, sans-serif',
-                transform: 'translateZ(0)'
-              }}
-            >
-              MARKET
-            </motion.h2>
-            
-            <motion.p
-              initial={shouldAnimate ? { opacity: 0 } : false}
-              animate={shouldAnimate ? { opacity: 1 } : false}
-              transition={shouldAnimate ? { 
-                delay: 0.7,
-                duration: 0.3 
-              } : { duration: 0 }}
-              className="text-lg md:text-xl lg:text-2xl font-medium opacity-90"
-              style={{ transform: 'translateZ(0)' }}
-            >
-              Marketlerden alışveriş yap
-            </motion.p>
-
-            {/* Active Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5 }}
-              className="absolute top-6 right-6 bg-green-400 text-green-900 px-3 py-1.5 md:px-4 md:py-2 rounded-full font-bold text-xs md:text-sm animate-pulse"
-            >
-              Aktif
-            </motion.div>
-
-            {/* Hover Arrow */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileHover={{ opacity: 1, x: 10 }}
-              className="absolute right-6 top-1/2 transform -translate-y-1/2 hidden md:block"
-            >
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </motion.div>
-          </div>
-
-          {/* Decorative Elements */}
-          <div className="absolute top-0 left-0 w-32 h-32 bg-white/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-        </motion.button>
+              {/* İçerik */}
+              <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
+                <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl mb-4 group-hover:bg-white/30 transition-colors">
+                  <Icon size={36} strokeWidth={1.5} />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-2">
+                  {card.label}
+                </h2>
+                <p className="text-sm md:text-base font-medium opacity-90 mb-4">
+                  {card.sub}
+                </p>
+                <div className="flex items-center gap-1 text-sm font-bold bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+                  Keşfet
+                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </motion.button>
+          )
+        })}
       </div>
-    </>
+    </div>
   )
 }
 
+// ─── ANA SAYFA ─────────────────────────────────────────────────
 export default function MusteriAnaSayfa() {
   const router = useRouter()
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -258,7 +105,6 @@ export default function MusteriAnaSayfa() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Oturum kontrolü
     const customerId = localStorage.getItem('customer_id')
     const name = localStorage.getItem('customer_name')
     const address = localStorage.getItem('customer_address')
@@ -266,10 +112,7 @@ export default function MusteriAnaSayfa() {
     if (customerId && name) {
       setIsLoggedIn(true)
       setCustomerName(name)
-      if (address) {
-        setSelectedAddress(address)
-        // Adres varsa split screen göster (restoranlar sayfasına otomatik yönlendirme kaldırıldı)
-      }
+      if (address) setSelectedAddress(address)
     }
   }, [])
 
@@ -280,14 +123,10 @@ export default function MusteriAnaSayfa() {
         setShowMenu(false)
       }
     }
-
     if (showMenu) {
       document.addEventListener('mousedown', handleClickOutside)
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showMenu])
 
   const handleAddressClick = () => {
@@ -323,312 +162,290 @@ export default function MusteriAnaSayfa() {
     <>
       {/* Welcome Splash */}
       {showWelcomeSplash && (
-        <WelcomeSplash 
-          name={customerName} 
-          onComplete={() => setShowWelcomeSplash(false)} 
-        />
+        <WelcomeSplash name={customerName} onComplete={() => setShowWelcomeSplash(false)} />
       )}
 
-      <div className="min-h-screen bg-white overflow-x-hidden">
-        {/* Header */}
-        <header 
-          className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40 overflow-x-hidden"
-          style={{
-            paddingTop: isMobile() ? 'max(env(safe-area-inset-top), 8px)' : '0',
-            paddingLeft: isMobile() ? 'max(env(safe-area-inset-left), 12px)' : '0',
-            paddingRight: isMobile() ? 'max(env(safe-area-inset-right), 12px)' : '0'
-          }}
-        >
-          {isMobile() ? (
-            // Mobil Header - Tek satır ultra kompakt
-            <div className="w-full px-3 py-2">
-              <div className="flex items-center justify-between gap-1.5 w-full">
-                {/* Sol: Adres */}
-                <button
-                  onClick={handleAddressClick}
-                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors min-w-0 flex-shrink overflow-hidden"
-                  style={{ maxWidth: 'calc(100vw - 200px)' }}
-                >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" className="flex-shrink-0">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  <span className="text-[11px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                    {selectedAddress || 'Adres Seç'}
-                  </span>
-                </button>
-
-                {/* Sağ: Kullanıcı + Menü + Bildirim */}
-                {isLoggedIn && (
-                  <div className="flex items-center gap-1 flex-shrink-0">
-                    {/* Kullanıcı Avatar */}
-                    <div className="w-7 h-7 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
-                      {customerName.charAt(0).toUpperCase()}
-                    </div>
-                    
-                    {/* Hamburger Menu */}
-                    <div className="relative" ref={menuRef}>
-                      <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="p-1 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
-                      >
-                        <Menu size={18} />
-                      </button>
-
-                      <AnimatePresence>
-                        {showMenu && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
-                          >
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/siparislerim')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <FileText size={18} />
-                              <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/yardim')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                              </svg>
-                              <span className="text-[14px] font-medium">❓ Yardım Merkezi</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/profil')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <User size={18} />
-                              <span className="text-[14px] font-medium">👤 Profilim</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                handleLogout()
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
-                            >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                <polyline points="16 17 21 12 16 7"></polyline>
-                                <line x1="21" y1="12" x2="9" y2="12"></line>
-                              </svg>
-                              <span className="text-[14px] font-medium">🚪 Çıkış Yap</span>
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                    
-                    {/* Notification Bell */}
-                    <NotificationBell />
-                  </div>
-                )}
-
-                {!isLoggedIn && (
-                  <button
-                    onClick={() => setShowAuthModal(true)}
-                    className="px-3 py-1 text-[11px] font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors flex-shrink-0"
-                    style={{ fontFamily: 'Open Sans, sans-serif' }}
-                  >
-                    Giriş
-                  </button>
-                )}
-              </div>
-            </div>
-          ) : (
-            // Web Header - Orijinal tasarım
-            <div className="max-w-7xl mx-auto px-4 h-[72px] flex items-center justify-between">
-              {/* Sol: Logo + Adres */}
-              <div className="flex items-center gap-4">
-                <Image 
-                  src="/logo.png" 
-                  alt="Alda Gel" 
-                  width={120} 
-                  height={40}
-                  className="cursor-pointer"
-                  onClick={() => router.push('/')}
+      <div className="min-h-screen bg-stone-50 overflow-x-hidden">
+        {/* ═══ HEADER ═══ */}
+        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50">
+          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+            {/* Sol: Logo + Adres */}
+            <div className="flex items-center gap-3 min-w-0">
+              <button
+                onClick={() => router.push('/')}
+                className="flex-shrink-0 flex items-center"
+              >
+                <Image
+                  src="/logo.png"
+                  alt="Alda-Gel Logo"
+                  width={102}
+                  height={34}
+                  className="object-contain w-[68px] md:w-24 lg:w-[108px] h-auto"
+                  priority
                 />
-                
-                <button
-                  onClick={handleAddressClick}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                    {selectedAddress || 'Adresini Seç'}
-                  </span>
-                </button>
-              </div>
+              </button>
 
-              {/* Sağ: Auth Buttons veya User Info */}
-              <div className="flex items-center gap-3">
-                {!isLoggedIn ? (
-                  <>
-                    <button
-                      onClick={() => setShowAuthModal(true)}
-                      className="px-6 py-2 text-[14px] font-semibold text-[#3c4043] hover:bg-[#f7f7f7] rounded-lg transition-colors"
-                      style={{ fontFamily: 'Open Sans, sans-serif' }}
-                    >
-                      Giriş Yap
-                    </button>
-                    <button
-                      onClick={() => setShowAuthModal(true)}
-                      className="px-6 py-2 text-[14px] font-semibold text-white bg-[#f59e0b] hover:bg-[#d97706] rounded-lg transition-colors"
-                      style={{ fontFamily: 'Open Sans, sans-serif' }}
-                    >
-                      Kayıt Ol
-                    </button>
-                  </>
-                ) : (
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
-                        {customerName.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-[14px] font-semibold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                        {customerName}
-                      </span>
-                    </div>
-                    
-                    {/* Hamburger Menu */}
-                    <div className="relative" ref={menuRef}>
-                      <button
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
-                      >
-                        <Menu size={20} />
-                      </button>
-
-                      <AnimatePresence>
-                        {showMenu && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            transition={{ duration: 0.15 }}
-                            className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
-                          >
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/siparislerim')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <FileText size={18} />
-                              <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/yardim')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                              </svg>
-                              <span className="text-[14px] font-medium">❓ Yardım Merkezi</span>
-                            </button>
-                            <button
-                              onClick={() => {
-                                setShowMenu(false)
-                                router.push('/profil')
-                              }}
-                              className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
-                            >
-                              <User size={18} />
-                              <span className="text-[14px] font-medium">👤 Profilim</span>
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                    
-                    {/* Notification Bell */}
-                    <NotificationBell />
-                    
-                    <button
-                      onClick={handleLogout}
-                      className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
-                    >
-                      Çıkış
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </header>
-
-        {/* Main Content */}
-        <main className="relative min-h-[calc(100vh-72px)]">
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-              style={{
-                backgroundImage: 'url(/alda-gel-hero.png)',
-              }}
-            />
-            {/* Optional overlay for better text readability */}
-            <div className="absolute inset-0 bg-black/20" />
-          </div>
-
-          {/* Content */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 py-8">
-          {!isLoggedIn || !selectedAddress ? (
-            // Giriş yapmamış veya adres seçmemiş kullanıcılar için
-            <div className="text-center py-20">
-              <h1 className="text-[48px] font-bold text-white mb-4 drop-shadow-2xl" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                Alda Gel
-              </h1>
-              <p className="text-[18px] text-white mb-8 drop-shadow-lg">
-                Samsun 19 Mayıs'ta hızlı teslimat
-              </p>
-              
               <button
                 onClick={handleAddressClick}
-                className="px-8 py-4 text-[16px] font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-lg transition-colors shadow-2xl"
-                style={{ fontFamily: 'Open Sans, sans-serif' }}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-stone-100 hover:bg-amber-50 border border-stone-200 hover:border-amber-300 rounded-full transition-all text-sm"
               >
-                {!isLoggedIn ? 'Giriş Yap ve Başla' : 'Adresini Seç ve Başla'}
+                <MapPin size={14} className="text-amber-600 flex-shrink-0" />
+                <span className="text-stone-700 font-medium truncate max-w-[160px]">
+                  {selectedAddress || 'Adres Seç'}
+                </span>
               </button>
             </div>
-          ) : (
-            // Giriş yapmış ve adres seçmiş kullanıcılar için Split Screen
-            <SplitScreenSelector />
-          )}
+
+            {/* Sağ: Auth / User */}
+            <div className="flex items-center gap-2">
+              {!isLoggedIn ? (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 rounded-full transition-all shadow-md hover:shadow-lg"
+                >
+                  Giriş Yap
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {/* Kullanıcı Avatar */}
+                  <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    {customerName.charAt(0).toUpperCase()}
+                  </div>
+
+                  {/* Hamburger */}
+                  <div className="relative" ref={menuRef}>
+                    <button
+                      onClick={() => setShowMenu(!showMenu)}
+                      className="p-2 text-stone-500 hover:text-amber-600 transition-colors rounded-full hover:bg-stone-100"
+                    >
+                      <Menu size={20} />
+                    </button>
+
+                    <AnimatePresence>
+                      {showMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: -8 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -8 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-stone-200 overflow-hidden"
+                        >
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/siparislerim') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-stone-700 hover:bg-amber-50 transition-colors text-left"
+                          >
+                            <FileText size={18} className="text-amber-600" />
+                            <span className="text-sm font-medium">Geçmiş Siparişlerim</span>
+                          </button>
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/yardim') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-stone-700 hover:bg-amber-50 transition-colors text-left"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-600"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                            <span className="text-sm font-medium">Yardım Merkezi</span>
+                          </button>
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/profil') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-stone-700 hover:bg-amber-50 transition-colors text-left"
+                          >
+                            <User size={18} className="text-amber-600" />
+                            <span className="text-sm font-medium">Profilim</span>
+                          </button>
+                          <button
+                            onClick={() => { setShowMenu(false); handleLogout() }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-red-600 hover:bg-red-50 transition-colors text-left border-t border-stone-100"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            <span className="text-sm font-medium">Çıkış Yap</span>
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <NotificationBell />
+                </div>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* ═══ MOBİL ADRES BAR ═══ */}
+        {isLoggedIn && (
+          <div className="sm:hidden bg-white border-b border-stone-100 px-4 py-2">
+            <button
+              onClick={handleAddressClick}
+              className="flex items-center gap-2 w-full text-left"
+            >
+              <MapPin size={16} className="text-amber-600 flex-shrink-0" />
+              <span className="text-sm text-stone-600 truncate">
+                {selectedAddress || 'Adresinizi Seçin'}
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* ═══ HERO SECTION ═══ */}
+        <main className="relative">
+          {/* Arka plan görseli */}
+          <div className="absolute inset-0 z-0">
+            <div
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: 'url(/alda-gel-hero.png)' }}
+            />
+            {/* Karartma overlay — metin okunurluğu için zorunlu */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/30 to-stone-900/80" />
+          </div>
+
+          {/* İçerik */}
+          <div className="relative z-10 max-w-6xl mx-auto px-4">
+            {!isLoggedIn || !selectedAddress ? (
+              /* ═══ GİRİŞ YAPMAMIŞ / ADRES SEÇMEMİŞ ═══ */
+              <div className="min-h-[70vh] flex items-center justify-center py-16">
+                <motion.div
+                  initial={shouldAnimate ? { opacity: 0, y: 30 } : {}}
+                  animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, ease: 'easeOut' }}
+                  className="w-full max-w-lg"
+                >
+                  {/* Yarı saydam panel — backdrop-blur ile metin arka plandan ayrılır */}
+                  <div className="bg-white/85 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/30">
+                    {/* Başlık */}
+                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#3E1F0C] mb-3 tracking-tight leading-tight">
+                      Alda-Gel Yemek & Sanal Market
+                    </h1>
+
+                    {/* Alt başlık */}
+                    <p className="text-sm sm:text-base md:text-lg text-stone-500 mb-6 sm:mb-8 font-medium leading-relaxed">
+                      Samsun 19 Mayıs'ta lezzetli ve hızlı teslimat.
+                    </p>
+
+                    {/* CTA Butonu — hover parlaması */}
+                    <button
+                      onClick={handleAddressClick}
+                      className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-base sm:text-lg md:text-xl font-black rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.5)] flex items-center justify-center gap-3"
+                    >
+                      <span>Keşfet ve Başla</span>
+                      <ChevronRight
+                        size={24}
+                        className="group-hover:translate-x-1 transition-transform"
+                      />
+                    </button>
+
+                    {/* Alt bilgi */}
+                    <p className="mt-4 text-xs text-stone-400 font-medium">
+                      {!isLoggedIn ? 'Giriş yaparak başlayın' : 'Adresinizi seçerek başlayın'}
+                    </p>
+                  </div>
+
+                  {/* Trust badges */}
+                  <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-white/80 text-xs sm:text-sm flex-wrap">
+                    <div className="flex items-center gap-1.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                      <span className="font-medium">Komisyon Yok</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      <span className="font-medium">Hızlı Teslimat</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                      <span className="font-medium">Yerel Lezzetler</span>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+            ) : (
+              /* ═══ GİRİŞ YAPMIŞ + ADRES SEÇMİŞ ═══ */
+              <>
+                {/* Karşılama + Split Screen */}
+                <div className="pt-10 pb-6">
+                  <motion.div
+                    initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+                    animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+                    transition={{ duration: 0.5 }}
+                    className="text-center mb-8"
+                  >
+                    <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mb-2">
+                      Hoş Geldin, <span className="text-amber-300">{customerName}</span>
+                    </h1>
+                    <p className="text-white/80 text-base sm:text-lg font-medium drop-shadow">
+                      Bugün ne yemek istersin?
+                    </p>
+                  </motion.div>
+
+                  <SplitScreenSelector />
+                </div>
+              </>
+            )}
           </div>
         </main>
+
+        {/* ═══ ALT BÖLÜM: ÖZELLİKLER ═══ */}
+        {!isLoggedIn || !selectedAddress ? (
+          <section className="bg-stone-50 py-16 px-4 relative z-10">
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-2xl sm:text-3xl font-black text-[#3E1F0C] mb-3">
+                  Neden Alda Gel?
+                </h2>
+                <p className="text-stone-500 text-base sm:text-lg">
+                  19 Mayıs'ın kendi yemek ve market uygulaması.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                {[
+                  {
+                    emoji: '🍔',
+                    title: 'Lezzetli Yemekler',
+                    desc: 'Mahallenizin en iyi restoranlarından enfes burger, dürüm ve daha fazlası.',
+                  },
+                  {
+                    emoji: '🛵',
+                    title: 'Hızlı Teslimat',
+                    desc: 'Siparişiniz ortalama 25 dakikada kapınızda. Takip edebilirsiniz.',
+                  },
+                  {
+                    emoji: '💰',
+                    title: 'Komisyon Yok',
+                    desc: 'Restoran sahiplerine %0 komisyon ile daha uygun fiyatlar.',
+                  },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+                    whileInView={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.15, duration: 0.5 }}
+                    className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
+                  >
+                    <div className="text-4xl mb-4">{item.emoji}</div>
+                    <h3 className="text-lg font-bold text-[#3E1F0C] mb-2">{item.title}</h3>
+                    <p className="text-stone-500 text-sm leading-relaxed">{item.desc}</p>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
+
+        {/* ═══ FOOTER ═══ */}
+        <footer className="bg-stone-900 text-stone-400 py-8 px-4 relative z-10">
+          <div className="max-w-6xl mx-auto text-center">
+            <p className="text-sm">
+              Alda Gel — Samsun 19 Mayıs
+            </p>
+            <p className="text-xs mt-1 opacity-60">
+              Yerel esnaf, yerel lezzet, yerel hız.
+            </p>
+          </div>
+        </footer>
       </div>
 
-      {/* Modals */}
+      {/* ═══ MODALLAR ═══ */}
       {showAuthModal && (
-        <AuthModal 
+        <AuthModal
           onClose={() => setShowAuthModal(false)}
           onLoginSuccess={handleLoginSuccess}
         />
@@ -641,9 +458,7 @@ export default function MusteriAnaSayfa() {
         />
       )}
 
-      {/* Push Notification Prompt */}
       {isLoggedIn && <PushNotificationPrompt />}
     </>
   )
 }
-

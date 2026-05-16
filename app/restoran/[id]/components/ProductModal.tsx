@@ -63,8 +63,8 @@ export default function ProductModal({ product, allProducts, onClose, onShowUpse
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className={`bg-white rounded-2xl w-full ${mobile ? 'max-w-[95vw]' : 'max-w-[500px]'} max-h-[90vh] overflow-y-auto`}>
+    <div className={`fixed inset-0 bg-black/50 flex ${mobile ? 'items-end' : 'items-center'} justify-center z-50 ${mobile ? '' : 'p-4'}`}>
+      <div className={`bg-white ${mobile ? 'rounded-t-2xl' : 'rounded-2xl'} w-full ${mobile ? 'max-w-full' : 'max-w-[500px]'} ${mobile ? 'max-h-[95vh]' : 'max-h-[90vh]'} overflow-y-auto`}>
         {/* Header */}
         <div className={`flex items-center justify-between ${mobile ? 'p-4' : 'p-6'} border-b border-[#e8e8e8] sticky top-0 bg-white z-10`}>
           <h2 className={`${mobile ? 'text-[16px]' : 'text-[20px]'} font-bold text-[#3c4043] pr-4`} style={{ fontFamily: 'Open Sans, sans-serif' }}>
@@ -72,7 +72,7 @@ export default function ProductModal({ product, allProducts, onClose, onShowUpse
           </h2>
           <button
             onClick={onClose}
-            className={`text-[#6f6f6f] hover:text-[#3c4043] ${mobile ? 'text-[28px]' : 'text-[24px]'} leading-none flex-shrink-0`}
+            className={`text-[#6f6f6f] hover:text-[#3c4043] ${mobile ? 'text-[28px]' : 'text-[24px]'} leading-none flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center`}
           >
             ×
           </button>
@@ -104,7 +104,7 @@ export default function ProductModal({ product, allProducts, onClose, onShowUpse
             <div className={`flex items-center ${mobile ? 'gap-3' : 'gap-4'}`}>
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className={`${mobile ? 'w-9 h-9 text-[18px]' : 'w-10 h-10 text-[20px]'} bg-[#f7f7f7] rounded-lg flex items-center justify-center font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors`}
+                className={`${mobile ? 'w-10 h-10 text-[18px]' : 'w-10 h-10 text-[20px]'} bg-[#f7f7f7] rounded-lg flex items-center justify-center font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors`}
               >
                 −
               </button>
@@ -113,7 +113,7 @@ export default function ProductModal({ product, allProducts, onClose, onShowUpse
               </span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className={`${mobile ? 'w-9 h-9 text-[18px]' : 'w-10 h-10 text-[20px]'} bg-[#f7f7f7] rounded-lg flex items-center justify-center font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors`}
+                className={`${mobile ? 'w-10 h-10 text-[18px]' : 'w-10 h-10 text-[20px]'} bg-[#f7f7f7] rounded-lg flex items-center justify-center font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors`}
               >
                 +
               </button>
@@ -137,7 +137,7 @@ export default function ProductModal({ product, allProducts, onClose, onShowUpse
           {/* Sepete Ekle Butonu */}
           <button
             onClick={handleAddToCart}
-            className={`w-full ${mobile ? 'h-[48px] text-[14px]' : 'h-[56px] text-[16px]'} bg-[#f59e0b] text-white rounded-lg font-bold hover:bg-[#d97706] transition-colors flex items-center justify-center gap-3`}
+            className={`w-full ${mobile ? 'min-h-[48px] text-[14px]' : 'min-h-[56px] text-[16px]'} bg-[#f59e0b] text-white rounded-lg font-bold hover:bg-[#d97706] transition-colors flex items-center justify-center gap-3`}
             style={{ fontFamily: 'Open Sans, sans-serif' }}
           >
             <span>Sepete Ekle</span>

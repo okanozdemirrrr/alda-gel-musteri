@@ -264,7 +264,7 @@ export default function RestaurantMenuPage() {
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className={`absolute ${isMobile() ? 'top-2 left-2 w-9 h-9' : 'top-4 left-4 w-10 h-10'} bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#3c4043] hover:bg-white transition-all shadow-lg`}
+          className={`absolute ${isMobile() ? 'top-2 left-2 w-10 h-10' : 'top-4 left-4 w-10 h-10'} bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-[#3c4043] hover:bg-white transition-all shadow-lg`}
           style={{ paddingLeft: isMobile() ? 'max(8px, env(safe-area-inset-left))' : undefined }}
         >
           <svg width={isMobile() ? '18' : '20'} height={isMobile() ? '18' : '20'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -383,7 +383,7 @@ export default function RestaurantMenuPage() {
           <div className="flex gap-2">
             <button
               onClick={() => setActiveTab('menu')}
-              className={`${isMobile() ? 'py-2 px-2 text-[11px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
+              className={`${isMobile() ? 'py-2.5 px-3 text-[12px] min-h-[40px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'menu'
                   ? 'border-[#f59e0b] text-[#f59e0b]'
                   : 'border-transparent text-[#6f6f6f] hover:text-[#3c4043]'
@@ -393,7 +393,7 @@ export default function RestaurantMenuPage() {
             </button>
             <button
               onClick={() => setActiveTab('reviews')}
-              className={`${isMobile() ? 'py-2 px-2 text-[11px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
+              className={`${isMobile() ? 'py-2.5 px-3 text-[12px] min-h-[40px]' : 'py-3 px-2 text-[14px]'} font-semibold border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'reviews'
                   ? 'border-[#f59e0b] text-[#f59e0b]'
                   : 'border-transparent text-[#6f6f6f] hover:text-[#3c4043]'
@@ -419,7 +419,7 @@ export default function RestaurantMenuPage() {
                       const element = document.getElementById(`category-${category.id}`)
                       element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
                     }}
-                    className={`flex-shrink-0 ${isMobile() ? 'px-3 py-1.5 text-[11px]' : 'px-4 py-2 text-[13px]'} bg-[#f7f7f7] hover:bg-[#f59e0b] hover:text-white rounded-full font-semibold text-[#3c4043] transition-all`}
+                    className={`flex-shrink-0 ${isMobile() ? 'px-3 py-2 text-[11px] min-h-[36px]' : 'px-4 py-2 text-[13px]'} bg-[#f7f7f7] hover:bg-[#f59e0b] hover:text-white rounded-full font-semibold text-[#3c4043] transition-all`}
                   >
                     {category.icon_url && <span className="mr-1">{category.icon_url}</span>}
                     {category.name}
@@ -500,7 +500,7 @@ export default function RestaurantMenuPage() {
                             handleQuickAdd(product)
                           }}
                           disabled={restaurant?.is_active === false}
-                          className={`${isMobile() ? 'px-2 py-1 text-[10px]' : 'px-3 py-1.5 text-[11px]'} rounded-md font-semibold transition-all flex items-center gap-1 ${
+                          className={`${isMobile() ? 'px-2.5 py-1.5 text-[10px] min-h-[32px]' : 'px-3 py-1.5 text-[11px]'} rounded-md font-semibold transition-all flex items-center gap-1 ${
                             restaurant?.is_active === false
                               ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                               : 'bg-[#f59e0b] text-white hover:bg-[#d97706] hover:scale-105'

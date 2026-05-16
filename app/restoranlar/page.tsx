@@ -20,7 +20,7 @@ interface Restaurant {
   min_order_amount?: number
   rating?: number
   estimated_delivery_time?: string
-  category?: string
+  categories?: string[]
   is_open?: boolean
   is_active?: boolean
   has_campaign?: boolean
@@ -31,12 +31,16 @@ interface Restaurant {
 const CATEGORIES = [
   { name: 'Tümü', icon: '🍽️' },
   { name: 'Burger', icon: '🍔' },
-  { name: 'Pizza', icon: '🍕' },
   { name: 'Döner', icon: '🥙' },
-  { name: 'Tatlı', icon: '🍰' },
-  { name: 'Kahve', icon: '☕' },
   { name: 'Tavuk', icon: '🍗' },
-  { name: 'Kebap', icon: '🍖' }
+  { name: 'Kebap', icon: '🍖' },
+  { name: 'Pizza', icon: '🍕' },
+  { name: 'Tantuni', icon: '🌯' },
+  { name: 'Çiğköfte', icon: '�' },
+  { name: 'Ev Yemekleri', icon: '🥘' },
+  { name: 'Pide', icon: '🫓' },
+  { name: 'Lahmacun', icon: '🫔' },
+  { name: 'Izgara', icon: '🥩' }
 ]
 
 const MAX_DISTANCE_METERS = 10000 // 10 km
@@ -164,8 +168,9 @@ export default function RestoranlarPage() {
         if (restaurant.distance > MAX_DISTANCE_METERS) return false
         
         // Kategori filtresi
-        if (selectedCategory !== 'Tümü' && restaurant.category !== selectedCategory) {
-          return false
+        if (selectedCategory !== 'Tümü') {
+          const cats = restaurant.categories || []
+          if (!cats.includes(selectedCategory)) return false
         }
 
         return true
@@ -213,7 +218,7 @@ export default function RestoranlarPage() {
     <div className="min-h-screen bg-white overflow-x-hidden">
       {/* Header */}
       <header 
-        className="bg-white border-b border-[#e8e8e8] sticky top-0 z-40 overflow-x-hidden"
+        className="bg-white border-b border-[#e8e8e8] sticky top-0 z-50"
         style={{
           paddingTop: isMobile() ? 'max(env(safe-area-inset-top), 8px)' : '0',
           paddingLeft: isMobile() ? 'max(env(safe-area-inset-left), 12px)' : '0',
@@ -224,20 +229,35 @@ export default function RestoranlarPage() {
           // Mobil Header - Tek satır ultra kompakt
           <div className="w-full px-3 py-2">
             <div className="flex items-center justify-between gap-1.5 w-full">
-              {/* Sol: Adres */}
-              <button
-                onClick={() => setShowAddressModal(true)}
-                className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors min-w-0 flex-shrink overflow-hidden"
-                style={{ maxWidth: 'calc(100vw - 200px)' }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" className="flex-shrink-0">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span className="text-[11px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                  {selectedAddress || 'Adres Seç'}
-                </span>
-              </button>
+              {/* Sol: Logo + Adres */}
+              <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+                <button
+                  onClick={() => router.push('/')}
+                  className="flex-shrink-0 flex items-center"
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="Alda-Gel Logo"
+                    width={102}
+                    height={34}
+                    className="object-contain w-[54px] md:w-[68px] h-auto"
+                    priority
+                  />
+                </button>
+                <button
+                  onClick={() => setShowAddressModal(true)}
+                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors min-w-0 flex-shrink overflow-hidden"
+                  style={{ maxWidth: 'calc(100vw - 280px)' }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" className="flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span className="text-[11px] font-semibold text-[#3c4043] truncate" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                    {selectedAddress || 'Adres Seç'}
+                  </span>
+                </button>
+              </div>
 
               {/* Sağ: Kullanıcı + Menü + Bildirim */}
               <div className="flex items-center gap-1 flex-shrink-0">
@@ -262,16 +282,16 @@ export default function RestoranlarPage() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95, y: -10 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
+                        className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
                       >
                         <button
                           onClick={() => {
                             setShowMenu(false)
                             router.push('/siparislerim')
                           }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
                         >
-                          <FileText size={18} />
+                          <FileText size={18} className="text-amber-500" />
                           <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
                         </button>
                         <button
@@ -279,9 +299,9 @@ export default function RestoranlarPage() {
                             setShowMenu(false)
                             router.push('/profil')
                           }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
                         >
-                          <User size={18} />
+                          <User size={18} className="text-amber-500" />
                           <span className="text-[14px] font-medium">👤 Profilim</span>
                         </button>
                         <button
@@ -289,9 +309,9 @@ export default function RestoranlarPage() {
                             setShowMenu(false)
                             router.push('/yardim')
                           }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
                         >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                             <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -303,7 +323,7 @@ export default function RestoranlarPage() {
                             setShowMenu(false)
                             handleLogout()
                           }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                          className="w-full px-4 py-3 flex items-center gap-3 text-red-500 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
                         >
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -325,15 +345,20 @@ export default function RestoranlarPage() {
         ) : (
           // Web Header - Orijinal tasarım
           <div className="max-w-7xl mx-auto px-4 h-[72px] flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Image 
-                src="/logo.png" 
-                alt="Alda Gel" 
-                width={120} 
-                height={40}
-                className="cursor-pointer"
-                onClick={() => router.push('/musteri')}
-              />
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => router.push('/')}
+                className="flex-shrink-0 flex items-center"
+              >
+                <Image
+                  src="/logo.png"
+                  alt="Alda-Gel Logo"
+                  width={102}
+                  height={34}
+                  className="object-contain w-20 md:w-24 lg:w-[108px] h-auto"
+                  priority
+                />
+              </button>
               
               <button
                 onClick={() => setShowAddressModal(true)}
@@ -375,16 +400,16 @@ export default function RestoranlarPage() {
                       animate={{ opacity: 1, scale: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95, y: -10 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-56 bg-slate-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50"
+                      className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
                     >
                       <button
                         onClick={() => {
                           setShowMenu(false)
                           router.push('/siparislerim')
                         }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
                       >
-                        <FileText size={18} />
+                        <FileText size={18} className="text-amber-500" />
                         <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
                       </button>
                       <button
@@ -392,9 +417,9 @@ export default function RestoranlarPage() {
                           setShowMenu(false)
                           router.push('/profil')
                         }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left"
+                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
                       >
-                        <User size={18} />
+                        <User size={18} className="text-amber-500" />
                         <span className="text-[14px] font-medium">👤 Profilim</span>
                       </button>
                       <button
@@ -402,9 +427,9 @@ export default function RestoranlarPage() {
                           setShowMenu(false)
                           router.push('/yardim')
                         }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-white hover:bg-slate-700 transition-colors text-left border-t border-slate-700"
+                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
                       >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
                           <circle cx="12" cy="12" r="10"></circle>
                           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
                           <line x1="12" y1="17" x2="12.01" y2="17"></line>
@@ -431,7 +456,7 @@ export default function RestoranlarPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Kategori Barı */}
         <div className="mb-6 overflow-x-auto scrollbar-hide">
           <div className="flex gap-3 pb-2">
@@ -439,7 +464,7 @@ export default function RestoranlarPage() {
               <button
                 key={category.name}
                 onClick={() => setSelectedCategory(category.name)}
-                className={`flex-shrink-0 px-4 py-2 rounded-full text-[14px] font-semibold transition-all ${
+                className={`flex-shrink-0 px-4 py-2.5 sm:py-2 rounded-full text-[13px] sm:text-[14px] font-semibold transition-all min-h-[40px] ${
                   selectedCategory === category.name
                     ? 'bg-[#f59e0b] text-white shadow-md'
                     : 'bg-[#f7f7f7] text-[#3c4043] hover:bg-[#e8e8e8]'
@@ -459,7 +484,7 @@ export default function RestoranlarPage() {
             <h2 className="text-[20px] font-bold text-[#3c4043] mb-4" style={{ fontFamily: 'Open Sans, sans-serif' }}>
               Restoranlar
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {openRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} router={router} />
               ))}
@@ -473,7 +498,7 @@ export default function RestoranlarPage() {
             <h2 className="text-[18px] font-bold text-[#6f6f6f] mb-4" style={{ fontFamily: 'Open Sans, sans-serif' }}>
               Geçici Olarak Kapalı
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
               {closedRestaurants.map((restaurant) => (
                 <RestaurantCard key={restaurant.id} restaurant={restaurant} router={router} isClosed />
               ))}

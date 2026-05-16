@@ -2,6 +2,7 @@ import './globals.css'
 import type { Metadata } from 'next'
 import { CartProvider } from './context/CartContext'
 import BackButtonHandler from './components/BackButtonHandler'
+import DeliveryTracker from './components/DeliveryTracker'
 
 export const metadata: Metadata = {
   title: 'Alda Gel - Müşteri',
@@ -19,6 +20,7 @@ export default function RootLayout({
       <body>
         <CartProvider>
           <BackButtonHandler />
+          <DeliveryTracker />
           {children}
         </CartProvider>
       </body>

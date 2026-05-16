@@ -122,7 +122,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
 
       if (authError) throw authError
 
-      // 2. Customers tablosuna kayıt
+      // 2. Customers tablosuna kayıt (Alda-Gel uygulamasından kayıt = app_user)
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .insert([{
@@ -131,7 +131,8 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           full_name: fullName,
           email: registerEmail.trim(),
           phone: phone,
-          address: address.trim()
+          address: address.trim(),
+          registration_source: 'app_user'
         }])
         .select()
         .single()
@@ -161,23 +162,23 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-[480px] max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[480px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[#e8e8e8]">
-          <h2 className="text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8]">
+          <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
             {mode === 'login' ? 'Giriş Yap' : 'Kayıt Ol'}
           </h2>
           <button
             onClick={onClose}
-            className="text-[#6f6f6f] hover:text-[#3c4043] text-[24px] leading-none"
+            className="text-[#6f6f6f] hover:text-[#3c4043] text-[28px] leading-none min-w-[44px] min-h-[44px] flex items-center justify-center"
           >
             ×
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {mode === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
@@ -219,7 +220,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
+                className="w-full min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
                 style={{ fontFamily: 'Open Sans, sans-serif' }}
               >
                 {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
@@ -372,7 +373,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
+                className="w-full min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
                 style={{ fontFamily: 'Open Sans, sans-serif' }}
               >
                 {loading ? 'Kaydediliyor...' : 'Kayıt Ol'}
