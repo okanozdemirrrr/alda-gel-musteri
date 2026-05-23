@@ -17,10 +17,49 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   const [note, setNote] = useState('')
   const [upsellProducts, setUpsellProducts] = useState<Product[]>([])
   const [selections, setSelections] = useState<Record<string, SelectedOption[]>>({})
+  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>([])
+  const [optionsLoading, setOptionsLoading] = useState(true)
   const { addToCart, cart } = useCart()
   const mobile = isMobile()
 
-  const optionGroups: OptionGroup[] = product.option_groups || []
+  // Supabase'den opsiyon gruplarını ve seçeneklerini çek
+  useEffect(() => {
+    const fetchOptionGroups = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('product_option_groups')
+          .select('*, product_options(*)')
+          .eq('product_id', product.id)
+          .order('display_order', { ascending: true })
+
+        if (error) throw error
+
+        if (data && data.length > 0) {
+          const mapped: OptionGroup[] = data.map((g: any) => ({
+            id: g.id,
+            name: g.name,
+            required: g.required ?? false,
+            min_select: g.min_select ?? (g.required ? 1 : 0),
+            max_select: g.max_select ?? 1,
+            options: (g.product_options || [])
+              .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
+              .map((o: any) => ({
+                id: o.id,
+                name: o.name,
+                price_diff: o.price_diff ?? 0
+              }))
+          }))
+          setOptionGroups(mapped)
+        }
+      } catch (err) {
+        console.error('Opsiyon grupları yüklenemedi:', err)
+      } finally {
+        setOptionsLoading(false)
+      }
+    }
+
+    fetchOptionGroups()
+  }, [product.id])
 
   useEffect(() => {
     if (product.upsell_product_ids && product.upsell_product_ids.length > 0) {
@@ -161,7 +200,20 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
           )}
 
           {/* ═══ OPSİYON GRUPLARI ═══ */}
-          {optionGroups.length > 0 && (
+          {optionsLoading && (
+            <div className="space-y-3 mb-4">
+              {[1, 2].map(i => (
+                <div key={i} className="border border-[#e8e8e8] rounded-xl p-3 animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-3" />
+                  <div className="space-y-2">
+                    <div className="h-10 bg-gray-100 rounded-lg" />
+                    <div className="h-10 bg-gray-100 rounded-lg" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          {!optionsLoading && optionGroups.length > 0 && (
             <div className="space-y-4 mb-4">
               {optionGroups.map(group => {
                 const groupSelections = selections[group.id] || []
