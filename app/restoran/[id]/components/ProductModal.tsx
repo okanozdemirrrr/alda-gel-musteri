@@ -30,24 +30,27 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
           .from('product_option_groups')
           .select('*, product_options(*)')
           .eq('product_id', product.id)
-          .order('display_order', { ascending: true })
 
-        if (error) throw error
+        if (error) {
+          console.error('Opsiyon query hatası:', error)
+          setOptionsLoading(false)
+          return
+        }
+
+        console.log('Opsiyon grupları DB:', data)
 
         if (data && data.length > 0) {
           const mapped: OptionGroup[] = data.map((g: any) => ({
             id: g.id,
             name: g.name,
-            required: g.required ?? false,
-            min_select: g.min_select ?? (g.required ? 1 : 0),
-            max_select: g.max_select ?? 1,
-            options: (g.product_options || [])
-              .sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0))
-              .map((o: any) => ({
-                id: o.id,
-                name: o.name,
-                price_diff: o.price_diff ?? 0
-              }))
+            required: g.required ?? g.is_required ?? false,
+            min_select: g.min_select ?? (g.required || g.is_required ? 1 : 0),
+            max_select: g.max_select ?? (g.type === 'radio' ? 1 : 10),
+            options: (g.product_options || []).map((o: any) => ({
+              id: o.id,
+              name: o.name,
+              price_diff: o.price_diff ?? o.price_modifier ?? o.extra_price ?? 0
+            }))
           }))
           setOptionGroups(mapped)
         }
