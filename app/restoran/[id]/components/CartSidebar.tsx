@@ -176,12 +176,14 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
       // Sipariş numarası oluştur
       const orderNumber = `MG${Date.now().toString().slice(-8)}`
 
-      // Sipariş öğelerini hazırla
+      // Sipariş öğelerini hazırla (opsiyonlar dahil)
       const orderItems = cart.map(item => ({
         product_id: item.product.id,
         product_name: item.product.name,
         quantity: item.quantity,
-        price: item.product.price,
+        price: item.unit_price || item.product.price,
+        base_price: item.product.price,
+        selected_options: item.selected_options || [],
         item_note: item.note || null
       }))
 
@@ -221,7 +223,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
       setTimeout(() => {
         setShowSuccess(false)
         onClose()
-        router.push('/musteri/siparislerim')
+        router.push('/siparislerim')
       }, 2000)
 
     } catch (error: any) {

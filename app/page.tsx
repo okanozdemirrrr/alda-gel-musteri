@@ -301,39 +301,39 @@ export default function MusteriAnaSayfa() {
           <div className="relative z-10 max-w-6xl mx-auto px-4">
             {!isLoggedIn || !selectedAddress ? (
               /* ═══ GİRİŞ YAPMAMIŞ / ADRES SEÇMEMİŞ ═══ */
-              <div className="min-h-[70vh] flex items-center justify-center py-16">
+              <div className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-10 sm:py-16">
                 <motion.div
                   initial={shouldAnimate ? { opacity: 0, y: 30 } : {}}
                   animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, ease: 'easeOut' }}
-                  className="w-full max-w-lg"
+                  className="w-[90%] md:w-[600px] lg:w-[800px]"
                 >
                   {/* Yarı saydam panel — backdrop-blur ile metin arka plandan ayrılır */}
-                  <div className="bg-white/85 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/30">
+                  <div className="bg-white/85 backdrop-blur-xl rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl border border-white/30">
                     {/* Başlık */}
-                    <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-[#3E1F0C] mb-3 tracking-tight leading-tight">
+                    <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#3E1F0C] mb-2 sm:mb-3 tracking-tight leading-tight">
                       Alda-Gel Yemek & Sanal Market
                     </h1>
 
                     {/* Alt başlık */}
-                    <p className="text-sm sm:text-base md:text-lg text-stone-500 mb-6 sm:mb-8 font-medium leading-relaxed">
+                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-500 mb-5 sm:mb-6 md:mb-8 font-medium leading-relaxed">
                       Samsun 19 Mayıs'ta lezzetli ve hızlı teslimat.
                     </p>
 
                     {/* CTA Butonu — hover parlaması */}
                     <button
                       onClick={handleAddressClick}
-                      className="group w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-base sm:text-lg md:text-xl font-black rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.5)] flex items-center justify-center gap-3"
+                      className="group w-full sm:w-auto px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 md:py-4 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-sm sm:text-base md:text-lg lg:text-xl font-black rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.5)] flex items-center justify-center gap-2 sm:gap-3"
                     >
                       <span>Keşfet ve Başla</span>
                       <ChevronRight
-                        size={24}
-                        className="group-hover:translate-x-1 transition-transform"
+                        size={20}
+                        className="group-hover:translate-x-1 transition-transform sm:w-6 sm:h-6"
                       />
                     </button>
 
                     {/* Alt bilgi */}
-                    <p className="mt-4 text-xs text-stone-400 font-medium">
+                    <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-stone-400 font-medium">
                       {!isLoggedIn ? 'Giriş yaparak başlayın' : 'Adresinizi seçerek başlayın'}
                     </p>
                   </div>

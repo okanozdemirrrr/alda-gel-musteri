@@ -71,6 +71,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   const [notes, setNotes] = useState('')
   const [shouldFlyToLocation, setShouldFlyToLocation] = useState(false) // FlyTo kontrolü
   const [autoLocating, setAutoLocating] = useState(false)
+  const [locationDenied, setLocationDenied] = useState(false)
+  const [manualSearch, setManualSearch] = useState('')
   const hasAutoLocated = useRef(false)
 
   // ═══ OTOmatik KONUM BULMA (Map step'e geçince) ═══
@@ -126,20 +128,15 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
       },
       (error) => {
         setLoading(false)
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            setError('Konum izni reddedildi. Lütfen tarayıcı ayarlarından konum iznini açın.')
-            break
-          case error.POSITION_UNAVAILABLE:
-            setError('Konum bilgisi alınamadı. Lütfen tekrar deneyin.')
-            break
-          case error.TIMEOUT:
-            setError('Konum talebi zaman aşımına uğradı. Lütfen tekrar deneyin.')
-            break
-          default:
-            setError('Konum alınırken bir hata oluştu.')
-        }
-        setTimeout(() => setError(''), 5000)
+        setLocationDenied(true)
+        setError('Konumunuz otomatik alınamadı. Lütfen adresinizi manuel olarak seçin veya arayın.')
+        // 2.5 saniye sonra otomatik olarak harita adımına geç (B Planı)
+        setTimeout(() => {
+          setError('')
+          setSelectedQuickLocation('')
+          setShouldFlyToLocation(false)
+          setStep('map')
+        }, 2500)
       },
       {
         enableHighAccuracy: true,
@@ -286,7 +283,54 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
               <p className="text-[14px] text-[#6f6f6f] mb-4">
                 Samsun 19 Mayıs'ta hızlı adres seçimi yapın
               </p>
-              {SAMSUN_QUICK_LOCATIONS.map((location) => (
+
+              {/* Manuel Adres Arama */}
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e9e9e]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Mahalle veya sokak ara... (ör: Engiz, İstiklal)"
+                  value={manualSearch}
+                  onChange={(e) => setManualSearch(e.target.value)}
+                  className="w-full h-[48px] pl-10 pr-4 bg-white border border-[#e8e8e8] rounded-xl text-[14px] focus:outline-none focus:border-[#f59e0b] transition-colors"
+                  style={{ fontFamily: 'Open Sans, sans-serif' }}
+                />
+              </div>
+
+              {/* Konum reddedildi uyarısı + Manuel devam butonu */}
+              {locationDenied && (
+                <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" className="flex-shrink-0 mt-0.5">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                      <line x1="12" y1="9" x2="12" y2="13"/>
+                      <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <div className="flex-1">
+                      <p className="text-[13px] font-semibold text-amber-800 mb-1">Konum izni alınamadı</p>
+                      <p className="text-[12px] text-amber-700 mb-3">Sorun değil! Aşağıdan mahallenizi seçebilir veya arama yaparak adresinizi manuel girebilirsiniz.</p>
+                      <button
+                        onClick={() => {
+                          setSelectedQuickLocation('')
+                          setShouldFlyToLocation(false)
+                          setStep('map')
+                        }}
+                        className="text-[13px] font-bold text-amber-700 underline hover:text-amber-900 transition-colors"
+                      >
+                        Haritadan manuel seçime geç →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Arama sonuçları — quick locations'ı filtrele */}
+              {SAMSUN_QUICK_LOCATIONS
+                .filter(location => !manualSearch || location.name.toLowerCase().includes(manualSearch.toLowerCase()))
+                .map((location) => (
                 <button
                   key={location.name}
                   onClick={() => handleQuickLocationSelect(location)}

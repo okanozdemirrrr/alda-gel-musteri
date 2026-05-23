@@ -74,6 +74,7 @@ export default function SepetPage() {
     const customerId = localStorage.getItem('customer_id')
     const customerName = localStorage.getItem('customer_name')
     const storedAddress = localStorage.getItem('customer_address')
+    const customerPhone = localStorage.getItem('customer_phone') || ''
 
     if (!customerId) {
       setCheckoutError('Lütfen giriş yapın.')
@@ -109,17 +110,26 @@ export default function SepetPage() {
       for (const [restaurantId, items] of Array.from(groups.entries())) {
         if (restaurantId === 'unknown') continue
 
+        // Restoranın gerçek delivery_fee'sini çek
+        const { data: restData } = await supabase
+          .from('restaurants')
+          .select('delivery_fee')
+          .eq('id', restaurantId)
+          .single()
+
         const orderNumber = `AG${Date.now().toString().slice(-8)}${Math.floor(Math.random() * 90 + 10)}`
 
-        const groupSubtotal = items.reduce((s: number, i: typeof cart[0]) => s + i.product.price * i.quantity, 0)
-        const groupDeliveryFee = 15.0
+        const groupSubtotal = items.reduce((s: number, i: typeof cart[0]) => s + (i.unit_price || i.product.price) * i.quantity, 0)
+        const groupDeliveryFee = restData?.delivery_fee ?? 15.0
         const groupTotal = groupSubtotal + groupDeliveryFee
 
         const orderItems = items.map((item: typeof cart[0]) => ({
           product_id: item.product.id,
           product_name: item.product.name,
           quantity: item.quantity,
-          price: item.product.price,
+          price: item.unit_price || item.product.price,
+          base_price: item.product.price,
+          selected_options: item.selected_options || [],
           item_note: item.note || null
         }))
 
@@ -129,6 +139,7 @@ export default function SepetPage() {
             restaurant_id: restaurantId,
             customer_id: customerId,
             customer_name: customerName || 'Müşteri',
+            customer_phone: customerPhone,
             delivery_address: storedAddress,
             latitude: customerLat ? parseFloat(customerLat.toString()) : null,
             longitude: customerLng ? parseFloat(customerLng.toString()) : null,

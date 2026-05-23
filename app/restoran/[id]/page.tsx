@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { Category, Product } from '@/types/menu'
@@ -9,7 +9,6 @@ import ProductModal from './components/ProductModal'
 import CartSidebar from './components/CartSidebar'
 import AddressModal from '../../components/AddressModal'
 import ReviewsSection from './components/ReviewsSection'
-import UpsellModal from './components/UpsellModal'
 import { Clock, Wallet } from 'lucide-react'
 import { isMobile } from '@/app/lib/platform'
 
@@ -42,11 +41,11 @@ export default function RestaurantMenuPage() {
   const [selectedAddress, setSelectedAddress] = useState('')
   const [activeTab, setActiveTab] = useState<'menu' | 'reviews'>('menu')
   const [averageRating, setAverageRating] = useState<number | null>(null)
-  const [showUpsell, setShowUpsell] = useState(false)
-  const [upsellMainProduct, setUpsellMainProduct] = useState<Product | null>(null)
-  const [upsellRelatedProducts, setUpsellRelatedProducts] = useState<Product[]>([])
   
-  const { addToCart, getCartItemCount, cart } = useCart()
+  const { addToCart, getCartItemCount, getCartTotal, updateQuantity, cart } = useCart()
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategoryId, setActiveCategoryId] = useState<string>('')
+  const scrollSpyRef = useRef(true)
 
   useEffect(() => {
     fetchRestaurantData()
@@ -113,7 +112,6 @@ export default function RestaurantMenuPage() {
         .from('products')
         .select('*')
         .eq('restaurant_id', restaurantId)
-        .eq('is_available', true)
         .order('display_order')
 
       if (productsError) throw productsError
@@ -125,76 +123,34 @@ export default function RestaurantMenuPage() {
     }
   }
 
-  const handleQuickAdd = async (product: Product) => {
-    // Restoran kapalıysa ekleme yapma
-    if (restaurant?.is_active === false) {
-      alert('Üzgünüz, restoran şu an sipariş almıyor')
-      return
-    }
-    
-    // Ürünü sepete ekle
-    addToCart(product, 1)
-    
-    // Yan ürünleri products tablosundaki upsell_product_ids array'inden kontrol et
-    try {
-      // Ürünün upsell_product_ids array'i var mı kontrol et
-      if (product.upsell_product_ids && product.upsell_product_ids.length > 0) {
-        // Yan ürünleri ID'lere göre çek
-        const { data: upsellProducts, error } = await supabase
-          .from('products')
-          .select('*')
-          .in('id', product.upsell_product_ids)
-          .eq('is_available', true)
-          .eq('is_visible', true)
-        
-        if (error) {
-          console.error('Yan ürünler yüklenemedi:', error)
-          return
-        }
-        
-        // Sepette olmayan yan ürünleri filtrele
-        if (upsellProducts && upsellProducts.length > 0) {
-          const relatedProducts = upsellProducts.filter(p => 
-            !cart.some(item => item.product.id === p.id)
-          )
-          
-          if (relatedProducts.length > 0) {
-            setUpsellMainProduct(product)
-            setUpsellRelatedProducts(relatedProducts)
-            setShowUpsell(true)
-          }
+  // Scroll Spy - aktif kategoriyi takip et
+  useEffect(() => {
+    if (activeTab !== 'menu' || categories.length === 0) return
+    const handleScroll = () => {
+      if (!scrollSpyRef.current) return
+      let current = ''
+      for (const cat of categories) {
+        const el = document.getElementById(`category-${cat.id}`)
+        if (el) {
+          const rect = el.getBoundingClientRect()
+          if (rect.top <= 160) current = cat.id
         }
       }
-    } catch (error) {
-      console.error('Yan ürün kontrolü başarısız:', error)
+      if (current && current !== activeCategoryId) setActiveCategoryId(current)
     }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [activeTab, categories, activeCategoryId])
+
+  const handleQuickAdd = async (product: Product) => {
+    if (restaurant?.is_active === false || product.is_available === false) return
+    addToCart(product, 1)
   }
 
   const handleProductClick = (product: Product) => {
-    // Restoran kapalıysa modal açma
-    if (restaurant?.is_active === false) {
-      alert('Üzgünüz, restoran şu an sipariş almıyor')
-      return
-    }
+    if (restaurant?.is_active === false || product.is_available === false) return
     setSelectedProduct(product)
-  }
-
-  const handleShowUpsell = (mainProduct: Product, relatedProducts: Product[]) => {
-    setSelectedProduct(null)
-    setUpsellMainProduct(mainProduct)
-    setUpsellRelatedProducts(relatedProducts)
-    setShowUpsell(true)
-  }
-
-  const handleUpsellClose = () => {
-    setShowUpsell(false)
-    setUpsellMainProduct(null)
-    setUpsellRelatedProducts([])
-  }
-
-  const handleUpsellContinue = () => {
-    handleUpsellClose()
-    setShowCart(true)
   }
 
   const handleAddressSelect = (address: string) => {
@@ -275,7 +231,7 @@ export default function RestaurantMenuPage() {
         {/* Cart Button - Fixed Floating */}
         <button
           onClick={() => setShowCart(true)}
-          className={`fixed ${isMobile() ? 'top-2 right-2 px-3 py-2 text-[12px]' : 'top-4 right-4 px-5 py-2.5 text-[14px]'} z-50 bg-[#f59e0b] text-white rounded-full font-bold hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-1.5`}
+          className={`fixed lg:hidden ${isMobile() ? 'top-2 right-2 px-3 py-2 text-[12px]' : 'top-4 right-4 px-5 py-2.5 text-[14px]'} z-50 bg-[#f59e0b] text-white rounded-full font-bold hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-1.5`}
           style={{ paddingRight: isMobile() ? 'max(12px, env(safe-area-inset-right))' : undefined }}
         >
           <svg width={isMobile() ? '16' : '18'} height={isMobile() ? '16' : '18'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -358,20 +314,18 @@ export default function RestaurantMenuPage() {
               </div>
             </div>
             
-            {!isMobile() && (
-              <button
-                onClick={() => setShowAddressModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
-                  <circle cx="12" cy="10" r="3"/>
-                </svg>
-                <span className="text-[12px] font-semibold text-[#3c4043] max-w-[200px] truncate">
-                  {selectedAddress || 'Adresini Seç'}
-                </span>
-              </button>
-            )}
+            <button
+              onClick={() => setShowAddressModal(true)}
+              className={`flex items-center gap-2 ${isMobile() ? 'mt-2 px-2.5 py-1.5 w-full' : 'px-4 py-2'} bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg hover:border-[#f59e0b] transition-colors`}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="flex-shrink-0">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                <circle cx="12" cy="10" r="3"/>
+              </svg>
+              <span className={`${isMobile() ? 'text-[11px]' : 'text-[12px]'} font-semibold text-[#3c4043] truncate`}>
+                {selectedAddress || 'Adresini Seç'}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -406,7 +360,22 @@ export default function RestaurantMenuPage() {
 
         {/* Category Bar (only show on menu tab) */}
         {activeTab === 'menu' && (
-          <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-2 py-2' : 'px-6 py-3'} overflow-x-auto scrollbar-hide`}>
+          <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-2 py-2' : 'px-6 py-3'}`}>
+            <div className="relative mb-2">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e9e9e]" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input
+                type="text"
+                placeholder="Menüde ara..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className={`w-full ${isMobile() ? 'h-[36px] pl-9 pr-3 text-[12px]' : 'h-[40px] pl-10 pr-4 text-[13px]'} bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg focus:outline-none focus:border-[#f59e0b] transition-colors`}
+                style={{ fontFamily: 'Open Sans, sans-serif' }}
+              />
+            </div>
+            <div className="overflow-x-auto scrollbar-hide">
             <div className="flex gap-2">
               {categories.map(category => {
                 const categoryProducts = products.filter(p => p.category_id === category.id)
@@ -416,10 +385,17 @@ export default function RestaurantMenuPage() {
                   <button
                     key={category.id}
                     onClick={() => {
+                      scrollSpyRef.current = false
+                      setActiveCategoryId(category.id)
                       const element = document.getElementById(`category-${category.id}`)
                       element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                      setTimeout(() => { scrollSpyRef.current = true }, 800)
                     }}
-                    className={`flex-shrink-0 ${isMobile() ? 'px-3 py-2 text-[11px] min-h-[36px]' : 'px-4 py-2 text-[13px]'} bg-[#f7f7f7] hover:bg-[#f59e0b] hover:text-white rounded-full font-semibold text-[#3c4043] transition-all`}
+                    className={`flex-shrink-0 ${isMobile() ? 'px-3 py-2 text-[11px] min-h-[36px]' : 'px-4 py-2 text-[13px]'} rounded-full font-semibold transition-all ${
+                      activeCategoryId === category.id
+                        ? 'bg-[#f59e0b] text-white shadow-sm'
+                        : 'bg-[#f7f7f7] text-gray-600 hover:bg-[#e8e8e8]'
+                    }`}
                   >
                     {category.icon_url && <span className="mr-1">{category.icon_url}</span>}
                     {category.name}
@@ -427,15 +403,19 @@ export default function RestaurantMenuPage() {
                 )
               })}
             </div>
+            </div>
           </div>
         )}
       </div>
 
       {/* Main Content */}
-      {activeTab === 'menu' ? (
-        <main className={`max-w-7xl mx-auto ${isMobile() ? 'px-2 py-3' : 'px-6 py-6'}`}>
+      <div className={`max-w-7xl mx-auto ${isMobile() ? 'px-2' : 'px-6'} lg:flex lg:gap-6`}>
+        <div className="flex-1 min-w-0">
+        {activeTab === 'menu' ? (
+        <main className="py-3 lg:py-6">
         {categories.map(category => {
-          const categoryProducts = products.filter(p => p.category_id === category.id && p.is_visible !== false)
+          const categoryProducts = products.filter(p => p.category_id === category.id && p.is_visible !== false && (!searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())))
+          const availableCount = categoryProducts.filter(p => p.is_available !== false).length
           
           if (categoryProducts.length === 0) return null
 
@@ -445,79 +425,100 @@ export default function RestaurantMenuPage() {
                 {category.name}
               </h2>
 
-              {/* Grid Yapısı - Mobilde 2 kolon, masaüstünde 4 */}
-              <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 ${isMobile() ? 'gap-2' : 'gap-3'}`}>
-                {categoryProducts.map(product => (
-                  <div
-                    key={product.id}
-                    onClick={() => restaurant?.is_active !== false && handleProductClick(product)}
-                    className={`bg-white border border-[#e8e8e8] rounded-lg overflow-hidden transition-all ${
-                      restaurant?.is_active === false
-                        ? 'opacity-60 cursor-not-allowed'
-                        : 'hover:shadow-lg hover:border-[#f59e0b] cursor-pointer group'
-                    }`}
-                  >
-                    {/* Ürün Görseli - Üst */}
-                    <div className={`relative w-full ${isMobile() ? 'h-24' : 'h-32'} bg-gradient-to-br from-[#fef3c7] to-[#fde68a]`}>
-                      {product.image_url ? (
-                        <img 
-                          src={product.image_url} 
-                          alt={product.name}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      ) : (
-                        <div className={`w-full h-full flex items-center justify-center ${isMobile() ? 'text-2xl' : 'text-4xl'}`}>
-                          🍽️
+              {/* Mobil: Liste Görünümü / Desktop: Grid */}
+              {isMobile() ? (
+                <div className="space-y-2">
+                  {categoryProducts.map(product => {
+                    const soldOut = product.is_available === false
+                    const disabled = restaurant?.is_active === false || soldOut
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => !disabled && handleProductClick(product)}
+                        className={`flex items-center gap-3 bg-white border border-[#e8e8e8] rounded-xl p-2 transition-all ${
+                          disabled ? 'opacity-60' : 'hover:border-[#f59e0b] cursor-pointer group'
+                        }`}
+                      >
+                        <div className="relative w-24 h-24 flex-shrink-0 bg-gradient-to-br from-[#fef3c7] to-[#fde68a] rounded-xl overflow-hidden">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-2xl">🍽️</div>
+                          )}
+                          {soldOut && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <span className="bg-white text-[#3c4043] text-[10px] font-bold px-2 py-0.5 rounded-full">Tükendi</span>
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Ürün Bilgileri - Alt */}
-                    <div className={`${isMobile() ? 'p-2' : 'p-3'}`}>
-                      {/* Ürün Adı - Maksimum 2 satır */}
-                      <h3 className={`${isMobile() ? 'text-[11px] mb-0.5 min-h-[28px]' : 'text-[13px] mb-1 min-h-[32px]'} font-bold text-[#3c4043] line-clamp-2 leading-tight group-hover:text-[#f59e0b] transition-colors`} style={{ fontFamily: 'Open Sans, sans-serif' }}>
-                        {product.name}
-                      </h3>
-
-                      {/* Açıklama - Sadece masaüstünde göster */}
-                      {!isMobile() && product.description && (
-                        <p className="text-[10px] text-[#9e9e9e] mb-2 line-clamp-1 leading-tight">
-                          {product.description}
-                        </p>
-                      )}
-
-                      {/* Fiyat ve Ekle Butonu */}
-                      <div className={`flex items-center justify-between ${isMobile() ? 'mt-1' : 'mt-2'}`}>
-                        <span className={`${isMobile() ? 'text-[14px]' : 'text-[16px]'} font-bold text-[#f59e0b]`}>
-                          {product.price}₺
-                        </span>
-                        
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleQuickAdd(product)
-                          }}
-                          disabled={restaurant?.is_active === false}
-                          className={`${isMobile() ? 'px-2.5 py-1.5 text-[10px] min-h-[32px]' : 'px-3 py-1.5 text-[11px]'} rounded-md font-semibold transition-all flex items-center gap-1 ${
-                            restaurant?.is_active === false
-                              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                              : 'bg-[#f59e0b] text-white hover:bg-[#d97706] hover:scale-105'
-                          }`}
-                          style={{ fontFamily: 'Open Sans, sans-serif' }}
-                        >
-                          <svg width={isMobile() ? '10' : '12'} height={isMobile() ? '10' : '12'} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                          </svg>
-                          {restaurant?.is_active === false ? 'Kapalı' : 'Ekle'}
-                        </button>
+                        <div className="flex-1 min-w-0 py-1">
+                          <h3 className="text-[13px] font-bold text-[#3c4043] line-clamp-2 leading-tight mb-1 group-hover:text-[#f59e0b] transition-colors" style={{ fontFamily: 'Open Sans, sans-serif' }}>{product.name}</h3>
+                          {product.description && <p className="text-[11px] text-[#9e9e9e] line-clamp-1 mb-1.5">{product.description}</p>}
+                          <div className="flex items-center justify-between">
+                            <span className="text-[15px] font-bold text-[#f59e0b]">{product.price}₺</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleQuickAdd(product) }}
+                              disabled={disabled}
+                              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                                disabled ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-[#f59e0b] text-white hover:bg-[#d97706]'
+                              }`}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                    )
+                  })}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {categoryProducts.map(product => {
+                    const soldOut = product.is_available === false
+                    const disabled = restaurant?.is_active === false || soldOut
+                    return (
+                      <div
+                        key={product.id}
+                        onClick={() => !disabled && handleProductClick(product)}
+                        className={`bg-white border border-[#e8e8e8] rounded-lg overflow-hidden transition-all relative ${
+                          disabled ? 'opacity-60' : 'hover:shadow-lg hover:border-[#f59e0b] cursor-pointer group'
+                        }`}
+                      >
+                        <div className="relative w-full h-40 bg-gradient-to-br from-[#fef3c7] to-[#fde68a]">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" loading="lazy" decoding="async" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-4xl">🍽️</div>
+                          )}
+                          {soldOut && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <span className="bg-white text-[#3c4043] text-[11px] font-bold px-3 py-1 rounded-full shadow">Stokta Yok</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <h3 className="text-[13px] mb-1 min-h-[32px] font-bold text-[#3c4043] line-clamp-2 leading-tight group-hover:text-[#f59e0b] transition-colors" style={{ fontFamily: 'Open Sans, sans-serif' }}>{product.name}</h3>
+                          {product.description && <p className="text-[10px] text-[#9e9e9e] mb-2 line-clamp-1 leading-tight">{product.description}</p>}
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-[16px] font-bold text-[#f59e0b]">{product.price}₺</span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleQuickAdd(product) }}
+                              disabled={disabled}
+                              className={`px-3 py-1.5 text-[11px] rounded-md font-semibold transition-all flex items-center gap-1 ${
+                                disabled ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-[#f59e0b] text-white hover:bg-[#d97706] hover:scale-105'
+                              }`}
+                              style={{ fontFamily: 'Open Sans, sans-serif' }}
+                            >
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                              {soldOut ? 'Tükendi' : 'Ekle'}
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           )
         })}
@@ -538,6 +539,89 @@ export default function RestaurantMenuPage() {
       ) : (
         <ReviewsSection restaurantId={restaurantId} />
       )}
+        </div>
+
+        {/* Desktop Sabit Sepet Paneli */}
+        <aside className="hidden lg:block w-[360px] flex-shrink-0 py-6">
+          <div className="sticky top-24">
+            <div className="bg-white rounded-xl border border-[#e8e8e8] shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-[#e8e8e8] flex items-center justify-between">
+                <h3 className="text-[16px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+                  Sepetim
+                </h3>
+                {cart.length > 0 && (
+                  <span className="text-[12px] font-semibold text-[#f59e0b]">{getCartItemCount()} ürün</span>
+                )}
+              </div>
+
+              {cart.length === 0 ? (
+                <div className="p-8 text-center">
+                  <div className="text-4xl mb-3">🛒</div>
+                  <p className="text-[13px] text-[#6f6f6f]">Sepetiniz boş</p>
+                  <p className="text-[11px] text-[#9e9e9e] mt-1">Menüden ürün ekleyerek başlayın</p>
+                </div>
+              ) : (
+                <>
+                  <div className="max-h-[400px] overflow-y-auto divide-y divide-[#f0f0f0]">
+                    {cart.map(item => (
+                      <div key={item.product.id} className="p-3 flex items-center gap-3">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-semibold text-[#3c4043] truncate">{item.product.name}</p>
+                          <p className="text-[13px] text-[#f59e0b] font-bold">{(item.product.price * item.quantity).toFixed(2)}₺</p>
+                          {item.note && <p className="text-[10px] text-[#9e9e9e] truncate mt-0.5">📝 {item.note}</p>}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                            className="w-7 h-7 bg-[#f7f7f7] rounded-md flex items-center justify-center text-[14px] font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors"
+                          >−</button>
+                          <span className="text-[13px] font-bold text-[#3c4043] w-5 text-center">{item.quantity}</span>
+                          <button
+                            onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                            className="w-7 h-7 bg-[#f7f7f7] rounded-md flex items-center justify-center text-[14px] font-bold text-[#3c4043] hover:bg-[#e8e8e8] transition-colors"
+                          >+</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="border-t border-[#e8e8e8] p-4 space-y-2 bg-[#fafafa]">
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-[#6f6f6f]">Ara Toplam</span>
+                      <span className="font-semibold text-[#3c4043]">{getCartTotal().toFixed(2)}₺</span>
+                    </div>
+                    <div className="flex justify-between text-[13px]">
+                      <span className="text-[#6f6f6f]">Teslimat</span>
+                      <span className="font-semibold text-[#3c4043]">{restaurant.delivery_fee.toFixed(2)}₺</span>
+                    </div>
+                    <div className="flex justify-between text-[15px] font-bold pt-2 border-t border-[#e8e8e8]">
+                      <span className="text-[#3c4043]">Toplam</span>
+                      <span className="text-[#f59e0b]">{(getCartTotal() + restaurant.delivery_fee).toFixed(2)}₺</span>
+                    </div>
+
+                    {getCartTotal() < restaurant.minimum_order_value && (
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-2.5 mt-1">
+                        <p className="text-[11px] text-orange-700 font-medium text-center">
+                          Min. sipariş tutarına {(restaurant.minimum_order_value - getCartTotal()).toFixed(2)}₺ kaldı
+                        </p>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => setShowCart(true)}
+                      disabled={getCartTotal() < restaurant.minimum_order_value}
+                      className="w-full min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-bold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
+                      style={{ fontFamily: 'Open Sans, sans-serif' }}
+                    >
+                      {getCartTotal() < restaurant.minimum_order_value ? 'Minimum tutara ulaşın' : 'Siparişi Tamamla'}
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </aside>
+      </div>
 
       {/* Product Modal */}
       {selectedProduct && (
@@ -545,17 +629,6 @@ export default function RestaurantMenuPage() {
           product={selectedProduct}
           allProducts={products}
           onClose={() => setSelectedProduct(null)}
-          onShowUpsell={handleShowUpsell}
-        />
-      )}
-
-      {/* Upsell Modal */}
-      {showUpsell && upsellMainProduct && (
-        <UpsellModal
-          mainProduct={upsellMainProduct}
-          relatedProducts={upsellRelatedProducts}
-          onClose={handleUpsellClose}
-          onContinue={handleUpsellContinue}
         />
       )}
 

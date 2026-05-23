@@ -1,11 +1,11 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-import { Product, CartItemLocal } from '@/types/menu'
+import { Product, CartItemLocal, SelectedOption } from '@/types/menu'
 
 interface CartContextType {
   cart: CartItemLocal[]
-  addToCart: (product: Product, quantity?: number, note?: string) => void
+  addToCart: (product: Product, quantity?: number, note?: string, selectedOptions?: SelectedOption[], unitPrice?: number) => void
   removeFromCart: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   updateNote: (productId: string, note: string) => void
@@ -36,20 +36,32 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('alda_gel_cart', JSON.stringify(cart))
   }, [cart])
 
-  const addToCart = (product: Product, quantity: number = 1, note?: string) => {
+  const addToCart = (product: Product, quantity: number = 1, note?: string, selectedOptions?: SelectedOption[], unitPrice?: number) => {
     setCart(prevCart => {
-      const existingItem = prevCart.find(item => item.product.id === product.id)
-      
+      // Opsiyonlu ürünler her zaman ayrı satır olarak eklenir
+      const optionKey = selectedOptions && selectedOptions.length > 0
+        ? selectedOptions.map(o => o.option_id).sort().join('|')
+        : ''
+
+      const existingItem = prevCart.find(item => {
+        if (item.product.id !== product.id) return false
+        const itemKey = item.selected_options && item.selected_options.length > 0
+          ? item.selected_options.map(o => o.option_id).sort().join('|')
+          : ''
+        return itemKey === optionKey
+      })
+
       if (existingItem) {
-        // Ürün zaten sepette, miktarı artır
-        return prevCart.map(item =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + quantity, note: note || item.note }
-            : item
-        )
+        return prevCart.map(item => {
+          if (item.product.id !== product.id) return item
+          const itemKey = item.selected_options && item.selected_options.length > 0
+            ? item.selected_options.map(o => o.option_id).sort().join('|')
+            : ''
+          if (itemKey !== optionKey) return item
+          return { ...item, quantity: item.quantity + quantity, note: note || item.note }
+        })
       } else {
-        // Yeni ürün ekle
-        return [...prevCart, { product, quantity, note }]
+        return [...prevCart, { product, quantity, note, selected_options: selectedOptions, unit_price: unitPrice }]
       }
     })
   }
@@ -84,7 +96,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + item.product.price * item.quantity, 0)
+    return cart.reduce((total, item) => {
+      const price = item.unit_price || item.product.price
+      return total + price * item.quantity
+    }, 0)
   }
 
   const getCartItemCount = () => {
