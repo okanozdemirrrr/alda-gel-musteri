@@ -3,11 +3,10 @@ workflows:
     name: Alda-Gel iOS Build
     instance_type: mac_mini_m1
     environment:
-      # Sürüm seçmeyi bırakıyoruz, işletim sisteminin kendi getirdiğini kullansın
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Sürüm Kontrolü
+      - name: Node ve NPM Sürümü
         script: |
           node -v
           npm -v
@@ -15,6 +14,9 @@ workflows:
         script: npm install
       - name: Next.js Projesini Derle
         script: npm run build
+      - name: Capacitor iOS Platformunu Ekle
+        script: |
+          npx cap add ios || echo "iOS platformu zaten var"
       - name: Capacitor iOS Senkronizasyonu
         script: npx cap sync ios
       - name: iOS Projesini Derle
