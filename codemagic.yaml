@@ -1,0 +1,21 @@
+workflows:
+  ios-app-store:
+    name: Alda-Gel iOS Build
+    instance_type: mac_mini_m1
+    environment:
+      node: 20.x
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Paketleri Yükle (npm install)
+        script: npm install
+      - name: Next.js Projesini Derle
+        script: npm run build
+      - name: Capacitor iOS Senkronizasyonu
+        script: npx cap sync ios
+      - name: iOS Projesini Derle (Kaba İnşaat)
+        script: |
+          xcode-project build-ipa \
+            --workspace "$CM_BUILD_DIR/ios/App/App.xcworkspace" \
+            --scheme "App" \
+            --disable-codesign
