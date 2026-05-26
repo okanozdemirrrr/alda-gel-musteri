@@ -23,9 +23,13 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   const mobile = isMobile()
 
   // Supabase'den opsiyon gruplarını ve seçeneklerini çek
+  const [debugInfo, setDebugInfo] = useState<string>('')
+
   useEffect(() => {
     const fetchOptionGroups = async () => {
       try {
+        setDebugInfo(`Sorgu atılıyor... product_id: ${product.id}`)
+
         const { data, error } = await supabase
           .from('product_option_groups')
           .select('*, product_options(*)')
@@ -33,11 +37,13 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
 
         if (error) {
           console.error('Opsiyon query hatası:', error)
+          setDebugInfo(`HATA: ${error.message} | code: ${error.code}`)
           setOptionsLoading(false)
           return
         }
 
         console.log('Opsiyon grupları DB:', data)
+        setDebugInfo(`Gelen veri: ${data?.length ?? 0} grup | raw: ${JSON.stringify(data).slice(0, 200)}`)
 
         if (data && data.length > 0) {
           const mapped: OptionGroup[] = data.map((g: any) => ({
@@ -54,8 +60,9 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
           }))
           setOptionGroups(mapped)
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Opsiyon grupları yüklenemedi:', err)
+        setDebugInfo(`CATCH HATA: ${err?.message}`)
       } finally {
         setOptionsLoading(false)
       }
@@ -200,6 +207,14 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
             <p className={`${mobile ? 'text-[12px]' : 'text-[13px]'} text-[#6f6f6f] mb-4`}>
               {product.description}
             </p>
+          )}
+
+          {/* DEBUG - Geçici */}
+          {debugInfo && (
+            <div className="mb-3 p-2 bg-blue-50 border border-blue-200 rounded-lg text-[11px] text-blue-800 break-all">
+              <div>product_id: {product.id}</div>
+              <div>{debugInfo}</div>
+            </div>
           )}
 
           {/* ═══ OPSİYON GRUPLARI ═══ */}

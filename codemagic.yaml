@@ -3,11 +3,15 @@ workflows:
     name: Alda-Gel iOS Build
     instance_type: mac_mini_m1
     environment:
-      node: 18.x
+      # Sürüm seçmeyi bırakıyoruz, işletim sisteminin kendi getirdiğini kullansın
+      xcode: latest
+      cocoapods: default
     scripts:
-      - name: Node Sürümünü Kontrol Et
-        script: node -v
-      - name: Paketleri Yükle (npm install)
+      - name: Sürüm Kontrolü
+        script: |
+          node -v
+          npm -v
+      - name: Paketleri Yükle
         script: npm install
       - name: Next.js Projesini Derle
         script: npm run build
