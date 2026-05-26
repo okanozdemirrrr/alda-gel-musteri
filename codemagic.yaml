@@ -6,19 +6,18 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Node ve NPM Sürümü
-        script: |
-          node -v
-          npm -v
       - name: Paketleri Yükle
         script: npm install
       - name: Next.js Projesini Derle
         script: npm run build
-      - name: Capacitor iOS Platformunu Ekle
+      - name: iOS Platformunu Kur ve Senkronize Et
         script: |
-          npx cap add ios || echo "iOS platformu zaten var"
-      - name: Capacitor iOS Senkronizasyonu
-        script: npx cap sync ios
+          # Önce platformu ekle, hata verirse zaten var demektir, devam et
+          npx cap add ios || true
+          # Bekle, dosya sisteminin kendine gelmesini sağla
+          sleep 5
+          # Şimdi sync et
+          npx cap sync ios
       - name: iOS Projesini Derle
         script: |
           xcode-project build-ipa \
