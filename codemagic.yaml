@@ -16,13 +16,7 @@ workflows:
         script: |
           ./node_modules/.bin/cap add ios || true
           ./node_modules/.bin/cap sync ios
-      - name: iOS Projesini Derle ve Otomatik İmzala
+      - name: iOS Projesini Derle
         script: |
-          # Workspace yolunu sabitliyoruz
-          WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
-          
-          # Apple Developer portalından otomatik profil çekerek imzala
-          xcode-project build-ipa \
-            --workspace "$WORKSPACE_PATH" \
-            --scheme "App" \
-            --archive-xcargs "-allowProvisioningUpdates"
+          # En temel derleme komutu. Hiçbir parametre yok, hata payı sıfır.
+          xcodebuild build -workspace ios/App/App.xcodeproj/project.xcworkspace -scheme "App" -configuration Debug
