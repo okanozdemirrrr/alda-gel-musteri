@@ -5,6 +5,11 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
+      # Apple API Anahtarlarını ve Sertifikayı doğrudan buraya gömdük
+      vars:
+        APP_STORE_CONNECT_ISSUER_ID: "46730e8e-37d5-4cb4-a708-28d4b3da8c1f"
+        APP_STORE_CONNECT_KEY_ID: "2PF3CPKH5Q"
+        APP_STORE_CONNECT_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg+pgAc3MZH3embQP+\neT5GtsWNSep3shn7/h96IrS721qgCgYIKoZIzj0DAQehRANCAARAcV+lE3UR6Taw\n7Pb3e4N7ODAaoiS7FERk8t4jWeCg6G+qHq5ilUcQQ848loHPWapS1ipgDhzw+srL\nmQTDu0RQ\n-----END PRIVATE KEY-----"
     scripts:
       - name: Bağımlılıkları Kur
         script: |
@@ -16,14 +21,16 @@ workflows:
         script: |
           ./node_modules/.bin/cap add ios || true
           ./node_modules/.bin/cap sync ios
-      - name: iOS Projesini Derle
+      - name: iOS Projesini Derle ve IPA Olarak Paketle
         script: |
-          # DEVELOPMENT_TEAM parametresiyle Apple Developer Team ID'ni buraya zorla gömüyoruz.
-          # ÖNEMLİ: Alttaki XXXXXXXXXX yerine KENDİ APPLE TEAM ID'ni yazacaksın kanka.
-          xcodebuild build \
-            -workspace ios/App/App.xcodeproj/project.xcworkspace \
-            -scheme "App" \
-            -configuration Debug \
-            DEVELOPMENT_TEAM="XXXXXXXXXX" \
-            CODE_SIGN_ALLOW_FAILED_TESTS=YES \
-            CODE_SIGNING_ALLOWED=NO
+          WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
+          
+          # xcode-project aracı, yukarıdaki environment değişkenlerini (Vars) otomatik okur.
+          # Apple sunucularına bağlanıp sertifikayı doğrular ve .ipa dosyasını üretir.
+          xcode-project build-ipa \
+            --workspace "$WORKSPACE_PATH" \
+            --scheme "App"
+    artifacts:
+      # Üretilen fiziksel paket dosyasını Codemagic panelinden indirebilmek için çıktı yolunu belirtiyoruz
+      - ios/App/build/Apps/*.ipa
+      - build/ios/ipa/*.ipa
