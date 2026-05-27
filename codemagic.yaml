@@ -18,14 +18,10 @@ workflows:
           npx cap sync ios
       - name: iOS Projesini Derle
         script: |
-          # Önce dosya yapısını kontrol edelim (debug)
-          ls -R ios
+          WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
+          echo "Workspace yolu: $WORKSPACE_PATH"
           
-          # xcworkspace dosyasını otomatik bulup build al
-          WORKSPACE_PATH=$(find ios -name "*.xcworkspace" | head -n 1)
-          echo "Workspace bulundu: $WORKSPACE_PATH"
-          
+          # Parametreyi çıkardık, bu haliyle kaba inşaatı bitirmeli
           xcode-project build-ipa \
             --workspace "$WORKSPACE_PATH" \
-            --scheme "App" \
-            --disable-codesign
+            --scheme "App"
