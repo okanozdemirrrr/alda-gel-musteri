@@ -6,25 +6,23 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Bağımlılıkları Kur ve Hazırla
+      - name: Bağımlılıkları Kur
         script: |
           npm install
-          # Capacitor paketlerini en tepeden kurmaya zorla
           npm install @capacitor/core @capacitor/cli @capacitor/ios
       - name: Next.js Projesini Derle
         script: npm run build
-      - name: iOS Platformunu Kur
+      - name: iOS Platformunu Kur ve Senkronize Et
         script: |
-          # npx kullanmadan doğrudan node_modules içindeki cli'yı çağır
           ./node_modules/.bin/cap add ios || true
-      - name: Senkronizasyon
-        script: |
           ./node_modules/.bin/cap sync ios
-      - name: iOS Projesini Derle
+      - name: iOS Projesini Derle ve Otomatik İmzala
         script: |
+          # Workspace yolunu sabitliyoruz
           WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
-          xcodebuild build \
-            -workspace "$WORKSPACE_PATH" \
-            -scheme "App" \
-            -sdk iphoneos \
-            -configuration Debug
+          
+          # Apple Developer portalından otomatik profil çekerek imzala
+          xcode-project build-ipa \
+            --workspace "$WORKSPACE_PATH" \
+            --scheme "App" \
+            --archive-xcargs "-allowProvisioningUpdates"
