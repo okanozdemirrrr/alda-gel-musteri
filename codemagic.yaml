@@ -6,10 +6,8 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Paketleri ve iOS Gereksinimlerini Yükle
-        script: |
-          npm install
-          npm install @capacitor/ios --save-dev
+      - name: Paketleri Yükle
+        script: npm install
       - name: Next.js Projesini Derle
         script: npm run build
       - name: iOS Platformunu Kur ve Senkronize Et
@@ -19,9 +17,10 @@ workflows:
       - name: iOS Projesini Derle
         script: |
           WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
-          echo "Workspace yolu: $WORKSPACE_PATH"
           
-          # Parametreyi çıkardık, bu haliyle kaba inşaatı bitirmeli
-          xcode-project build-ipa \
-            --workspace "$WORKSPACE_PATH" \
-            --scheme "App"
+          # build-ipa yerine build komutunu kullanıyoruz ki .plist hatası almayalım
+          xcodebuild build \
+            -workspace "$WORKSPACE_PATH" \
+            -scheme "App" \
+            -sdk iphoneos \
+            -configuration Debug
