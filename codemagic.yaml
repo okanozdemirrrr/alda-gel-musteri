@@ -14,13 +14,18 @@ workflows:
         script: npm run build
       - name: iOS Platformunu Kur ve Senkronize Et
         script: |
-          # Önce platformu ekle, hata verirse görmezden gel
           npx cap add ios || true
-          # Şimdi sync et
           npx cap sync ios
       - name: iOS Projesini Derle
         script: |
+          # Önce dosya yapısını kontrol edelim (debug)
+          ls -R ios
+          
+          # xcworkspace dosyasını otomatik bulup build al
+          WORKSPACE_PATH=$(find ios -name "*.xcworkspace" | head -n 1)
+          echo "Workspace bulundu: $WORKSPACE_PATH"
+          
           xcode-project build-ipa \
-            --workspace "$CM_BUILD_DIR/ios/App/App.xcworkspace" \
+            --workspace "$WORKSPACE_PATH" \
             --scheme "App" \
             --disable-codesign
