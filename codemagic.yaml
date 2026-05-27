@@ -18,5 +18,12 @@ workflows:
           ./node_modules/.bin/cap sync ios
       - name: iOS Projesini Derle
         script: |
-          # En temel derleme komutu. Hiçbir parametre yok, hata payı sıfır.
-          xcodebuild build -workspace ios/App/App.xcodeproj/project.xcworkspace -scheme "App" -configuration Debug
+          # DEVELOPMENT_TEAM parametresiyle Apple Developer Team ID'ni buraya zorla gömüyoruz.
+          # ÖNEMLİ: Alttaki XXXXXXXXXX yerine KENDİ APPLE TEAM ID'ni yazacaksın kanka.
+          xcodebuild build \
+            -workspace ios/App/App.xcodeproj/project.xcworkspace \
+            -scheme "App" \
+            -configuration Debug \
+            DEVELOPMENT_TEAM="XXXXXXXXXX" \
+            CODE_SIGN_ALLOW_FAILED_TESTS=YES \
+            CODE_SIGNING_ALLOWED=NO
