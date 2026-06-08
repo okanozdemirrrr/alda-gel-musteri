@@ -5,7 +5,6 @@ workflows:
     environment:
       xcode: latest
       cocoapods: default
-      # Apple API Anahtarlarını ve Sertifikayı doğrudan buraya gömdük
       vars:
         APP_STORE_CONNECT_ISSUER_ID: "46730e8e-37d5-4cb4-a708-28d4b3da8c1f"
         APP_STORE_CONNECT_KEY_ID: "2PF3CPKH5Q"
@@ -21,16 +20,50 @@ workflows:
         script: |
           ./node_modules/.bin/cap add ios || true
           ./node_modules/.bin/cap sync ios
+      - name: Apple Anahtarını ve Plist Dosyasını Hazırla
+        script: |
+          # 1. Apple'ın bizden istediği private key dosyasını doğru dizine oluşturuyoruz
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+          
+          # 2. Sürekli hata veren export_options.plist dosyasını manuel yaratıp diske yazıyoruz
+          cat <<EOF > exportOptions.plist
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>manageAppVersionAndBuildNumber</key>
+              <true/>
+              <key>signingStyle</key>
+              <string>automatic</string>
+          </dict>
+          </plist>
+          EOF
       - name: iOS Projesini Derle ve IPA Olarak Paketle
         script: |
           WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
           
-          # xcode-project aracı, yukarıdaki environment değişkenlerini (Vars) otomatik okur.
-          # Apple sunucularına bağlanıp sertifikayı doğrular ve .ipa dosyasını üretir.
-          xcode-project build-ipa \
-            --workspace "$WORKSPACE_PATH" \
-            --scheme "App"
+          # 3. Önce projeyi Apple sunucularından imza çekerek arşivliyoruz
+          xcodebuild archive \
+            -workspace "$WORKSPACE_PATH" \
+            -scheme "App" \
+            -archivePath build/ios/App.xcarchive \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            -authenticationKeyPath "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+
+          # 4. Arşivden nihai .ipa dosyasını dışarı aktarıyoruz
+          xcodebuild -exportArchive \
+            -archivePath build/ios/App.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist exportOptions.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
+            -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
+            -authenticationKeyPath "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
     artifacts:
-      # Üretilen fiziksel paket dosyasını Codemagic panelinden indirebilmek için çıktı yolunu belirtiyoruz
-      - ios/App/build/Apps/*.ipa
       - build/ios/ipa/*.ipa
