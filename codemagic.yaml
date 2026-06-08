@@ -8,7 +8,13 @@ workflows:
       vars:
         APP_STORE_CONNECT_ISSUER_ID: "46730e8e-37d5-4cb4-a708-28d4b3da8c1f"
         APP_STORE_CONNECT_KEY_ID: "2PF3CPKH5Q"
-        APP_STORE_CONNECT_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\nMIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg+pgAc3MZH3embQP+\neT5GtsWNSep3shn7/h96IrS721qgCgYIKoZIzj0DAQehRANCAARAcV+lE3UR6Taw\n7Pb3e4N7ODAaoiS7FERk8t4jWeCg6G+qHq5ilUcQQ848loHPWapS1ipgDhzw+srL\nmQTDu0RQ\n-----END PRIVATE KEY-----"
+        APP_STORE_CONNECT_PRIVATE_KEY: |
+          -----BEGIN PRIVATE KEY-----
+          MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg+pgAc3MZH3embQP+
+          eT5GtsWNSep3shn7/h96IrS721qgCgYIKoZIzj0DAQehRANCAARAcV+lE3UR6Taw
+          7Pb3e4N7ODAaoiS7FERk8t4jWeCg6G+qHq5ilUcQQ848loHPWapS1ipgDhzw+srL
+          mQTDu0RQ
+          -----END PRIVATE KEY-----
     scripts:
       - name: Bağımlılıkları Kur
         script: |
@@ -20,15 +26,13 @@ workflows:
         script: |
           ./node_modules/.bin/cap add ios || true
           ./node_modules/.bin/cap sync ios
-      - name: Apple Anahtarını ve Plist Dosyasını Hazırla
+      - name: iOS Projesini Derle ve IPA Olarak Paketle
         script: |
-          # 1. Apple'ın bizden istediği private key dosyasını doğru dizine oluşturuyoruz
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > ~/.appstoreconnect/private_keys/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8
-          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+          # 1. Apple özel anahtarını diske tam yol olarak yazıyoruz
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > "$CM_BUILD_DIR/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
           
-          # 2. Sürekli hata veren export_options.plist dosyasını manuel yaratıp diske yazıyoruz
-          cat <<EOF > exportOptions.plist
+          # 2. Geçici plist dosyasını ana dizine basıyoruz
+          cat <<EOF > "$CM_BUILD_DIR/exportOptions.plist"
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
@@ -42,11 +46,10 @@ workflows:
           </dict>
           </plist>
           EOF
-      - name: iOS Projesini Derle ve IPA Olarak Paketle
-        script: |
+
           WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
           
-          # 3. Önce projeyi Apple sunucularından imza çekerek arşivliyoruz
+          # 3. Projeyi arşivliyoruz (Burada tam dosya yollarını $CM_BUILD_DIR ile gösterdik)
           xcodebuild archive \
             -workspace "$WORKSPACE_PATH" \
             -scheme "App" \
@@ -54,16 +57,16 @@ workflows:
             -allowProvisioningUpdates \
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
-            -authenticationKeyPath "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+            -authenticationKeyPath "$CM_BUILD_DIR/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
 
           # 4. Arşivden nihai .ipa dosyasını dışarı aktarıyoruz
           xcodebuild -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist exportOptions.plist \
+            -exportOptionsPlist "$CM_BUILD_DIR/exportOptions.plist" \
             -allowProvisioningUpdates \
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
-            -authenticationKeyPath "AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+            -authenticationKeyPath "$CM_BUILD_DIR/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
     artifacts:
       - build/ios/ipa/*.ipa
