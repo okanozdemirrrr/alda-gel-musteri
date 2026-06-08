@@ -6,6 +6,8 @@ workflows:
       xcode: latest
       cocoapods: default
       vars:
+        # Bizim resmi Apple Developer Takım Kimliğimiz (Team ID)
+        APPLE_TEAM_ID: "2PF3CPKH5Q"
         APP_STORE_CONNECT_ISSUER_ID: "46730e8e-37d5-4cb4-a708-28d4b3da8c1f"
         APP_STORE_CONNECT_KEY_ID: "2PF3CPKH5Q"
         APP_STORE_CONNECT_PRIVATE_KEY: |
@@ -47,9 +49,15 @@ workflows:
           </plist>
           EOF
 
+          # 3. CRITICAL: Xcode proje dosyasındaki tüm takım kimliklerini (DevelopmentTeam) komutla zorla güncelliyoruz!
+          # Projenin içindeki boş veya hatalı TeamID alanlarını bizim yasal Apple Team ID'miz ile eziyoruz.
+          XCODE_PROJ_PATH="ios/App/App.xcodeproj/project.pbxproj"
+          sed -i '' "s/DevelopmentTeam = .*/DevelopmentTeam = $APPLE_TEAM_ID;/g" "$XCODE_PROJ_PATH" || true
+          sed -i '' "s/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = $APPLE_TEAM_ID;/g" "$XCODE_PROJ_PATH" || true
+
           WORKSPACE_PATH="ios/App/App.xcodeproj/project.xcworkspace"
           
-          # 3. Projeyi arşivliyoruz (Burada tam dosya yollarını $CM_BUILD_DIR ile gösterdik)
+          # 4. Projeyi arşivliyoruz (Artık projenin içi de dışı da aynı takıma ayarlandı)
           xcodebuild archive \
             -workspace "$WORKSPACE_PATH" \
             -scheme "App" \
@@ -57,9 +65,10 @@ workflows:
             -allowProvisioningUpdates \
             -authenticationKeyID "$APP_STORE_CONNECT_KEY_ID" \
             -authenticationKeyIssuerID "$APP_STORE_CONNECT_ISSUER_ID" \
-            -authenticationKeyPath "$CM_BUILD_DIR/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8"
+            -authenticationKeyPath "$CM_BUILD_DIR/AuthKey_$APP_STORE_CONNECT_KEY_ID.p8" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID"
 
-          # 4. Arşivden nihai .ipa dosyasını dışarı aktarıyoruz
+          # 5. Arşivden nihai .ipa dosyasını dışarı aktarıyoruz
           xcodebuild -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
