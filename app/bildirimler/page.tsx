@@ -31,7 +31,7 @@ export default function BildirimlerPage() {
     try {
       const customerId = localStorage.getItem('customer_id')
       if (!customerId) {
-        router.push('/musteri')
+        router.push('/')
         return
       }
 
@@ -148,7 +148,7 @@ export default function BildirimlerPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
+      <div className="app-page bg-[#f7f7f7] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f59e0b] border-t-transparent mb-4" />
           <p className="text-[#6f6f6f]">Yükleniyor...</p>
@@ -158,10 +158,10 @@ export default function BildirimlerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
-        <div className="max-w-[800px] mx-auto px-4 py-4">
+        <div className="app-content-narrow px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
               <button
@@ -220,7 +220,7 @@ export default function BildirimlerPage() {
       </div>
 
       {/* Notifications List */}
-      <div className="max-w-[800px] mx-auto px-4 py-6">
+      <div className="app-content-narrow px-4 py-6">
         {filteredNotifications.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔔</div>

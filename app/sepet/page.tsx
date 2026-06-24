@@ -7,7 +7,9 @@ import { ArrowLeft, Trash2, Plus, Minus, MessageSquare, ShoppingBag, MapPin, Cre
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/app/context/CartContext'
 import { supabase } from '@/app/lib/supabase'
+import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { isMobile } from '@/app/lib/platform'
+import StableImage from '@/app/components/StableImage'
 
 const shouldAnimate = !isMobile()
 
@@ -87,14 +89,10 @@ export default function SepetPage() {
 
     try {
       // 2) Müşteri koordinatlarını çek
-      const { data: customerData } = await supabase
-        .from('customers')
-        .select('latitude, longitude')
-        .eq('id', customerId)
-        .single()
+      const addressData = await fetchUserAddressCoordinates(customerId)
 
-      const customerLat = customerData?.latitude
-      const customerLng = customerData?.longitude
+      const customerLat = addressData?.latitude
+      const customerLng = addressData?.longitude
 
       // 3) Sepetteki ürünleri restaurant_id'ye göre grupla
       const groups = new Map<string, typeof cart[0][]>()
@@ -174,7 +172,7 @@ export default function SepetPage() {
   // ─── BOŞ SEPET ──────────────────────────────────────────────
   if (cart.length === 0 && !showCheckoutSuccess) {
     return (
-      <div className="min-h-screen bg-stone-50 overflow-x-hidden">
+      <div className="app-page bg-stone-50">
         <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40 safe-area-header">
           <div className="max-w-4xl mx-auto px-4 min-h-16 py-2 flex items-center gap-3">
             <button onClick={() => router.back()} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-stone-100 rounded-full transition-colors">
@@ -184,7 +182,7 @@ export default function SepetPage() {
           </div>
         </header>
 
-        <div className="flex flex-col items-center justify-center min-h-[60vh] px-4">
+        <div className="flex flex-col items-center justify-center min-h-[60dvh] px-4">
           <motion.div
             initial={shouldAnimate ? { opacity: 0, scale: 0.9 } : {}}
             animate={shouldAnimate ? { opacity: 1, scale: 1 } : {}}
@@ -238,7 +236,7 @@ export default function SepetPage() {
         )}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-stone-50 pb-44 overflow-x-hidden">
+      <div className="app-page bg-stone-50 pb-44">
         {/* Header */}
         <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40 safe-area-header">
           <div className="max-w-4xl mx-auto px-4 min-h-16 py-2 flex items-center gap-3">
@@ -266,22 +264,15 @@ export default function SepetPage() {
                 className="bg-white rounded-2xl p-3 sm:p-4 border border-stone-100 shadow-sm flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow"
               >
                 {/* Ürün Görseli */}
-                <div
-                  onClick={() => openNoteModal(item)}
-                  className="w-16 h-16 sm:w-20 sm:h-20 bg-stone-100 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden cursor-pointer"
-                >
-                  {item.product.image_url ? (
-                    <Image
-                      src={item.product.image_url}
-                      alt={item.product.name}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover rounded-xl"
-                      unoptimized
-                    />
-                  ) : (
-                    <span className="text-3xl">🍽️</span>
-                  )}
+                <div onClick={() => openNoteModal(item)} className="flex-shrink-0">
+                  <StableImage
+                    src={item.product.image_url}
+                    alt={item.product.name}
+                    fixedWidth={80}
+                    fixedHeight={80}
+                    containerClassName="rounded-xl cursor-pointer"
+                    fallback={<span className="text-3xl">🍽️</span>}
+                  />
                 </div>
 
                 {/* Ürün Bilgileri */}

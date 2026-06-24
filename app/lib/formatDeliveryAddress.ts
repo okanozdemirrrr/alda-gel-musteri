@@ -12,6 +12,61 @@ export interface DeliveryAddressInput {
   notes?: string | null
 }
 
+export interface UserAddressRecord {
+  customer_id: string
+  title?: string
+  district: string
+  neighborhood: string
+  street: string
+  building_no: string
+  floor: string
+  directions: string | null
+  full_address: string
+  latitude: number
+  longitude: number
+}
+
+export function buildUserAddressRecord(input: {
+  customerId: string
+  title: string
+  district: string
+  neighborhood: string
+  street: string
+  buildingNo: string
+  floor: string
+  directions: string
+  latitude: number
+  longitude: number
+}): UserAddressRecord {
+  const district = input.district.trim()
+  const neighborhood = input.neighborhood.trim()
+  const street = input.street.trim()
+  const building_no = input.buildingNo.trim()
+  const floor = input.floor.trim()
+  const directions = input.directions.trim() || null
+
+  return {
+    customer_id: input.customerId,
+    title: input.title.trim() || 'Ev',
+    district,
+    neighborhood,
+    street,
+    building_no,
+    floor,
+    directions,
+    full_address: formatDeliveryAddress({
+      district,
+      neighborhood,
+      street,
+      floor,
+      building_no,
+      directions,
+    }),
+    latitude: input.latitude,
+    longitude: input.longitude,
+  }
+}
+
 export function formatDeliveryAddress(address: DeliveryAddressInput): string {
   const district = (address.district ?? '').trim()
   const neighborhood = (address.neighborhood ?? '').trim()

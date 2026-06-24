@@ -6,6 +6,7 @@ import { supabase } from '@/app/lib/supabase'
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle, Star, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import OrderDetailModal from '@/app/components/OrderDetailModal'
+import { OrderListSkeleton } from '@/app/components/Skeleton'
 import { normalizeOrderItems } from '@/app/lib/orderItems'
 import type { OrderDetail } from '@/types/order'
 
@@ -281,11 +282,8 @@ export default function SiparislerimPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f59e0b] border-t-transparent mb-4" />
-          <p className="text-[#6f6f6f]">Yükleniyor...</p>
-        </div>
+      <div className="app-page bg-[#f7f7f7]">
+        <OrderListSkeleton />
       </div>
     )
   }
@@ -419,10 +417,10 @@ export default function SiparislerimPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
-      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
-        <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10 safe-area-header">
+        <div className="app-content-narrow px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => router.back()}
             className="p-2 hover:bg-[#f7f7f7] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -436,7 +434,7 @@ export default function SiparislerimPage() {
       </div>
 
       {/* Orders List */}
-      <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="app-content-narrow px-3 sm:px-4 py-4 sm:py-6">
         {orders.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📦</div>
@@ -495,7 +493,7 @@ export default function SiparislerimPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 w-full sm:max-w-md shadow-2xl max-h-[95vh] overflow-y-auto"
+              className="bg-white rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 w-full sm:max-w-md shadow-2xl max-h-[95dvh] overflow-y-auto"
             >
               <h3 className="text-[20px] font-bold text-[#3c4043] mb-4">
                 Siparişinizi Değerlendirin

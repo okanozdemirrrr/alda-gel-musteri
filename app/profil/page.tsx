@@ -40,7 +40,7 @@ export default function ProfilPage() {
       
       if (authError || !user) {
         localStorage.clear()
-        router.push('/musteri')
+        router.push('/')
         return
       }
 
@@ -48,7 +48,7 @@ export default function ProfilPage() {
       const customerId = localStorage.getItem('customer_id')
       
       if (!customerId) {
-        router.push('/musteri')
+        router.push('/')
         return
       }
 
@@ -173,7 +173,7 @@ export default function ProfilPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center">
+      <div className="app-page bg-[#f7f7f7] flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[#f59e0b] border-t-transparent mb-4" />
           <p className="text-[#6f6f6f]">Profil yükleniyor...</p>
@@ -185,7 +185,7 @@ export default function ProfilPage() {
   // Eğer profil yüklenemedi ise hata ekranı göster
   if (!profile && error) {
     return (
-      <div className="min-h-screen bg-[#f7f7f7] flex items-center justify-center p-4">
+      <div className="app-page bg-[#f7f7f7] flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-xl p-6 border border-red-200">
           <div className="text-center mb-4">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -212,7 +212,7 @@ export default function ProfilPage() {
             <button
               onClick={() => {
                 localStorage.clear()
-                router.push('/musteri')
+                router.push('/')
               }}
               className="w-full py-3 min-h-[44px] bg-gray-100 text-[#3c4043] rounded-lg font-semibold hover:bg-gray-200 transition-colors"
             >
@@ -230,10 +230,10 @@ export default function ProfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
-        <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
+        <div className="app-content-narrow px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between safe-area-header">
           <div className="flex items-center gap-3 sm:gap-4">
             <button
               onClick={() => router.back()}
@@ -259,7 +259,7 @@ export default function ProfilPage() {
       </div>
 
       {/* Profile Content */}
-      <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <div className="app-content-narrow px-3 sm:px-4 py-4 sm:py-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

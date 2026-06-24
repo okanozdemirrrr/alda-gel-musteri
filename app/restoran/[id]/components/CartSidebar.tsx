@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useCart } from '@/app/context/CartContext'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
+import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Banknote, CheckCircle } from 'lucide-react'
 
@@ -164,14 +165,10 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
       }
 
       // Müşterinin koordinatlarını al
-      const { data: customerData } = await supabase
-        .from('customers')
-        .select('latitude, longitude')
-        .eq('id', customerId)
-        .single()
+      const addressData = await fetchUserAddressCoordinates(customerId)
 
-      const customerLat = customerData?.latitude
-      const customerLng = customerData?.longitude
+      const customerLat = addressData?.latitude
+      const customerLng = addressData?.longitude
 
       // Sipariş numarası oluştur
       const orderNumber = `MG${Date.now().toString().slice(-8)}`
@@ -589,7 +586,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-white rounded-2xl w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto"
+                className="bg-white rounded-2xl w-full sm:max-w-[500px] max-h-[90dvh] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Header */}

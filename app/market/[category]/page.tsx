@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
+import StableImage from '@/app/components/StableImage'
 
 interface Product {
   id: number
@@ -93,7 +94,7 @@ export default function CategoryPage() {
 
   if (!categoryInfo) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="app-page bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-2xl mb-4">🤷‍♂️</p>
           <p className="text-gray-600">Kategori bulunamadı</p>
@@ -132,10 +133,10 @@ export default function CategoryPage() {
   }, 0)
 
   return (
-    <div className="min-h-screen bg-white pb-24">
+    <div className="app-page bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 h-[64px] flex items-center justify-between">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm safe-area-header">
+        <div className="app-container px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.back()}
@@ -151,8 +152,8 @@ export default function CategoryPage() {
 
           {/* Sepet */}
           <button
-            onClick={() => router.push('/musteri/sepet')}
-            className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            onClick={() => router.push('/sepet')}
+            className="relative p-2 rounded-lg transition-colors touch-press"
           >
             <ShoppingCart size={24} className="text-gray-700" />
             {cartCount > 0 && (
@@ -165,11 +166,12 @@ export default function CategoryPage() {
       </header>
 
       {/* Products Grid */}
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="app-container scroll-surface gpu-layer px-4 py-6">
         {isLoading ? (
-          <div className="text-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto"></div>
-            <p className="text-gray-500 mt-4">Yükleniyor...</p>
+          <div className="grid grid-cols-2 gap-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="skeleton h-44 rounded-2xl" />
+            ))}
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-20">
@@ -201,17 +203,13 @@ export default function CategoryPage() {
                   )}
 
                   {/* Ürün Görseli */}
-                  <div className="w-full aspect-square bg-gray-50 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
-                    {product.image_url ? (
-                      <img
-                        src={product.image_url}
-                        alt={product.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-5xl">{product.emoji}</span>
-                    )}
-                  </div>
+                  <StableImage
+                    src={product.image_url}
+                    alt={product.name}
+                    aspectRatio="1/1"
+                    containerClassName="w-full rounded-lg mb-3"
+                    fallback={<span className="text-5xl">{product.emoji}</span>}
+                  />
 
                   {/* Ürün Bilgileri */}
                   <h5 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]">
@@ -266,16 +264,19 @@ export default function CategoryPage() {
 
       {/* Floating Cart Summary */}
       {cartCount > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-50">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div>
+        <div
+          className="fixed left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-40 safe-area-footer"
+          style={{ bottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))' }}
+        >
+          <div className="app-container px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
                 <p className="text-sm text-gray-600">{cartCount} ürün</p>
-                <p className="text-2xl font-bold text-gray-900">₺{cartTotal.toFixed(2)}</p>
+                <p className="text-xl font-bold text-gray-900">₺{cartTotal.toFixed(2)}</p>
               </div>
               <button
-                onClick={() => router.push('/musteri/sepet')}
-                className="bg-orange-500 text-white px-8 py-4 rounded-xl font-bold hover:bg-orange-600 transition-colors flex items-center gap-2"
+                onClick={() => router.push('/sepet')}
+                className="touch-press bg-orange-500 text-white px-6 py-3 rounded-xl font-bold transition-colors flex items-center gap-2 flex-shrink-0"
               >
                 <ShoppingCart size={20} />
                 Sepete Git

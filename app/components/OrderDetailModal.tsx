@@ -31,7 +31,7 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 40 }}
           transition={{ duration: 0.2 }}
-          className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-[#1e293b] text-white shadow-2xl border border-[#334155]"
+          className="w-full sm:max-w-lg max-h-[92dvh] overflow-y-auto rounded-t-2xl sm:rounded-2xl bg-[#1e293b] text-white shadow-2xl border border-[#334155]"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}

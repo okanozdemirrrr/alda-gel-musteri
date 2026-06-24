@@ -1,6 +1,6 @@
 {
   "name": "alda-gel-musteri",
-  "version": "1.0.5",
+  "version": "1.0.10",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "build:mobile": "next build && npx cap sync",
+    "build:android": "npm run build:mobile && cd android && .\\gradlew.bat bundleRelease",
     "cap:sync": "npx cap sync",
     "cap:ios": "npx cap open ios"
   },

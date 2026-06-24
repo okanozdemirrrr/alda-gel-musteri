@@ -18,7 +18,7 @@ export default function BackButtonHandler() {
 
     const setupListener = async () => {
       listenerHandle = await App.addListener('backButton', ({ canGoBack }) => {
-        if (pathname === '/' || pathname === '/musteri') {
+        if (pathname === '/') {
           App.exitApp()
           return
         }

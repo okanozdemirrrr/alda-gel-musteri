@@ -59,10 +59,10 @@ export default function HesapSil() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f7f7f7]">
+    <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
       <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
-        <div className="max-w-[600px] mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
+        <div className="app-content-narrow px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => router.back()}
             className="p-2 hover:bg-[#f7f7f7] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
@@ -76,7 +76,7 @@ export default function HesapSil() {
       </div>
 
       {/* Content */}
-      <div className="max-w-[600px] mx-auto px-3 sm:px-6 py-6 sm:py-10">
+      <div className="app-content-narrow px-3 sm:px-6 py-6 sm:py-10">
 
         {/* Done State */}
         {step === 'done' && (

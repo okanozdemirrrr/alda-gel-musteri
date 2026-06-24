@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { supabase } from '@/app/lib/supabase'
-import { formatDeliveryAddress } from '@/app/lib/formatDeliveryAddress'
+import { saveUserAddress } from '@/app/lib/addressService'
 import dynamic from 'next/dynamic'
 
 const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false })
@@ -190,36 +189,21 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         throw new Error('Lütfen önce giriş yapın')
       }
 
-      const trimmedDirections = notes.trim() || null
-
-      const fullAddress = formatDeliveryAddress({
+      const addressRecord = await saveUserAddress({
+        customerId,
+        title: addressName,
         district,
         neighborhood,
         street: streetAddress,
+        buildingNo: doorNumber,
         floor,
-        building_no: doorNumber,
-        directions: trimmedDirections,
+        directions: notes,
+        latitude,
+        longitude,
       })
 
-      const { error: updateError } = await supabase
-        .from('customers')
-        .update({
-          address: fullAddress,
-          district: district.trim(),
-          neighborhood: neighborhood.trim(),
-          street_address: streetAddress.trim(),
-          floor: floor.trim(),
-          door_number: doorNumber.trim(),
-          directions: trimmedDirections,
-          latitude,
-          longitude,
-        })
-        .eq('id', customerId)
-
-      if (updateError) throw updateError
-
-      localStorage.setItem('customer_address', fullAddress)
-      onAddressSelect(fullAddress)
+      localStorage.setItem('customer_address', addressRecord.full_address)
+      onAddressSelect(addressRecord.full_address)
     } catch (err: any) {
       setError(err.message || 'Adres kaydedilemedi')
     } finally {
@@ -229,7 +213,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4 px-safe">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden pb-safe">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95dvh] sm:max-h-[90dvh] overflow-y-auto overflow-x-hidden pb-safe">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8] sticky top-0 bg-white z-10">
           <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
             {step === 'quick' && 'Adres Seç'}

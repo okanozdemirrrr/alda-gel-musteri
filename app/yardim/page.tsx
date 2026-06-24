@@ -44,7 +44,7 @@ export default function YardimMerkezi() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="app-page bg-gray-50">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-4xl mx-auto px-4 h-[64px] flex items-center gap-4">

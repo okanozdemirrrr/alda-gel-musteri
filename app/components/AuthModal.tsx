@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
+import { fetchUserAddressFullText } from '@/app/lib/addressService'
 
 interface AuthModalProps {
   onClose: () => void
@@ -83,8 +84,10 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
       // LocalStorage'a kaydet
       localStorage.setItem('customer_id', customerData.id)
       localStorage.setItem('customer_name', customerData.full_name)
-      if (customerData.address) {
-        localStorage.setItem('customer_address', customerData.address)
+
+      const savedAddress = await fetchUserAddressFullText(customerData.id)
+      if (savedAddress) {
+        localStorage.setItem('customer_address', savedAddress)
       }
 
       onLoginSuccess(customerData.full_name)
@@ -131,7 +134,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           full_name: fullName,
           email: registerEmail.trim(),
           phone: phone,
-          address: address.trim(),
           registration_source: 'app_user'
         }])
         .select()
@@ -143,6 +145,26 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           throw new Error('Bu telefon numarası zaten kayıtlı')
         }
         throw customerError
+      }
+
+      if (address.trim()) {
+        const { error: addressError } = await supabase
+          .from('user_addresses')
+          .insert([{
+            customer_id: customerData.id,
+            title: 'Ev',
+            district: '',
+            neighborhood: '',
+            street: '',
+            building_no: '',
+            floor: '',
+            directions: null,
+            full_address: address.trim(),
+            latitude: 41.492892,
+            longitude: 36.081592,
+          }])
+
+        if (addressError) throw addressError
       }
 
       // LocalStorage'a kaydet
@@ -163,7 +185,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[480px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[480px] max-h-[95dvh] sm:max-h-[90dvh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8]">
           <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>

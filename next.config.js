@@ -4,7 +4,19 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['images.unsplash.com'],
+    domains: ['images.unsplash.com', 'aldagelmarket.com.tr'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'aldagelmarket.com.tr',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        pathname: '/**',
+      },
+    ],
     unoptimized: true,
   },
   experimental: {

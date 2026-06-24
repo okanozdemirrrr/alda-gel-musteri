@@ -66,7 +66,7 @@ export default function UpsellModal({
           animate={{ y: 0 }}
           exit={{ y: '100%' }}
           transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-          className="bg-white w-full max-w-[600px] rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+          className="bg-white w-full max-w-[600px] rounded-t-3xl shadow-2xl max-h-[85dvh] overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -90,7 +90,7 @@ export default function UpsellModal({
           </div>
 
           {/* Scrollable Content */}
-          <div className="overflow-y-auto max-h-[calc(85vh-180px)] p-6">
+          <div className="overflow-y-auto max-h-[calc(85dvh-180px)] p-6">
             {/* Horizontal Scroll Container */}
             <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
               {availableProducts.map((product) => {

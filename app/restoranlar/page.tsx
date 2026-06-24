@@ -7,8 +7,11 @@ import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, FileText, User, Clock, Wallet } from 'lucide-react'
 import { calculateDistance, formatDistance } from '@/app/lib/distanceUtils'
+import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import AddressModal from '../components/AddressModal'
 import NotificationBell from '../components/NotificationBell'
+import { RestaurantListSkeleton } from '../components/Skeleton'
+import StableImage from '../components/StableImage'
 import { isMobile } from '../lib/platform'
 
 interface Restaurant {
@@ -65,7 +68,7 @@ export default function RestoranlarPage() {
     const address = localStorage.getItem('customer_address')
 
     if (!customerId) {
-      router.push('/musteri')
+      router.push('/')
       return
     }
 
@@ -103,13 +106,7 @@ export default function RestoranlarPage() {
 
   const fetchCustomerLocation = async (customerId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('customers')
-        .select('latitude, longitude')
-        .eq('id', customerId)
-        .single()
-
-      if (error) throw error
+      const data = await fetchUserAddressCoordinates(customerId)
 
       if (data?.latitude && data?.longitude) {
         setCustomerLat(data.latitude)
@@ -193,7 +190,7 @@ export default function RestoranlarPage() {
     localStorage.removeItem('customer_id')
     localStorage.removeItem('customer_name')
     localStorage.removeItem('customer_address')
-    router.push('/musteri')
+    router.push('/')
   }
 
   const handleAddressSelect = (address: string) => {
@@ -204,18 +201,11 @@ export default function RestoranlarPage() {
   }
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-2">🛵</div>
-          <p className="text-[#6f6f6f]">Yükleniyor...</p>
-        </div>
-      </div>
-    )
+    return <RestaurantListSkeleton />
   }
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
+    <div className="app-page bg-white">
       {/* Header */}
       <header 
         className="bg-white border-b border-[#e8e8e8] sticky top-0 z-50"
@@ -246,8 +236,7 @@ export default function RestoranlarPage() {
                 </button>
                 <button
                   onClick={() => setShowAddressModal(true)}
-                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg hover:border-[#f59e0b] transition-colors min-w-0 flex-shrink overflow-hidden"
-                  style={{ maxWidth: 'calc(100vw - 280px)' }}
+                  className="flex items-center gap-1 px-2 py-1 bg-orange-50 border border-orange-200 rounded-lg transition-colors min-w-0 flex-1 overflow-hidden touch-press"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" strokeWidth="2.5" className="flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
@@ -456,9 +445,9 @@ export default function RestoranlarPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+      <main className="app-container scroll-surface gpu-layer px-3 sm:px-4 py-4 sm:py-6">
         {/* Kategori Barı */}
-        <div className="mb-6 overflow-x-auto scrollbar-hide">
+        <div className="mb-6 overflow-x-auto scrollbar-hide scroll-surface gpu-layer">
           <div className="flex gap-3 pb-2">
             {CATEGORIES.map((category) => (
               <button
@@ -544,36 +533,26 @@ function RestaurantCard({
   return (
     <div
       onClick={() => !isClosed && router.push(`/restoran/${restaurant.id}`)}
-      className={`bg-white border border-[#e8e8e8] rounded-xl overflow-hidden hover:shadow-lg transition-all cursor-pointer ${
+      className={`gpu-layer touch-press bg-white border border-[#e8e8e8] rounded-xl overflow-hidden transition-all cursor-pointer ${
         isClosed ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#f59e0b]'
       }`}
     >
       {/* Kapak Fotoğrafı */}
-      <div className="relative h-[160px] bg-gradient-to-br from-[#fef3c7] to-[#fde68a]">
-        {restaurant.cover_image_url ? (
-          <img 
-            src={restaurant.cover_image_url} 
-            alt={restaurant.name}
-            className="w-full h-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-6xl">
-            🍽️
-          </div>
-        )}
-        
-        {/* Kampanya Badge */}
+      <div className="relative gpu-layer">
+        <StableImage
+          src={restaurant.cover_image_url}
+          alt={restaurant.name}
+          fixedHeight={160}
+          containerClassName="w-full"
+          fallback={<span className="text-6xl">🍽️</span>}
+        />
         {restaurant.has_campaign && !isClosed && (
-          <div className="absolute top-3 left-3 bg-[#f59e0b] text-white px-3 py-1 rounded-full text-[11px] font-bold">
+          <div className="absolute top-3 left-3 z-10 bg-[#f59e0b] text-white px-3 py-1 rounded-full text-[11px] font-bold">
             Fırsat
           </div>
         )}
-
-        {/* Kapalı Badge */}
         {isClosed && (
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="absolute inset-0 z-10 bg-black/50 flex items-center justify-center">
             <span className="bg-white text-[#3c4043] px-4 py-2 rounded-lg font-bold text-[14px]">
               Şu an Kapalı
             </span>

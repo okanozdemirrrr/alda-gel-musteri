@@ -179,7 +179,7 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
 
       <div
         ref={modalScrollRef}
-        className={`bg-white ${mobile ? 'rounded-t-2xl' : 'rounded-2xl'} w-full max-w-full ${mobile ? '' : 'max-w-[500px]'} ${mobile ? 'max-h-[95vh]' : 'max-h-[90vh]'} overflow-y-auto overflow-x-hidden pb-safe`}
+        className={`bg-white ${mobile ? 'rounded-t-2xl' : 'rounded-2xl'} w-full max-w-full ${mobile ? '' : 'max-w-[500px]'} ${mobile ? 'max-h-[95dvh]' : 'max-h-[90dvh]'} overflow-y-auto overflow-x-hidden pb-safe scroll-surface gpu-layer`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Ürün Görseli */}

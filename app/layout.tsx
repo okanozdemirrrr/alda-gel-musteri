@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { CartProvider } from './context/CartContext'
 import BackButtonHandler from './components/BackButtonHandler'
 import DeliveryTracker from './components/DeliveryTracker'
+import AppShell from './components/AppShell'
 
 export const metadata: Metadata = {
   title: 'Alda Gel - Müşteri',
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
   viewportFit: 'cover',
 }
 
@@ -26,7 +29,7 @@ export default function RootLayout({
         <CartProvider>
           <BackButtonHandler />
           <DeliveryTracker />
-          {children}
+          <AppShell>{children}</AppShell>
         </CartProvider>
       </body>
     </html>

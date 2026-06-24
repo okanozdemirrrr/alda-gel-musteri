@@ -165,10 +165,10 @@ export default function MusteriAnaSayfa() {
         <WelcomeSplash name={customerName} onComplete={() => setShowWelcomeSplash(false)} />
       )}
 
-      <div className="min-h-screen bg-stone-50 overflow-x-hidden">
+      <div className="app-page bg-stone-50">
         {/* ═══ HEADER ═══ */}
         <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50 safe-area-header">
-          <div className="max-w-6xl mx-auto px-4 min-h-16 py-2 flex items-center justify-between">
+          <div className="app-container max-w-6xl px-4 min-h-16 py-2 flex items-center justify-between">
             {/* Sol: Logo + Adres */}
             <div className="flex items-center gap-3 min-w-0">
               <button
@@ -286,11 +286,11 @@ export default function MusteriAnaSayfa() {
         )}
 
         {/* ═══ HERO SECTION ═══ */}
-        <main className="relative">
-          {/* Arka plan görseli */}
-          <div className="absolute inset-0 z-0">
+        <main className="relative gpu-layer scroll-surface">
+          {/* Arka plan görseli — sabit yükseklik, layout shift yok */}
+          <div className="absolute inset-0 z-0 min-h-[70dvh] gpu-layer">
             <div
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat gpu-layer"
               style={{ backgroundImage: 'url(/alda-gel-hero.png)' }}
             />
             {/* Karartma overlay — metin okunurluğu için zorunlu */}
@@ -301,7 +301,7 @@ export default function MusteriAnaSayfa() {
           <div className="relative z-10 max-w-6xl mx-auto px-4">
             {!isLoggedIn || !selectedAddress ? (
               /* ═══ GİRİŞ YAPMAMIŞ / ADRES SEÇMEMİŞ ═══ */
-              <div className="min-h-[60vh] sm:min-h-[70vh] flex items-center justify-center py-10 sm:py-16">
+              <div className="min-h-[60dvh] sm:min-h-[70dvh] flex items-center justify-center py-10 sm:py-16">
                 <motion.div
                   initial={shouldAnimate ? { opacity: 0, y: 30 } : {}}
                   animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
