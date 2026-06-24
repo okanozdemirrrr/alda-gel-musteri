@@ -89,7 +89,7 @@ export default function SepetPage() {
 
     try {
       // 2) Müşteri koordinatlarını çek
-      const addressData = await fetchUserAddressCoordinates(customerId)
+      const addressData = await fetchUserAddressCoordinates()
 
       const customerLat = addressData?.latitude
       const customerLng = addressData?.longitude

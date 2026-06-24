@@ -184,13 +184,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
     setError('')
 
     try {
-      const customerId = localStorage.getItem('customer_id')
-      if (!customerId) {
-        throw new Error('Lütfen önce giriş yapın')
-      }
-
       const addressRecord = await saveUserAddress({
-        customerId,
         title: addressName,
         district,
         neighborhood,

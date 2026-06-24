@@ -76,7 +76,7 @@ export default function RestoranlarPage() {
     setSelectedAddress(address || '')
 
     // Müşteri koordinatlarını al
-    fetchCustomerLocation(customerId)
+    fetchCustomerLocation()
     fetchRestaurants()
 
     // 30 saniyelik polling - restoran durumlarını güncelle
@@ -104,9 +104,9 @@ export default function RestoranlarPage() {
     }
   }, [showMenu])
 
-  const fetchCustomerLocation = async (customerId: string) => {
+  const fetchCustomerLocation = async () => {
     try {
-      const data = await fetchUserAddressCoordinates(customerId)
+      const data = await fetchUserAddressCoordinates()
 
       if (data?.latitude && data?.longitude) {
         setCustomerLat(data.latitude)

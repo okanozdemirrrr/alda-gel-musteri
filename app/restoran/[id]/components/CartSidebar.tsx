@@ -165,7 +165,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
       }
 
       // Müşterinin koordinatlarını al
-      const addressData = await fetchUserAddressCoordinates(customerId)
+      const addressData = await fetchUserAddressCoordinates()
 
       const customerLat = addressData?.latitude
       const customerLng = addressData?.longitude

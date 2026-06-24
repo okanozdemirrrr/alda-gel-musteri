@@ -85,7 +85,9 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
       localStorage.setItem('customer_id', customerData.id)
       localStorage.setItem('customer_name', customerData.full_name)
 
-      const savedAddress = await fetchUserAddressFullText(customerData.id)
+      const savedAddress = authData.user
+        ? await fetchUserAddressFullText(authData.user.id)
+        : null
       if (savedAddress) {
         localStorage.setItem('customer_address', savedAddress)
       }
@@ -147,11 +149,11 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
         throw customerError
       }
 
-      if (address.trim()) {
+      if (address.trim() && authData.user?.id) {
         const { error: addressError } = await supabase
           .from('user_addresses')
           .insert([{
-            customer_id: customerData.id,
+            user_id: authData.user.id,
             title: 'Ev',
             district: '',
             neighborhood: '',

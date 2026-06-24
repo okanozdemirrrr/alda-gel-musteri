@@ -13,7 +13,7 @@ export interface DeliveryAddressInput {
 }
 
 export interface UserAddressRecord {
-  customer_id: string
+  user_id: string
   title?: string
   district: string
   neighborhood: string
@@ -27,7 +27,7 @@ export interface UserAddressRecord {
 }
 
 export function buildUserAddressRecord(input: {
-  customerId: string
+  userId: string
   title: string
   district: string
   neighborhood: string
@@ -46,7 +46,7 @@ export function buildUserAddressRecord(input: {
   const directions = input.directions.trim() || null
 
   return {
-    customer_id: input.customerId,
+    user_id: input.userId,
     title: input.title.trim() || 'Ev',
     district,
     neighborhood,

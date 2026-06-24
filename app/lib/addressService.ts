@@ -1,11 +1,20 @@
 import { supabase } from '@/app/lib/supabase'
 import { buildUserAddressRecord, type UserAddressRecord } from '@/app/lib/formatDeliveryAddress'
 
-export async function fetchUserAddressCoordinates(customerId: string) {
+export async function resolveAuthUserId(): Promise<string> {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error) throw error
+  if (!user) throw new Error('Lütfen önce giriş yapın')
+  return user.id
+}
+
+export async function fetchUserAddressCoordinates(userId?: string) {
+  const resolvedUserId = userId ?? await resolveAuthUserId()
+
   const { data, error } = await supabase
     .from('user_addresses')
     .select('latitude, longitude')
-    .eq('customer_id', customerId)
+    .eq('user_id', resolvedUserId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -14,11 +23,13 @@ export async function fetchUserAddressCoordinates(customerId: string) {
   return data
 }
 
-export async function fetchUserAddressFullText(customerId: string) {
+export async function fetchUserAddressFullText(userId?: string) {
+  const resolvedUserId = userId ?? await resolveAuthUserId()
+
   const { data, error } = await supabase
     .from('user_addresses')
     .select('full_address')
-    .eq('customer_id', customerId)
+    .eq('user_id', resolvedUserId)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -28,7 +39,6 @@ export async function fetchUserAddressFullText(customerId: string) {
 }
 
 export async function saveUserAddress(input: {
-  customerId: string
   title: string
   district: string
   neighborhood: string
@@ -39,12 +49,13 @@ export async function saveUserAddress(input: {
   latitude: number
   longitude: number
 }): Promise<UserAddressRecord> {
-  const addressRecord = buildUserAddressRecord(input)
+  const userId = await resolveAuthUserId()
+  const addressRecord = buildUserAddressRecord({ userId, ...input })
 
   const { data: existingAddresses, error: fetchError } = await supabase
     .from('user_addresses')
     .select('id')
-    .eq('customer_id', input.customerId)
+    .eq('user_id', userId)
     .order('created_at', { ascending: false })
     .limit(1)
 
