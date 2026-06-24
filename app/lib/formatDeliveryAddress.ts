@@ -18,7 +18,6 @@ export interface UserAddressRecord {
   district: string
   neighborhood: string
   street: string
-  building_no: string
   floor: string
   directions: string | null
   full_address: string
@@ -51,7 +50,6 @@ export function buildUserAddressRecord(input: {
     district,
     neighborhood,
     street,
-    building_no,
     floor,
     directions,
     full_address: formatDeliveryAddress({

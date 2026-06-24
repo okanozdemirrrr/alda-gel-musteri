@@ -158,7 +158,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
             district: '',
             neighborhood: '',
             street: '',
-            building_no: '',
             floor: '',
             directions: null,
             full_address: address.trim(),
