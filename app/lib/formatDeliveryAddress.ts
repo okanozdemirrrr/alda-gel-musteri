@@ -12,14 +12,10 @@ export interface DeliveryAddressInput {
   notes?: string | null
 }
 
+// Sadece user_addresses tablosunda kesinlikle var olan sütunlar
 export interface UserAddressRecord {
   user_id: string
-  title?: string
-  district: string
-  neighborhood: string
-  street: string
-  floor: string
-  directions: string | null
+  title: string
   full_address: string
   latitude: number
   longitude: number
@@ -37,28 +33,16 @@ export function buildUserAddressRecord(input: {
   latitude: number
   longitude: number
 }): UserAddressRecord {
-  const district = input.district.trim()
-  const neighborhood = input.neighborhood.trim()
-  const street = input.street.trim()
-  const building_no = input.buildingNo.trim()
-  const floor = input.floor.trim()
-  const directions = input.directions.trim() || null
-
   return {
     user_id: input.userId,
     title: input.title.trim() || 'Ev',
-    district,
-    neighborhood,
-    street,
-    floor,
-    directions,
     full_address: formatDeliveryAddress({
-      district,
-      neighborhood,
-      street,
-      floor,
-      building_no,
-      directions,
+      district: input.district,
+      neighborhood: input.neighborhood,
+      street: input.street,
+      floor: input.floor,
+      building_no: input.buildingNo,
+      directions: input.directions,
     }),
     latitude: input.latitude,
     longitude: input.longitude,

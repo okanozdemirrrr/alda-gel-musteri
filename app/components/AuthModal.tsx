@@ -155,11 +155,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           .insert([{
             user_id: authData.user.id,
             title: 'Ev',
-            district: '',
-            neighborhood: '',
-            street: '',
-            floor: '',
-            directions: null,
             full_address: address.trim(),
             latitude: 41.492892,
             longitude: 36.081592,
