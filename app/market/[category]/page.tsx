@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 
@@ -34,23 +34,20 @@ const categoryNames: { [key: string]: { name: string; icon: string } } = {
   dondurulmus: { name: 'Dondurulmuş Ürünler', icon: '🧊' }
 }
 
-// Dynamic route - static export için
-export const dynamic = 'force-static'
-export const dynamicParams = true
-
-export default function CategoryPage({ params }: { params: Promise<{ category: string }> }) {
-  const resolvedParams = use(params)
+export default function CategoryPage() {
+  const params = useParams()
+  const category = params.category as string
   const router = useRouter()
   const [cart, setCart] = useState<{ [key: string]: number }>({})
   const [products, setProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
-  const categoryInfo = categoryNames[resolvedParams.category]
+  const categoryInfo = categoryNames[category]
 
   useEffect(() => {
     fetchProducts()
     setupRealtime()
-  }, [resolvedParams.category])
+  }, [category])
 
   const fetchProducts = async () => {
     setIsLoading(true)
@@ -58,7 +55,7 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
       const { data, error } = await supabase
         .from('market_products')
         .select('*')
-        .eq('category', resolvedParams.category)
+        .eq('category', category)
         .eq('stock_status', 'active')
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
@@ -74,14 +71,14 @@ export default function CategoryPage({ params }: { params: Promise<{ category: s
 
   const setupRealtime = () => {
     const channel = supabase
-      .channel(`customer-market-${resolvedParams.category}`)
+      .channel(`customer-market-${category}`)
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'market_products',
-          filter: `category=eq.${resolvedParams.category}`
+          filter: `category=eq.${category}`
         },
         () => {
           fetchProducts()

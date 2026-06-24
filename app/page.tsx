@@ -167,8 +167,8 @@ export default function MusteriAnaSayfa() {
 
       <div className="min-h-screen bg-stone-50 overflow-x-hidden">
         {/* ═══ HEADER ═══ */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-50 safe-area-header">
+          <div className="max-w-6xl mx-auto px-4 min-h-16 py-2 flex items-center justify-between">
             {/* Sol: Logo + Adres */}
             <div className="flex items-center gap-3 min-w-0">
               <button
@@ -201,7 +201,7 @@ export default function MusteriAnaSayfa() {
               {!isLoggedIn ? (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="px-5 py-2 text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 rounded-full transition-all shadow-md hover:shadow-lg"
+                  className="px-5 py-2.5 min-h-[44px] text-sm font-bold text-white bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 rounded-full transition-all shadow-md hover:shadow-lg"
                 >
                   Giriş Yap
                 </button>
@@ -216,7 +216,7 @@ export default function MusteriAnaSayfa() {
                   <div className="relative" ref={menuRef}>
                     <button
                       onClick={() => setShowMenu(!showMenu)}
-                      className="p-2 text-stone-500 hover:text-amber-600 transition-colors rounded-full hover:bg-stone-100"
+                      className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-stone-500 hover:text-amber-600 transition-colors rounded-full hover:bg-stone-100"
                     >
                       <Menu size={20} />
                     </button>
@@ -272,10 +272,10 @@ export default function MusteriAnaSayfa() {
 
         {/* ═══ MOBİL ADRES BAR ═══ */}
         {isLoggedIn && (
-          <div className="sm:hidden bg-white border-b border-stone-100 px-4 py-2">
+          <div className="sm:hidden bg-white border-b border-stone-100 px-4 py-2.5">
             <button
               onClick={handleAddressClick}
-              className="flex items-center gap-2 w-full text-left"
+              className="flex items-center gap-2 w-full text-left min-h-[44px] py-1"
             >
               <MapPin size={16} className="text-amber-600 flex-shrink-0" />
               <span className="text-sm text-stone-600 truncate">

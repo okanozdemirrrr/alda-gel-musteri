@@ -3,26 +3,47 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
-import { ArrowLeft, Package, Clock, CheckCircle, XCircle, Star } from 'lucide-react'
+import { ArrowLeft, Package, Clock, CheckCircle, XCircle, Star, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import OrderDetailModal from '@/app/components/OrderDetailModal'
+import { normalizeOrderItems } from '@/app/lib/orderItems'
+import type { OrderDetail } from '@/types/order'
 
 const ACTIVE_STATUSES = ['new_order', 'getting_ready', 'ready', 'assigned', 'picking_up', 'on_the_way']
 const PAST_STATUSES = ['delivered', 'cancelled']
 
-interface Order {
-  id: number
-  order_number: string
+interface Order extends OrderDetail {
   restaurant_id: string
-  restaurant_name?: string
-  amount: number
-  status: string
-  payment_method: 'cash' | 'card'
-  created_at: string
   delivered_at: string | null
-  items: any[]
   has_review?: boolean
   review_reply?: string | null
   review_replied_at?: string | null
+}
+
+function mapPackageToOrder(raw: any, restaurantName?: string): Order {
+  return {
+    id: raw.id,
+    order_number: raw.order_number || `#${raw.id}`,
+    restaurant_id: raw.restaurant_id || '',
+    restaurant_name: restaurantName,
+    amount: Number(raw.amount || 0),
+    subtotal: raw.subtotal != null ? Number(raw.subtotal) : null,
+    delivery_fee: raw.delivery_fee != null ? Number(raw.delivery_fee) : null,
+    delivery_address: raw.delivery_address || '',
+    customer_name: raw.customer_name || 'Müşteri',
+    customer_phone: raw.customer_phone,
+    payment_method: raw.payment_method,
+    status: raw.status || 'new_order',
+    created_at: raw.created_at,
+    items: normalizeOrderItems(raw.items),
+    delivered_at: raw.delivered_at ?? null,
+  }
+}
+
+function getJoinedRestaurantName(restaurants: { name?: string } | { name?: string }[] | null | undefined): string | undefined {
+  if (!restaurants) return undefined
+  if (Array.isArray(restaurants)) return restaurants[0]?.name
+  return restaurants.name
 }
 
 export default function SiparislerimPage() {
@@ -34,6 +55,7 @@ export default function SiparislerimPage() {
   const [ratingDelivery, setRatingDelivery] = useState(0)
   const [comment, setComment] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [detailOrder, setDetailOrder] = useState<Order | null>(null)
   const ordersRef = useRef<Order[]>([])
 
   // orders değiştiğinde ref'i güncelle (realtime callback'te güncel veriye erişim için)
@@ -58,7 +80,20 @@ export default function SiparislerimPage() {
       const { data: ordersData, error: ordersError } = await supabase
         .from('packages')
         .select(`
-          *,
+          id,
+          order_number,
+          restaurant_id,
+          amount,
+          subtotal,
+          delivery_fee,
+          status,
+          payment_method,
+          created_at,
+          delivered_at,
+          delivery_address,
+          customer_name,
+          customer_phone,
+          items,
           restaurants!restaurant_id (
             name
           )
@@ -78,11 +113,10 @@ export default function SiparislerimPage() {
             .maybeSingle()
 
           return {
-            ...order,
-            restaurant_name: order.restaurants?.name,
+            ...mapPackageToOrder(order, getJoinedRestaurantName(order.restaurants)),
             has_review: !!reviewData,
             review_reply: reviewData?.reply,
-            review_replied_at: reviewData?.replied_at
+            review_replied_at: reviewData?.replied_at,
           }
         })
       )
@@ -141,19 +175,14 @@ export default function SiparislerimPage() {
                 // Güncel sipariş verisini ref'ten bul (restaurant_name için)
                 const existing = ordersRef.current.find(o => o.id === updated.id)
                 setReviewingOrder({
-                  id: updated.id,
-                  order_number: updated.order_number,
-                  restaurant_id: updated.restaurant_id,
-                  restaurant_name: existing?.restaurant_name,
-                  amount: updated.amount,
-                  status: updated.status,
-                  payment_method: updated.payment_method,
-                  created_at: updated.created_at,
-                  delivered_at: updated.delivered_at,
-                  items: existing?.items || updated.items || [],
+                  ...mapPackageToOrder(
+                    { ...updated, restaurant_id: existing?.restaurant_id || updated.restaurant_id },
+                    existing?.restaurant_name
+                  ),
+                  items: existing?.items || normalizeOrderItems(updated.items),
                   has_review: false,
                   review_reply: null,
-                  review_replied_at: null
+                  review_replied_at: null,
                 })
               }
             }
@@ -271,7 +300,11 @@ export default function SiparislerimPage() {
     return (
       <div
         key={order.id}
-        className="bg-white rounded-xl p-3 sm:p-4 border border-[#e8e8e8] hover:shadow-md transition-shadow"
+        role="button"
+        tabIndex={0}
+        onClick={() => setDetailOrder(order)}
+        onKeyDown={(e) => e.key === 'Enter' && setDetailOrder(order)}
+        className="bg-white rounded-xl p-3 sm:p-4 border border-[#e8e8e8] hover:shadow-md hover:border-[#f59e0b]/40 transition-all cursor-pointer"
       >
         {/* Header */}
         <div className="flex items-start justify-between mb-3">
@@ -293,14 +326,25 @@ export default function SiparislerimPage() {
 
         {/* Items */}
         <div className="space-y-2 mb-3">
-          {order.items?.map((item: any, idx: number) => (
-            <div key={idx} className="flex items-center justify-between text-[13px]">
-              <span className="text-[#6f6f6f]">
-                {item.quantity}x {item.product_name}
-              </span>
-              <span className="font-semibold text-[#3c4043]">
-                {(item.price * item.quantity).toFixed(2)}₺
-              </span>
+          {order.items?.map((item, idx) => (
+            <div key={idx}>
+              <div className="flex items-center justify-between text-[13px]">
+                <span className="text-[#6f6f6f]">
+                  {item.quantity}x {item.product_name}
+                </span>
+                <span className="font-semibold text-[#3c4043]">
+                  {(item.price * item.quantity).toFixed(2)}₺
+                </span>
+              </div>
+              {item.selected_options?.length > 0 && (
+                <ul className="mt-0.5 pl-1 space-y-0.5">
+                  {item.selected_options.map((opt) => (
+                    <li key={`${opt.group_id}-${opt.option_id}`} className="text-[11px] text-[#9e9e9e]">
+                      – {opt.group_name}: {opt.option_name}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           ))}
         </div>
@@ -310,6 +354,9 @@ export default function SiparislerimPage() {
           <div className="flex items-center gap-2">
             <span className="text-[12px] text-[#6f6f6f]">
               {order.payment_method === 'cash' ? '💵 Nakit' : '💳 Kart'}
+            </span>
+            <span className="text-[11px] text-[#f59e0b] font-medium flex items-center gap-0.5">
+              Detay <ChevronRight size={12} />
             </span>
           </div>
           <span className="text-[18px] font-bold text-[#f59e0b]">
@@ -321,7 +368,10 @@ export default function SiparislerimPage() {
         {canReview(order) && (
           <div className="mt-3 pt-3 border-t border-[#e8e8e8]">
             <button
-              onClick={() => setReviewingOrder(order)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setReviewingOrder(order)
+              }}
               className="w-full min-h-[44px] py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-lg font-semibold text-[13px] hover:from-orange-600 hover:to-orange-700 transition-all flex items-center justify-center gap-2"
             >
               <Star size={16} fill="white" />
@@ -433,6 +483,9 @@ export default function SiparislerimPage() {
           </div>
         )}
       </div>
+
+      {/* Sipariş Detay Modalı */}
+      <OrderDetailModal order={detailOrder} onClose={() => setDetailOrder(null)} />
 
       {/* Değerlendirme Modalı */}
       <AnimatePresence>

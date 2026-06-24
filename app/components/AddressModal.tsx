@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/app/lib/supabase'
+import { formatDeliveryAddress } from '@/app/lib/formatDeliveryAddress'
 import dynamic from 'next/dynamic'
 
-// Leaflet'i dinamik import et (SSR sorunlarını önlemek için)
 const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false })
 
 interface AddressModalProps {
@@ -21,13 +21,13 @@ interface QuickLocation {
   floor?: string
   doorNumber?: string
   notes?: string
-  isManual?: boolean // Hangarlar gibi manuel dolum gereken yerler
+  isManual?: boolean
 }
 
 const SAMSUN_QUICK_LOCATIONS: QuickLocation[] = [
-  { 
-    name: '19 Mayıs KYK Yurdu', 
-    lat: 41.5110, 
+  {
+    name: '19 Mayıs KYK Yurdu',
+    lat: 41.5110,
     lng: 36.1154,
     neighborhood: 'İstiklal',
     streetAddress: 'Denizevleri',
@@ -35,9 +35,9 @@ const SAMSUN_QUICK_LOCATIONS: QuickLocation[] = [
     doorNumber: '1',
     notes: '19 Mayıs KYK Yurdu'
   },
-  { 
-    name: 'Mühendislik Fakültesi Kampüsü', 
-    lat: 41.5098, 
+  {
+    name: 'Mühendislik Fakültesi Kampüsü',
+    lat: 41.5098,
     lng: 36.1154,
     neighborhood: 'İstiklal',
     streetAddress: 'Denizevleri',
@@ -45,11 +45,11 @@ const SAMSUN_QUICK_LOCATIONS: QuickLocation[] = [
     doorNumber: '1',
     notes: 'Mühendislik ve Sivil Havacılık Fakültesi'
   },
-  { 
-    name: 'Hangarlar Bölgesi', 
-    lat: 0,  // Kullanılmayacak
-    lng: 0,  // Kullanılmayacak
-    isManual: true // Manuel dolum gerekli, koordinat değişmez
+  {
+    name: 'Hangarlar Bölgesi',
+    lat: 0,
+    lng: 0,
+    isManual: true
   }
 ]
 
@@ -58,7 +58,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  // Form states
   const [addressName, setAddressName] = useState('Ev')
   const [selectedQuickLocation, setSelectedQuickLocation] = useState('')
   const [latitude, setLatitude] = useState(41.492892)
@@ -69,13 +68,12 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   const [floor, setFloor] = useState('')
   const [doorNumber, setDoorNumber] = useState('')
   const [notes, setNotes] = useState('')
-  const [shouldFlyToLocation, setShouldFlyToLocation] = useState(false) // FlyTo kontrolü
+  const [shouldFlyToLocation, setShouldFlyToLocation] = useState(false)
   const [autoLocating, setAutoLocating] = useState(false)
   const [locationDenied, setLocationDenied] = useState(false)
   const [manualSearch, setManualSearch] = useState('')
   const hasAutoLocated = useRef(false)
 
-  // ═══ OTOmatik KONUM BULMA (Map step'e geçince) ═══
   useEffect(() => {
     if (step === 'map' && !selectedQuickLocation && !hasAutoLocated.current) {
       hasAutoLocated.current = true
@@ -97,10 +95,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         setShouldFlyToLocation(true)
         setAutoLocating(false)
       },
-      (err) => {
-        // İzin reddedildi / GPS kapalı / zaman aşımı → sessizce fallback
+      () => {
         setAutoLocating(false)
-        // Varsayılan koordinatlarda kal, müşteri eliyle kaydırabilir
       },
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     )
@@ -122,15 +118,14 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         setLatitude(lat)
         setLongitude(lng)
         setShouldFlyToLocation(true)
-        setSelectedQuickLocation('') // Quick location seçimini temizle
+        setSelectedQuickLocation('')
         setStep('map')
         setLoading(false)
       },
-      (error) => {
+      () => {
         setLoading(false)
         setLocationDenied(true)
         setError('Konumunuz otomatik alınamadı. Lütfen adresinizi manuel olarak seçin veya arayın.')
-        // 2.5 saniye sonra otomatik olarak harita adımına geç (B Planı)
         setTimeout(() => {
           setError('')
           setSelectedQuickLocation('')
@@ -148,33 +143,25 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
 
   const handleQuickLocationSelect = (location: QuickLocation) => {
     setSelectedQuickLocation(location.name)
-    
-    // Eğer manuel dolum gerekliyse (Hangarlar), koordinatları değiştirme
+
     if (location.isManual) {
-      // Koordinatları OLDUĞU GİBİ BIRAK (kullanıcının mevcut konumu)
-      setShouldFlyToLocation(false) // FlyTo YOK
-      
-      // Form alanlarını temizle
+      setShouldFlyToLocation(false)
       setNeighborhood('')
       setStreetAddress('')
       setFloor('')
       setDoorNumber('')
       setNotes('')
-      setAddressName('Ev') // Varsayılan
+      setAddressName('Ev')
     } else {
-      // Ön tanımlı lokasyonlar için koordinatları ayarla ve FlyTo aktif et
       setLatitude(location.lat)
       setLongitude(location.lng)
-      setShouldFlyToLocation(true) // JET GİBİ UÇ! 🚀
-      
-      // Ön tanımlı verileri doldur
+      setShouldFlyToLocation(true)
       setNeighborhood(location.neighborhood || '')
       setStreetAddress(location.streetAddress || '')
       setFloor(location.floor || '')
       setDoorNumber(location.doorNumber || '')
       setNotes(location.notes || '')
-      
-      // Adres ismini akıllıca ayarla
+
       if (location.name.includes('KYK') || location.name.includes('Yurt')) {
         setAddressName('Yurt')
       } else if (location.name.includes('Fakülte') || location.name.includes('Kampüs')) {
@@ -183,7 +170,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         setAddressName('Ev')
       }
     }
-    
+
     setStep('map')
   }
 
@@ -203,28 +190,35 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         throw new Error('Lütfen önce giriş yapın')
       }
 
-      const fullAddress = `${addressName} - ${neighborhood}, ${streetAddress}, Kat: ${floor}, No: ${doorNumber}`
+      const trimmedDirections = notes.trim() || null
 
-      // Adresi veritabanına kaydet (yeni yapı ile)
+      const fullAddress = formatDeliveryAddress({
+        district,
+        neighborhood,
+        street: streetAddress,
+        floor,
+        building_no: doorNumber,
+        directions: trimmedDirections,
+      })
+
       const { error: updateError } = await supabase
         .from('customers')
         .update({
           address: fullAddress,
-          district: district,
-          neighborhood: neighborhood,
-          street_address: streetAddress,
-          floor: floor,
-          door_number: doorNumber,
-          latitude: latitude,
-          longitude: longitude
+          district: district.trim(),
+          neighborhood: neighborhood.trim(),
+          street_address: streetAddress.trim(),
+          floor: floor.trim(),
+          door_number: doorNumber.trim(),
+          directions: trimmedDirections,
+          latitude,
+          longitude,
         })
         .eq('id', customerId)
 
       if (updateError) throw updateError
 
-      // LocalStorage'a kaydet
       localStorage.setItem('customer_address', fullAddress)
-
       onAddressSelect(fullAddress)
     } catch (err: any) {
       setError(err.message || 'Adres kaydedilemedi')
@@ -234,9 +228,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
-      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4 px-safe">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden pb-safe">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8] sticky top-0 bg-white z-10">
           <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
             {step === 'quick' && 'Adres Seç'}
@@ -251,9 +244,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-4 sm:p-6">
-          {/* Error Message */}
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -267,7 +258,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
             </div>
           )}
 
-          {/* Loading Overlay */}
           {loading && (
             <div className="mb-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <div className="flex items-center gap-3">
@@ -277,14 +267,12 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
             </div>
           )}
 
-          {/* Step 1: Quick Location Selection */}
           {step === 'quick' && (
             <div className="space-y-3">
               <p className="text-[14px] text-[#6f6f6f] mb-4">
                 Samsun 19 Mayıs'ta hızlı adres seçimi yapın
               </p>
 
-              {/* Manuel Adres Arama */}
               <div className="relative">
                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e9e9e]" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8"/>
@@ -300,7 +288,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 />
               </div>
 
-              {/* Konum reddedildi uyarısı + Manuel devam butonu */}
               {locationDenied && (
                 <div className="bg-amber-50 border border-amber-300 rounded-xl p-4">
                   <div className="flex items-start gap-3">
@@ -327,7 +314,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 </div>
               )}
 
-              {/* Arama sonuçları — quick locations'ı filtrele */}
               {SAMSUN_QUICK_LOCATIONS
                 .filter(location => !manualSearch || location.name.toLowerCase().includes(manualSearch.toLowerCase()))
                 .map((location) => (
@@ -350,8 +336,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
 
               <button
                 onClick={() => {
-                  setSelectedQuickLocation('') // Seçimi temizle
-                  setShouldFlyToLocation(false) // FlyTo YOK, kullanıcı kendisi seçecek
+                  setSelectedQuickLocation('')
+                  setShouldFlyToLocation(false)
                   setStep('map')
                 }}
                 className="w-full p-4 bg-[#f7f7f7] border border-[#e8e8e8] rounded-lg text-center hover:bg-[#e8e8e8] transition-colors min-h-[48px]"
@@ -380,10 +366,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
             </div>
           )}
 
-          {/* Step 2: Map Selection */}
           {step === 'map' && (
             <div className="space-y-4 relative">
-              {/* Otomatik Konum Arama Spinnerı */}
               {autoLocating && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-center gap-3">
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-amber-600 flex-shrink-0"></div>
@@ -393,7 +377,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 </div>
               )}
 
-              {/* Bilgilendirme Mesajı */}
               {selectedQuickLocation && (
                 <div className="bg-[#fef3c7] border border-[#f59e0b] rounded-lg p-4">
                   <div className="flex items-start gap-3">
@@ -426,7 +409,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                   onLocationChange={(lat, lng) => {
                     setLatitude(lat)
                     setLongitude(lng)
-                    setShouldFlyToLocation(false) // Kullanıcı manuel hareket ettirdi, flyTo'yu kapat
+                    setShouldFlyToLocation(false)
                   }}
                   shouldFlyTo={shouldFlyToLocation}
                 />
@@ -458,10 +441,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
             </div>
           )}
 
-          {/* Step 3: Address Details */}
           {step === 'details' && (
             <form onSubmit={(e) => { e.preventDefault(); handleSaveAddress(); }} className="space-y-4">
-              {/* Ön Doldurma Bilgilendirmesi */}
               {selectedQuickLocation && !SAMSUN_QUICK_LOCATIONS.find(loc => loc.name === selectedQuickLocation)?.isManual && (
                 <div className="bg-[#e8f5e9] border border-[#4caf50] rounded-lg p-4">
                   <div className="flex items-start gap-3">
@@ -485,13 +466,13 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
                   Adres İsmi
                 </label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {['Ev', 'İş', 'Yurt', 'Diğer'].map((name) => (
                     <button
                       key={name}
                       type="button"
                       onClick={() => setAddressName(name)}
-                      className={`px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors ${
+                      className={`px-4 py-2.5 min-h-[44px] rounded-lg text-[13px] font-semibold transition-colors ${
                         addressName === name
                           ? 'bg-[#f59e0b] text-white'
                           : 'bg-[#f7f7f7] text-[#3c4043] hover:bg-[#e8e8e8]'
@@ -518,7 +499,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 />
               </div>
 
-              {/* Mahalle - Serbest Metin */}
               <div>
                 <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
                   Mahalle
@@ -534,7 +514,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 />
               </div>
 
-              {/* Cadde/Sokak - Serbest Metin */}
               <div>
                 <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
                   Cadde / Sokak
@@ -611,7 +590,7 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 min-h-[48px] bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
+                  className="flex-1 min-h-[48px] py-3 bg-[#f59e0b] text-white rounded-lg font-semibold text-[14px] hover:bg-[#d97706] transition-colors disabled:opacity-50"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                 >
                   {loading ? 'Kaydediliyor...' : 'Adresimi Kaydet'}
@@ -624,4 +603,3 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
     </div>
   )
 }
-

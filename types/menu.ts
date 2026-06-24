@@ -6,8 +6,9 @@ export interface OptionItem {
 
 export interface OptionGroup {
   id: string
-  name: string            // "Boyut", "İçerik Seçimi", "Sos"
-  required: boolean       // Zorunlu mu?
+  name: string            // product_option_groups.title
+  type: 'radio' | 'checkbox'
+  required: boolean       // product_option_groups.necessity
   min_select: number      // Min seçim (zorunluysa genelde 1)
   max_select: number      // Max seçim (1 = radio, >1 = checkbox)
   options: OptionItem[]

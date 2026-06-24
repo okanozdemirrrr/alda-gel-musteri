@@ -241,9 +241,9 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
         onClick={onClose}
       />
       
-      <div className="relative bg-white w-full sm:max-w-[450px] h-full overflow-y-auto">
+      <div className="relative bg-white w-full sm:max-w-[450px] h-full overflow-y-auto overflow-x-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-[#e8e8e8] p-4 sm:p-6 z-10">
+        <div className="sticky top-0 bg-white border-b border-[#e8e8e8] p-4 sm:p-6 z-10 safe-area-header">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
               Sepetim
@@ -353,7 +353,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
 
         {/* Footer - Özet ve Ödeme */}
         {cart.length > 0 && (
-          <div className="sticky bottom-0 bg-white border-t border-[#e8e8e8] p-4 sm:p-6">
+          <div className="sticky bottom-0 bg-white border-t border-[#e8e8e8] p-4 sm:p-6 safe-area-footer">
             {/* Minimum Tutar Uyarısı */}
             {!canCheckout && (
               <div className="mb-4 p-3 bg-[#fef3c7] border border-[#f59e0b] rounded-lg">
@@ -412,7 +412,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="bg-white w-full sm:max-w-[450px] rounded-t-3xl p-4 pb-6 sm:p-6 sm:pb-8"
+                className="bg-white w-full sm:max-w-[450px] rounded-t-3xl p-4 sm:p-6 safe-area-footer"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6" />

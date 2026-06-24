@@ -63,7 +63,7 @@ export default function RestoranlarPage() {
     const customerId = localStorage.getItem('customer_id')
     const name = localStorage.getItem('customer_name')
     const address = localStorage.getItem('customer_address')
-    
+
     if (!customerId) {
       router.push('/musteri')
       return

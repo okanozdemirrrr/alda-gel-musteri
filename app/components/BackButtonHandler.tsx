@@ -3,28 +3,29 @@
 import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { App } from '@capacitor/app'
+import { Capacitor } from '@capacitor/core'
 
 export default function BackButtonHandler() {
   const router = useRouter()
   const pathname = usePathname()
 
   useEffect(() => {
-    let listenerHandle: any = null
+    if (!Capacitor.isNativePlatform()) {
+      return
+    }
 
-    // Android geri tuşu için listener
+    let listenerHandle: { remove: () => void } | null = null
+
     const setupListener = async () => {
       listenerHandle = await App.addListener('backButton', ({ canGoBack }) => {
-        // Ana sayfadaysa uygulamadan çık
         if (pathname === '/' || pathname === '/musteri') {
           App.exitApp()
           return
         }
 
-        // Diğer sayfalarda geri git
         if (canGoBack) {
           router.back()
         } else {
-          // Geri gidecek sayfa yoksa ana sayfaya yönlendir
           router.push('/')
         }
       })
@@ -32,13 +33,10 @@ export default function BackButtonHandler() {
 
     setupListener()
 
-    // Cleanup
     return () => {
-      if (listenerHandle) {
-        listenerHandle.remove()
-      }
+      listenerHandle?.remove()
     }
   }, [pathname, router])
 
-  return null // Bu component UI render etmez
+  return null
 }

@@ -1,7 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -176,10 +174,10 @@ export default function SepetPage() {
   // ─── BOŞ SEPET ──────────────────────────────────────────────
   if (cart.length === 0 && !showCheckoutSuccess) {
     return (
-      <div className="min-h-screen bg-stone-50">
-        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-3">
-            <button onClick={() => router.back()} className="p-2 hover:bg-stone-100 rounded-full transition-colors">
+      <div className="min-h-screen bg-stone-50 overflow-x-hidden">
+        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40 safe-area-header">
+          <div className="max-w-4xl mx-auto px-4 min-h-16 py-2 flex items-center gap-3">
+            <button onClick={() => router.back()} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-stone-100 rounded-full transition-colors">
               <ArrowLeft size={22} className="text-stone-600" />
             </button>
             <h1 className="text-xl font-bold text-stone-800">Sepetim</h1>
@@ -201,7 +199,7 @@ export default function SepetPage() {
             </p>
             <button
               onClick={() => router.push('/restoranlar')}
-              className="px-8 py-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
+              className="px-8 py-3 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold rounded-xl shadow-md hover:shadow-lg transition-all"
             >
               Restoranlara Göz At
             </button>
@@ -240,11 +238,11 @@ export default function SepetPage() {
         )}
       </AnimatePresence>
 
-      <div className="min-h-screen bg-stone-50 pb-44">
+      <div className="min-h-screen bg-stone-50 pb-44 overflow-x-hidden">
         {/* Header */}
-        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40">
-          <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-3">
-            <button onClick={() => router.back()} className="p-2 hover:bg-stone-100 rounded-full transition-colors">
+        <header className="bg-white/90 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-40 safe-area-header">
+          <div className="max-w-4xl mx-auto px-4 min-h-16 py-2 flex items-center gap-3">
+            <button onClick={() => router.back()} className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-stone-100 rounded-full transition-colors">
               <ArrowLeft size={22} className="text-stone-600" />
             </button>
             <div>
@@ -257,7 +255,7 @@ export default function SepetPage() {
         </header>
 
         {/* Ürün Listesi */}
-        <main className="max-w-4xl mx-auto px-4 py-6">
+        <main className="max-w-4xl mx-auto px-4 py-6 min-w-0">
           <div className="space-y-3 mb-6">
             {cart.map((item) => (
               <motion.div
@@ -305,7 +303,7 @@ export default function SepetPage() {
                 <div className="flex flex-col items-end gap-2 flex-shrink-0">
                   <button
                     onClick={() => removeFromCart(item.product.id)}
-                    className="text-stone-400 hover:text-red-500 p-1 transition-colors"
+                    className="text-stone-400 hover:text-red-500 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center transition-colors"
                   >
                     <Trash2 size={18} />
                   </button>
@@ -313,7 +311,7 @@ export default function SepetPage() {
                   <div className="flex items-center gap-1.5 bg-stone-100 rounded-xl p-1">
                     <button
                       onClick={() => handleQuantityChange(item.product.id, -1)}
-                      className="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-stone-50 transition-colors shadow-sm"
+                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center hover:bg-stone-50 transition-colors shadow-sm"
                     >
                       <Minus size={14} />
                     </button>
@@ -322,7 +320,7 @@ export default function SepetPage() {
                     </span>
                     <button
                       onClick={() => handleQuantityChange(item.product.id, 1)}
-                      className="w-8 h-8 bg-white rounded-lg flex items-center justify-center hover:bg-stone-50 transition-colors shadow-sm"
+                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center hover:bg-stone-50 transition-colors shadow-sm"
                     >
                       <Plus size={14} />
                     </button>
@@ -368,7 +366,7 @@ export default function SepetPage() {
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setPaymentMethod('cash')}
-                  className={`border-2 rounded-xl p-3 text-center transition-all ${
+                  className={`border-2 rounded-xl p-3 min-h-[72px] text-center transition-all ${
                     paymentMethod === 'cash'
                       ? 'border-amber-500 bg-amber-50'
                       : 'border-stone-200 hover:border-stone-300'
@@ -379,7 +377,7 @@ export default function SepetPage() {
                 </button>
                 <button
                   onClick={() => setPaymentMethod('card')}
-                  className={`border-2 rounded-xl p-3 text-center transition-all ${
+                  className={`border-2 rounded-xl p-3 min-h-[72px] text-center transition-all ${
                     paymentMethod === 'card'
                       ? 'border-amber-500 bg-amber-50'
                       : 'border-stone-200 hover:border-stone-300'
@@ -401,8 +399,8 @@ export default function SepetPage() {
         </main>
 
         {/* Alt Checkout Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50">
-          <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-footer">
+          <div className="max-w-4xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4">
             <button
               onClick={handleCheckout}
               disabled={cart.length === 0 || isProcessing}
