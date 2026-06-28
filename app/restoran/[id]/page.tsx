@@ -10,6 +10,7 @@ import CartSidebar from './components/CartSidebar'
 import { productHasOptionGroups } from '@/app/lib/productOptions'
 import AddressModal from '../../components/AddressModal'
 import ReviewsSection from './components/ReviewsSection'
+import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
 import { Clock, Wallet } from 'lucide-react'
 import { isMobile } from '@/app/lib/platform'
 import { RestaurantMenuSkeleton } from '@/app/components/Skeleton'
@@ -48,6 +49,7 @@ export default function RestaurantMenuPage() {
   const [activeCategoryId, setActiveCategoryId] = useState<string>('')
   const [quickAddCheckingId, setQuickAddCheckingId] = useState<string | null>(null)
   const [addedToast, setAddedToast] = useState<string | null>(null)
+  const [showGuestPrompt, setShowGuestPrompt] = useState(false)
   const scrollSpyRef = useRef(true)
 
   useEffect(() => {
@@ -155,6 +157,11 @@ export default function RestaurantMenuPage() {
     if (restaurant?.is_active === false || product.is_available === false) return
     if (quickAddCheckingId) return
 
+    if (typeof window !== 'undefined' && !localStorage.getItem('customer_id')) {
+      setShowGuestPrompt(true)
+      return
+    }
+
     setQuickAddCheckingId(product.id)
     try {
       const hasOptions = await productHasOptionGroups(product.id, product.option_groups)
@@ -201,6 +208,9 @@ export default function RestaurantMenuPage() {
 
   return (
     <div className="app-page bg-[#f7f7f7] pb-32">
+      {showGuestPrompt && (
+        <GuestLoginPrompt onClose={() => setShowGuestPrompt(false)} />
+      )}
       {addedToast && (
         <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] pointer-events-none">
           <div className="flex items-center gap-2.5 bg-[#1f2937] text-white text-[13px] font-medium px-4 py-3 rounded-xl shadow-2xl">
@@ -275,14 +285,15 @@ export default function RestaurantMenuPage() {
         </button>
         
         {/* Logo Overlap */}
-        <div className={`absolute ${isMobile() ? '-bottom-8 left-3' : '-bottom-12 left-6'}`}>
-          <div className={`${isMobile() ? 'w-16 h-16' : 'w-24 h-24'} bg-white rounded-2xl shadow-2xl border-4 border-white overflow-hidden gpu-layer`}>
+        <div className={`absolute ${isMobile() ? '-bottom-8 left-4' : '-bottom-12 left-6'}`}>
+          <div className={`${isMobile() ? 'w-16 h-16' : 'w-24 h-24'} bg-white rounded-full shadow-lg border-4 border-white overflow-hidden gpu-layer`}>
             <StableImage
               src={restaurant.logo_url}
               alt={restaurant.name}
               fixedWidth={isMobile() ? 64 : 96}
               fixedHeight={isMobile() ? 64 : 96}
               containerClassName="w-full h-full"
+              objectFit="cover"
               fallback={
                 <div className={`w-full h-full bg-gradient-to-br from-[#f59e0b] to-[#d97706] flex items-center justify-center text-white ${isMobile() ? 'text-xl' : 'text-3xl'} font-bold`}>
                   {restaurant.name.charAt(0)}
@@ -466,13 +477,14 @@ export default function RestaurantMenuPage() {
                           disabled ? 'opacity-60' : 'hover:border-[#f59e0b] cursor-pointer group'
                         }`}
                       >
-                        <div className="relative flex-shrink-0">
+                        <div className="relative flex-shrink-0 w-[88px] h-[88px] rounded-xl overflow-hidden bg-gray-100">
                           <StableImage
                             src={product.image_url}
                             alt={product.name}
-                            fixedWidth={96}
-                            fixedHeight={96}
-                            containerClassName="rounded-xl"
+                            fixedWidth={88}
+                            fixedHeight={88}
+                            containerClassName="w-full h-full"
+                            objectFit="cover"
                             fallback={<span className="text-2xl">🍽️</span>}
                           />
                           {soldOut && (
@@ -516,15 +528,15 @@ export default function RestaurantMenuPage() {
                       <div
                         key={product.id}
                         onClick={() => !disabled && handleProductClick(product)}
-                        className={`bg-white border border-[#e8e8e8] rounded-lg overflow-hidden transition-all relative ${
+                        className={`bg-white border border-[#e8e8e8] rounded-xl overflow-hidden transition-all relative ${
                           disabled ? 'opacity-60' : 'hover:shadow-lg hover:border-[#f59e0b] cursor-pointer group'
                         }`}
                       >
-                        <div className="relative">
+                        <div className="relative overflow-hidden bg-gray-100">
                           <StableImage
                             src={product.image_url}
                             alt={product.name}
-                            fixedHeight={160}
+                            aspectRatio="4/3"
                             containerClassName="w-full"
                             fallback={<span className="text-4xl">🍽️</span>}
                           />

@@ -18,45 +18,11 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
-  // Register form
+  // Register form — sadece Ad, Soyad, E-posta, Şifre
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [phoneError, setPhoneError] = useState('')
-  const [address, setAddress] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
-
-  const validatePhone = (phoneNum: string): boolean => {
-    if (!/^\d+$/.test(phoneNum)) {
-      setPhoneError('Sadece rakam girebilirsiniz')
-      return false
-    }
-    if (phoneNum.startsWith('0')) {
-      setPhoneError('Numarayı başında 0 olmadan yazın')
-      return false
-    }
-    if (phoneNum.length !== 10) {
-      setPhoneError('Telefon numarası 10 hane olmalıdır')
-      return false
-    }
-    if (!phoneNum.startsWith('5')) {
-      setPhoneError('Cep telefonu 5 ile başlamalıdır')
-      return false
-    }
-    setPhoneError('')
-    return true
-  }
-
-  const handlePhoneChange = (value: string) => {
-    const cleaned = value.replace(/\D/g, '')
-    setPhone(cleaned)
-    if (cleaned.length > 0) {
-      validatePhone(cleaned)
-    } else {
-      setPhoneError('')
-    }
-  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +30,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
     setError('')
 
     try {
-      // Supabase Auth ile giriş
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: loginEmail.trim(),
         password: loginPassword
@@ -72,7 +37,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
 
       if (authError) throw authError
 
-      // Customers tablosundan bilgileri çek
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .select('*')
@@ -81,9 +45,11 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
 
       if (customerError) throw customerError
 
-      // LocalStorage'a kaydet
       localStorage.setItem('customer_id', customerData.id)
       localStorage.setItem('customer_name', customerData.full_name)
+      if (customerData.phone) {
+        localStorage.setItem('customer_phone', customerData.phone)
+      }
 
       const savedAddress = authData.user
         ? await fetchUserAddressFullText(authData.user.id)
@@ -106,28 +72,18 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
     setError('')
 
     try {
-      // Telefon validasyonu
-      if (!validatePhone(phone)) {
-        setLoading(false)
-        return
-      }
-
       const fullName = `${firstName.trim()} ${lastName.trim()}`
 
-      // 1. Supabase Auth'a kayıt
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: registerEmail.trim(),
         password: registerPassword,
         options: {
-          data: {
-            full_name: fullName
-          }
+          data: { full_name: fullName }
         }
       })
 
       if (authError) throw authError
 
-      // 2. Customers tablosuna kayıt (Alda-Gel uygulamasından kayıt = app_user)
       const { data: customerData, error: customerError } = await supabase
         .from('customers')
         .insert([{
@@ -135,41 +91,15 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           surname: lastName.trim(),
           full_name: fullName,
           email: registerEmail.trim(),
-          phone: phone,
           registration_source: 'app_user'
         }])
         .select()
         .single()
 
-      if (customerError) {
-        // Telefon numarası zaten kayıtlı hatası
-        if (customerError.code === '23505' && customerError.message.includes('phone')) {
-          throw new Error('Bu telefon numarası zaten kayıtlı')
-        }
-        throw customerError
-      }
+      if (customerError) throw customerError
 
-      if (address.trim() && authData.user?.id) {
-        const { error: addressError } = await supabase
-          .from('user_addresses')
-          .insert([{
-            user_id: authData.user.id,
-            title: 'Ev',
-            full_address: address.trim(),
-            latitude: 41.492892,
-            longitude: 36.081592,
-          }])
-
-        if (addressError) throw addressError
-      }
-
-      // LocalStorage'a kaydet
       localStorage.setItem('customer_id', customerData.id)
       localStorage.setItem('customer_name', fullName)
-      localStorage.setItem('customer_phone', phone)
-      if (address.trim()) {
-        localStorage.setItem('customer_address', address.trim())
-      }
 
       onLoginSuccess(fullName)
     } catch (err: any) {
@@ -232,7 +162,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
               </div>
 
               {error && (
-                <p className="text-[#f59e0b] text-[12px]">{error}</p>
+                <p className="text-red-500 text-[12px]">{error}</p>
               )}
 
               <button
@@ -245,13 +175,10 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
               </button>
 
               <p className="text-[13px] text-center text-[#6f6f6f]">
-                Henüz Alda Gel'e kayıtlı değil misin?{' '}
+                Henüz Alda Gel&apos;e kayıtlı değil misin?{' '}
                 <button
                   type="button"
-                  onClick={() => {
-                    setMode('register')
-                    setError('')
-                  }}
+                  onClick={() => { setMode('register'); setError('') }}
                   className="text-[#f59e0b] font-semibold hover:underline"
                 >
                   Kayıt Ol
@@ -262,11 +189,11 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
                 <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
-                  İsim
+                  Ad
                 </label>
                 <input
                   type="text"
-                  placeholder="Örn: Ahmet Mehmet"
+                  placeholder="Örn: Ahmet"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="w-full h-[48px] px-4 bg-white border border-[#e8e8e8] rounded-lg text-[14px] focus:outline-none focus:border-[#f59e0b] transition-colors"
@@ -274,12 +201,11 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
                   required
                   disabled={loading}
                 />
-                <p className="text-[11px] text-[#6f6f6f] mt-1">İki isim girebilirsiniz</p>
               </div>
 
               <div>
                 <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
-                  Soyisim
+                  Soyad
                 </label>
                 <input
                   type="text"
@@ -291,64 +217,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
                   required
                   disabled={loading}
                 />
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
-                  Telefon Numarası <span className="text-red-500">*</span>
-                </label>
-                <p className="text-[11px] text-[#6f6f6f] mb-2">(başında 0 olmadan 10 hane)</p>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  maxLength={10}
-                  placeholder="5551234567"
-                  value={phone}
-                  onChange={(e) => handlePhoneChange(e.target.value)}
-                  className={`w-full h-[48px] px-4 bg-white border rounded-lg text-[14px] focus:outline-none transition-colors ${
-                    phoneError 
-                      ? 'border-red-500' 
-                      : phone.length === 10 && phone.startsWith('5') && !phone.startsWith('0')
-                      ? 'border-green-500'
-                      : 'border-[#e8e8e8] focus:border-[#f59e0b]'
-                  }`}
-                  style={{ fontFamily: 'Open Sans, sans-serif' }}
-                  required
-                  disabled={loading}
-                />
-                {phoneError && (
-                  <p className="text-[11px] text-red-500 mt-1">⚠️ {phoneError}</p>
-                )}
-                {phone.length === 10 && !phoneError && (
-                  <p className="text-[11px] text-green-600 mt-1">✓ Telefon numarası geçerli</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
-                  Açık Adres
-                </label>
-                <textarea
-                  placeholder="Örn: 19 Mayıs KYK Yurdu, A Blok, Kat 3, No 12"
-                  value={address}
-                  onChange={(e) => setAddress(e.target.value)}
-                  className="w-full h-[96px] px-4 py-3 bg-white border border-[#e8e8e8] rounded-lg text-[14px] focus:outline-none focus:border-[#f59e0b] transition-colors resize-none"
-                  style={{ fontFamily: 'Open Sans, sans-serif' }}
-                  required
-                  disabled={loading}
-                />
-              </div>
-
-              {/* Divider */}
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-[#e8e8e8]"></div>
-                </div>
-                <div className="relative flex justify-center text-[11px]">
-                  <span className="bg-white px-4 text-[#6f6f6f]">
-                    Bu bilgileri giriş yaparken kullanacaksınız
-                  </span>
-                </div>
               </div>
 
               <div>
@@ -385,7 +253,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
               </div>
 
               {error && (
-                <p className="text-[#f59e0b] text-[12px]">{error}</p>
+                <p className="text-red-500 text-[12px]">{error}</p>
               )}
 
               <button
@@ -401,10 +269,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
                 Zaten hesabın var mı?{' '}
                 <button
                   type="button"
-                  onClick={() => {
-                    setMode('login')
-                    setError('')
-                  }}
+                  onClick={() => { setMode('login'); setError('') }}
                   className="text-[#f59e0b] font-semibold hover:underline"
                 >
                   Giriş Yap
@@ -417,4 +282,3 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
     </div>
   )
 }
-

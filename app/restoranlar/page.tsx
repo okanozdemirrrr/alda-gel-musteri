@@ -48,11 +48,18 @@ const CATEGORIES = [
 
 const MAX_DISTANCE_METERS = 10000 // 10 km
 
+const STORE_REVIEW_EMAIL = 'review@aldagel.com'
+// 19 Mayıs, Samsun — Apple inceleme cihazının varsayılan konumu
+const APPLE_TEST_LAT = 41.492892
+const APPLE_TEST_LNG = 36.081592
+
 export default function RestoranlarPage() {
   const router = useRouter()
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
   const [customerName, setCustomerName] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isAppleTestAccount, setIsAppleTestAccount] = useState(false)
   const [selectedAddress, setSelectedAddress] = useState('')
   const [customerLat, setCustomerLat] = useState<number | null>(null)
   const [customerLng, setCustomerLng] = useState<number | null>(null)
@@ -62,29 +69,34 @@ export default function RestoranlarPage() {
   const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // Oturum kontrolü
-    const customerId = localStorage.getItem('customer_id')
     const name = localStorage.getItem('customer_name')
     const address = localStorage.getItem('customer_address')
 
-    if (!customerId) {
-      router.push('/')
-      return
-    }
-
-    setCustomerName(name || 'Misafir')
+    const customerId = localStorage.getItem('customer_id')
+    setIsLoggedIn(!!customerId)
+    setCustomerName(name || '')
     setSelectedAddress(address || '')
 
-    // Müşteri koordinatlarını al
-    fetchCustomerLocation()
+    // Apple test hesabı kontrolü — mesafe filtresini bypass etmek için
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email === STORE_REVIEW_EMAIL) {
+        setIsAppleTestAccount(true)
+        // Test hesabı için koordinatları doğrudan Samsun 19 Mayıs'a sabitle
+        setCustomerLat(APPLE_TEST_LAT)
+        setCustomerLng(APPLE_TEST_LNG)
+      } else {
+        fetchCustomerLocation()
+      }
+    })
+
     fetchRestaurants()
 
-    // 30 saniyelik polling - restoran durumlarını güncelle
     const interval = setInterval(() => {
       fetchRestaurants()
     }, 30000)
 
     return () => clearInterval(interval)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router])
 
   // Menü dışına tıklama kontrolü
@@ -142,11 +154,28 @@ export default function RestoranlarPage() {
 
   // Mesafe ve kategori filtreleme
   const filteredRestaurants = useMemo(() => {
+    // Apple test hesabı: mesafe/konum filtresi tamamen devre dışı — tüm restoranlar görünür
+    if (isAppleTestAccount) {
+      return restaurants
+        .map(r => ({ ...r, distance: 0 }))
+        .filter(restaurant => {
+          if (selectedCategory !== 'Tümü') {
+            const cats = restaurant.categories || []
+            if (!cats.includes(selectedCategory)) return false
+          }
+          return true
+        })
+        .sort((a, b) => {
+          if (a.is_open && !b.is_open) return -1
+          if (!a.is_open && b.is_open) return 1
+          return 0
+        })
+    }
+
     if (!customerLat || !customerLng) return restaurants
 
     return restaurants
       .map(restaurant => {
-        // Restoran koordinatları yoksa varsayılan mesafe
         if (!restaurant.latitude || !restaurant.longitude) {
           return { ...restaurant, distance: 0 }
         }
@@ -161,9 +190,9 @@ export default function RestoranlarPage() {
         return { ...restaurant, distance }
       })
       .filter(restaurant => {
-        // 10 km sınırı
+        // 10 km sınırı (sadece normal kullanıcılar için)
         if (restaurant.distance > MAX_DISTANCE_METERS) return false
-        
+
         // Kategori filtresi
         if (selectedCategory !== 'Tümü') {
           const cats = restaurant.categories || []
@@ -173,14 +202,11 @@ export default function RestoranlarPage() {
         return true
       })
       .sort((a, b) => {
-        // Açık restoranlar önce
         if (a.is_open && !b.is_open) return -1
         if (!a.is_open && b.is_open) return 1
-        
-        // Sonra mesafeye göre
         return a.distance - b.distance
       })
-  }, [restaurants, customerLat, customerLng, selectedCategory])
+  }, [restaurants, customerLat, customerLng, selectedCategory, isAppleTestAccount])
 
   // Açık ve kapalı restoranları ayır (is_active kontrolü de ekle)
   const openRestaurants = filteredRestaurants.filter(r => r.is_open !== false && r.is_active !== false)
@@ -250,84 +276,83 @@ export default function RestoranlarPage() {
 
               {/* Sağ: Kullanıcı + Menü + Bildirim */}
               <div className="flex items-center gap-1 flex-shrink-0">
-                {/* Kullanıcı Avatar */}
-                <div className="w-7 h-7 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
-                  {customerName.charAt(0).toUpperCase()}
-                </div>
-                
-                {/* Hamburger Menu */}
-                <div className="relative" ref={menuRef}>
-                  <button
-                    onClick={() => setShowMenu(!showMenu)}
-                    className="p-1 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
-                  >
-                    <Menu size={18} />
-                  </button>
-
-                  <AnimatePresence>
-                    {showMenu && (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                {isLoggedIn ? (
+                  <>
+                    {/* Kullanıcı Avatar */}
+                    <div className="w-7 h-7 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0">
+                      {customerName.charAt(0).toUpperCase() || '?'}
+                    </div>
+                    
+                    {/* Hamburger Menu */}
+                    <div className="relative" ref={menuRef}>
+                      <button
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-1 text-gray-400 hover:text-[#f59e0b] transition-colors flex-shrink-0"
                       >
-                        <button
-                          onClick={() => {
-                            setShowMenu(false)
-                            router.push('/siparislerim')
-                          }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
-                        >
-                          <FileText size={18} className="text-amber-500" />
-                          <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowMenu(false)
-                            router.push('/profil')
-                          }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
-                        >
-                          <User size={18} className="text-amber-500" />
-                          <span className="text-[14px] font-medium">👤 Profilim</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowMenu(false)
-                            router.push('/yardim')
-                          }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                          </svg>
-                          <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowMenu(false)
-                            handleLogout()
-                          }}
-                          className="w-full px-4 py-3 flex items-center gap-3 text-red-500 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                          </svg>
-                          <span className="text-[14px] font-medium">🚪 Çıkış Yap</span>
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-                
-                {/* Notification Bell */}
-                <NotificationBell />
+                        <Menu size={18} />
+                      </button>
+
+                      <AnimatePresence>
+                        {showMenu && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                          >
+                            <button
+                              onClick={() => { setShowMenu(false); router.push('/siparislerim') }}
+                              className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
+                            >
+                              <FileText size={18} className="text-amber-500" />
+                              <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowMenu(false); router.push('/profil') }}
+                              className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
+                            >
+                              <User size={18} className="text-amber-500" />
+                              <span className="text-[14px] font-medium">👤 Profilim</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowMenu(false); router.push('/yardim') }}
+                              className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                              </svg>
+                              <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
+                            </button>
+                            <button
+                              onClick={() => { setShowMenu(false); handleLogout() }}
+                              className="w-full px-4 py-3 flex items-center gap-3 text-red-500 hover:bg-red-50 transition-colors text-left border-t border-gray-100"
+                            >
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                              </svg>
+                              <span className="text-[14px] font-medium">🚪 Çıkış Yap</span>
+                            </button>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    {/* Notification Bell */}
+                    <NotificationBell />
+                  </>
+                ) : (
+                  <button
+                    onClick={() => router.push('/')}
+                    className="px-3 py-1.5 bg-[#f59e0b] text-white text-[12px] font-bold rounded-lg hover:bg-[#d97706] transition-colors"
+                  >
+                    Giriş Yap
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -364,81 +389,80 @@ export default function RestoranlarPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="text-[14px] text-[#6f6f6f]">
-                Hoş geldin, <span className="font-semibold text-[#3c4043]">{customerName}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
-                  {customerName.charAt(0).toUpperCase()}
-                </div>
-              </div>
-              
-              {/* Hamburger Menu */}
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setShowMenu(!showMenu)}
-                  className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
-                >
-                  <Menu size={20} />
-                </button>
+              {isLoggedIn ? (
+                <>
+                  <div className="text-[14px] text-[#6f6f6f]">
+                    Hoş geldin, <span className="font-semibold text-[#3c4043]">{customerName}</span>
+                  </div>
+                  <div className="w-8 h-8 bg-[#f59e0b] rounded-full flex items-center justify-center text-white font-bold text-[14px]">
+                    {customerName.charAt(0).toUpperCase() || '?'}
+                  </div>
 
-                <AnimatePresence>
-                  {showMenu && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                  {/* Hamburger Menu */}
+                  <div className="relative" ref={menuRef}>
+                    <button
+                      onClick={() => setShowMenu(!showMenu)}
+                      className="p-2 text-gray-300 hover:text-[#f59e0b] transition-colors cursor-pointer"
                     >
-                      <button
-                        onClick={() => {
-                          setShowMenu(false)
-                          router.push('/siparislerim')
-                        }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
-                      >
-                        <FileText size={18} className="text-amber-500" />
-                        <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false)
-                          router.push('/profil')
-                        }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
-                      >
-                        <User size={18} className="text-amber-500" />
-                        <span className="text-[14px] font-medium">👤 Profilim</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setShowMenu(false)
-                          router.push('/yardim')
-                        }}
-                        className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
-                      >
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
-                          <circle cx="12" cy="12" r="10"></circle>
-                          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-                          <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                        </svg>
-                        <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-              
-              {/* Notification Bell */}
-              <NotificationBell />
-              
-              <button
-                onClick={handleLogout}
-                className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
-              >
-                Çıkış
-              </button>
+                      <Menu size={20} />
+                    </button>
+
+                    <AnimatePresence>
+                      {showMenu && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute top-full right-0 z-[60] mt-2 w-56 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden"
+                        >
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/siparislerim') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
+                          >
+                            <FileText size={18} className="text-amber-500" />
+                            <span className="text-[14px] font-medium">📜 Geçmiş Siparişlerim</span>
+                          </button>
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/profil') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left"
+                          >
+                            <User size={18} className="text-amber-500" />
+                            <span className="text-[14px] font-medium">👤 Profilim</span>
+                          </button>
+                          <button
+                            onClick={() => { setShowMenu(false); router.push('/yardim') }}
+                            className="w-full px-4 py-3 flex items-center gap-3 text-gray-700 hover:bg-orange-50 hover:text-amber-600 transition-colors text-left border-t border-gray-100"
+                          >
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-amber-500">
+                              <circle cx="12" cy="12" r="10"></circle>
+                              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span className="text-[14px] font-medium">🆘 Yardım Merkezi</span>
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  <NotificationBell />
+
+                  <button
+                    onClick={handleLogout}
+                    className="text-[13px] text-[#6f6f6f] hover:text-[#f59e0b] transition-colors"
+                  >
+                    Çıkış
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => router.push('/')}
+                  className="px-5 py-2 bg-[#f59e0b] text-white text-[14px] font-bold rounded-lg hover:bg-[#d97706] transition-colors"
+                >
+                  Giriş Yap / Kayıt Ol
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -538,11 +562,11 @@ function RestaurantCard({
       }`}
     >
       {/* Kapak Fotoğrafı */}
-      <div className="relative gpu-layer">
+      <div className="relative overflow-hidden bg-gray-100">
         <StableImage
           src={restaurant.cover_image_url}
           alt={restaurant.name}
-          fixedHeight={160}
+          aspectRatio="16/9"
           containerClassName="w-full"
           fallback={<span className="text-6xl">🍽️</span>}
         />
@@ -562,7 +586,7 @@ function RestaurantCard({
 
       {/* İçerik */}
       <div className="p-4">
-        <h3 className="text-[16px] font-bold text-[#3c4043] mb-2" style={{ fontFamily: 'Open Sans, sans-serif' }}>
+        <h3 className="text-[16px] font-bold text-[#3c4043] mb-2 line-clamp-1" style={{ fontFamily: 'Open Sans, sans-serif' }}>
           {restaurant.name}
         </h3>
 

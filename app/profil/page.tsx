@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
-import { ArrowLeft, Edit2, Save, X } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { ArrowLeft, Edit2, Save, X, Trash2, AlertTriangle } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface CustomerProfile {
   id: string
@@ -21,6 +21,9 @@ export default function ProfilPage() {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   
   const [editedProfile, setEditedProfile] = useState({
     name: '',
@@ -169,6 +172,24 @@ export default function ProfilPage() {
     })
     setEditing(false)
     setError('')
+  }
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    setDeleteError('')
+    try {
+      // 1. Supabase Auth oturumunu kapat
+      await supabase.auth.signOut()
+
+      // 2. Tüm yerel verileri temizle
+      localStorage.clear()
+
+      // 3. Anasayfaya yönlendir
+      router.push('/')
+    } catch (err: any) {
+      setDeleteError('Bir hata oluştu. Lütfen tekrar deneyin.')
+      setDeleting(false)
+    }
   }
 
   if (loading) {
@@ -408,7 +429,110 @@ export default function ProfilPage() {
             <span className="font-semibold">💡 Bilgi:</span> Telefon numaranızı değiştirirseniz, yeni numaranızla giriş yapmanız gerekecektir.
           </p>
         </div>
+
+        {/* Delete Account Button */}
+        <div className="mt-6">
+          <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-9 h-9 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                <AlertTriangle size={18} className="text-red-600" />
+              </div>
+              <div>
+                <p className="text-[13px] font-bold text-red-800 mb-0.5">Hesabı Sil (Delete Account)</p>
+                <p className="text-[12px] text-red-600 leading-relaxed">
+                  Hesabınız kalıcı olarak silinecektir. Bu işlem App Store Guideline 5.1.1 kapsamında sunulmaktadır.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setDeleteError('')
+                setShowDeleteModal(true)
+              }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-xl font-bold text-[15px] transition-colors shadow-sm"
+            >
+              <Trash2 size={18} />
+              Hesabımı Sil
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50"
+            onClick={(e) => {
+              if (e.target === e.currentTarget && !deleting) setShowDeleteModal(false)
+            }}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 40, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 40, scale: 0.97 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-xl"
+            >
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <AlertTriangle size={32} className="text-red-600" />
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-[20px] font-bold text-[#3c4043] text-center mb-3">
+                Hesabı Sil
+              </h2>
+
+              {/* Message */}
+              <p className="text-[14px] text-[#6f6f6f] text-center leading-relaxed mb-5">
+                Hesabınızı <strong className="text-[#3c4043]">kalıcı olarak</strong> silmek istediğinize emin misiniz?{' '}
+                Bu işlem <strong className="text-red-600">geri alınamaz.</strong>
+              </p>
+
+              {/* Error */}
+              {deleteError && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-[13px] text-center">
+                  {deleteError}
+                </div>
+              )}
+
+              {/* Buttons */}
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={handleDeleteAccount}
+                  disabled={deleting}
+                  className="w-full flex items-center justify-center gap-2 py-3 min-h-[48px] bg-red-600 text-white rounded-xl font-semibold text-[15px] hover:bg-red-700 active:bg-red-800 transition-colors disabled:opacity-60"
+                >
+                  {deleting ? (
+                    <>
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Siliniyor...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={18} />
+                      Evet, Hesabımı Sil
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  disabled={deleting}
+                  className="w-full py-3 min-h-[48px] bg-[#f7f7f7] text-[#3c4043] rounded-xl font-semibold text-[15px] hover:bg-[#e8e8e8] transition-colors disabled:opacity-60"
+                >
+                  Vazgeç
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

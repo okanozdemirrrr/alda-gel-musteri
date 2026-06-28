@@ -27,6 +27,8 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
   const [showSuccess, setShowSuccess] = useState(false)
   const [phoneNumber, setPhoneNumber] = useState('')
   const [phoneError, setPhoneError] = useState('')
+  const [addressInput, setAddressInput] = useState('')
+  const [addressError, setAddressError] = useState('')
   const [selectedItem, setSelectedItem] = useState<any>(null)
   const [noteModalOpen, setNoteModalOpen] = useState(false)
   const [tempNote, setTempNote] = useState('')
@@ -55,8 +57,10 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
 
   const handleCheckout = async () => {
     if (!canCheckout) return
-    
-    // Restoran durumunu tekrar kontrol et
+
+    const storedPhone = typeof window !== 'undefined' ? localStorage.getItem('customer_phone') || '' : ''
+    const storedAddress = typeof window !== 'undefined' ? localStorage.getItem('customer_address') || '' : ''
+
     try {
       const { data: restaurantData, error } = await supabase
         .from('restaurants')
@@ -72,10 +76,11 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
         return
       }
 
-      // Restoran açıksa ödeme modalını aç
-      setShowPaymentModal(true)
-      setPhoneNumber('')
+      setPhoneNumber(storedPhone)
       setPhoneError('')
+      setAddressInput(storedAddress)
+      setAddressError('')
+      setShowPaymentModal(true)
     } catch (error) {
       console.error('Restoran durumu kontrol edilemedi:', error)
       alert('Bir hata oluştu. Lütfen tekrar deneyin.')
@@ -127,16 +132,23 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                        phoneNumber.startsWith('5') && 
                        !phoneNumber.startsWith('0')
 
+  const isAddressValid = typeof window !== 'undefined'
+    ? !!(localStorage.getItem('customer_address') || addressInput.trim())
+    : true
+
   const handlePaymentSelect = async (paymentMethod: 'cash' | 'card') => {
-    // Telefon numarası validasyonu
-    if (!validatePhoneNumber(phoneNumber)) {
+    if (!validatePhoneNumber(phoneNumber)) return
+
+    const effectiveAddress = localStorage.getItem('customer_address') || addressInput.trim()
+    if (!effectiveAddress) {
+      setAddressError('Teslimat adresi zorunludur')
       return
     }
+    setAddressError('')
 
     setIsProcessing(true)
 
     try {
-      // Ödeme aşamasında restoran durumunu tekrar kontrol et
       const { data: restaurantCheck, error: checkError } = await supabase
         .from('restaurants')
         .select('is_active')
@@ -153,13 +165,11 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
         return
       }
 
-      // Müşteri bilgilerini al
       const customerId = localStorage.getItem('customer_id')
-      const customerAddress = localStorage.getItem('customer_address')
+      const customerAddress = effectiveAddress
       const customerName = localStorage.getItem('customer_name')
 
-      if (!customerId || !customerAddress) {
-        alert('Lütfen adres bilgilerinizi girin')
+      if (!customerId) {
         setIsProcessing(false)
         return
       }
@@ -208,8 +218,26 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
 
       if (error) throw error
 
-      // Telefon numarasını localStorage'a da kaydet (gelecek siparişler için)
+      // Telefonu localStorage ve customers tablosuna kaydet
       localStorage.setItem('customer_phone', phoneNumber)
+      if (customerId) {
+        await supabase.from('customers').update({ phone: phoneNumber }).eq('id', customerId)
+      }
+
+      // Yeni girilen adresi kaydet
+      if (!localStorage.getItem('customer_address') && addressInput.trim()) {
+        localStorage.setItem('customer_address', addressInput.trim())
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('user_addresses').insert([{
+            user_id: user.id,
+            title: 'Teslimat Adresim',
+            full_address: addressInput.trim(),
+            latitude: 41.492892,
+            longitude: 36.081592,
+          }])
+        }
+      }
 
       // Başarılı - animasyon göster
       setShowPaymentModal(false)
@@ -422,13 +450,12 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                 </p>
 
                 {/* Telefon Numarası Input */}
-                <div className="mb-6">
+                <div className="mb-4">
                   <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
-                    Kuryenin iletişime geçmesi için cep telefon numaranızı yazın
-                    <span className="text-red-500 ml-1">*</span>
+                    Telefon Numarası <span className="text-red-500">*</span>
                   </label>
                   <p className="text-[11px] text-[#6f6f6f] mb-2">
-                    (numaranızı başında 0 olmadan yazınız)
+                    (başında 0 olmadan 10 hane)
                   </p>
                   <input
                     type="tel"
@@ -460,23 +487,45 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                   )}
                 </div>
 
+                {/* Adres Alanı — sadece kayıtlı adres yoksa göster */}
+                {!localStorage.getItem('customer_address') && (
+                  <div className="mb-6">
+                    <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
+                      Teslimat Adresi <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      placeholder="Örn: 19 Mayıs KYK Yurdu, A Blok, Kat 3, No 12"
+                      value={addressInput}
+                      onChange={(e) => { setAddressInput(e.target.value); setAddressError('') }}
+                      rows={3}
+                      className={`w-full bg-slate-100 rounded-lg p-3 text-[14px] border-2 transition-colors outline-none resize-none ${
+                        addressError ? 'border-red-500' : 'border-transparent focus:border-orange-500'
+                      }`}
+                      disabled={isProcessing}
+                    />
+                    {addressError && (
+                      <p className="text-[12px] text-red-500 mt-1">⚠️ {addressError}</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   {/* Nakit Ödeme */}
                   <button
                     onClick={() => handlePaymentSelect('cash')}
-                    disabled={isProcessing || !isPhoneValid}
+                    disabled={isProcessing || !isPhoneValid || !isAddressValid}
                     className={`w-full h-[72px] rounded-2xl flex items-center justify-center gap-4 transition-all shadow-lg ${
-                      isPhoneValid && !isProcessing
+                      isPhoneValid && isAddressValid && !isProcessing
                         ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                         : 'bg-gray-300 cursor-not-allowed opacity-60'
                     }`}
                   >
-                    <Banknote size={32} strokeWidth={2.5} className={isPhoneValid ? 'text-white' : 'text-gray-500'} />
+                    <Banknote size={32} strokeWidth={2.5} className={isPhoneValid && isAddressValid ? 'text-white' : 'text-gray-500'} />
                     <div className="text-left">
-                      <div className={`text-[18px] font-bold ${isPhoneValid ? 'text-white' : 'text-gray-500'}`}>
+                      <div className={`text-[18px] font-bold ${isPhoneValid && isAddressValid ? 'text-white' : 'text-gray-500'}`}>
                         Nakit
                       </div>
-                      <div className={`text-[13px] ${isPhoneValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
+                      <div className={`text-[13px] ${isPhoneValid && isAddressValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
                         Kapıda nakit ödeme
                       </div>
                     </div>
@@ -485,28 +534,28 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
                   {/* Kredi Kartı */}
                   <button
                     onClick={() => handlePaymentSelect('card')}
-                    disabled={isProcessing || !isPhoneValid}
+                    disabled={isProcessing || !isPhoneValid || !isAddressValid}
                     className={`w-full h-[72px] rounded-2xl flex items-center justify-center gap-4 transition-all shadow-lg ${
-                      isPhoneValid && !isProcessing
+                      isPhoneValid && isAddressValid && !isProcessing
                         ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                         : 'bg-gray-300 cursor-not-allowed opacity-60'
                     }`}
                   >
-                    <CreditCard size={32} strokeWidth={2.5} className={isPhoneValid ? 'text-white' : 'text-gray-500'} />
+                    <CreditCard size={32} strokeWidth={2.5} className={isPhoneValid && isAddressValid ? 'text-white' : 'text-gray-500'} />
                     <div className="text-left">
-                      <div className={`text-[18px] font-bold ${isPhoneValid ? 'text-white' : 'text-gray-500'}`}>
+                      <div className={`text-[18px] font-bold ${isPhoneValid && isAddressValid ? 'text-white' : 'text-gray-500'}`}>
                         Kapıda Kredi Kartı
                       </div>
-                      <div className={`text-[13px] ${isPhoneValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
+                      <div className={`text-[13px] ${isPhoneValid && isAddressValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
                         Kartla ödeme yapın
                       </div>
                     </div>
                   </button>
                 </div>
 
-                {!isPhoneValid && phoneNumber.length === 0 && (
+                {(!isPhoneValid || !isAddressValid) && (
                   <p className="text-[12px] text-center text-[#6f6f6f] mt-3">
-                    Devam etmek için telefon numaranızı girin
+                    Devam etmek için {!isPhoneValid ? 'telefon numaranızı' : 'teslimat adresinizi'} girin
                   </p>
                 )}
 

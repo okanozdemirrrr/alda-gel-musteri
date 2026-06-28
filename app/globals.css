@@ -50,6 +50,14 @@
     height: auto;
   }
 
+  /* object-cover/contain kullanan görseller kapsayıcılarını tam doldurmalı;
+     global height:auto reset'i bunları ezmemeli */
+  img.object-cover,
+  img.object-contain {
+    width: 100%;
+    height: 100%;
+  }
+
   button:active,
   a:active,
   [role='button']:active,

@@ -12,6 +12,7 @@ import {
   getFirstUnsatisfiedRequiredGroup,
 } from '@/app/lib/productOptions'
 import { isMobile } from '@/app/lib/platform'
+import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
 
 interface ProductModalProps {
   product: Product
@@ -28,6 +29,7 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   const [optionsLoading, setOptionsLoading] = useState(true)
   const [validationMessage, setValidationMessage] = useState<string | null>(null)
   const [shakeGroupId, setShakeGroupId] = useState<string | null>(null)
+  const [showGuestPrompt, setShowGuestPrompt] = useState(false)
   const modalScrollRef = useRef<HTMLDivElement>(null)
   const { addToCart, cart } = useCart()
   const mobile = isMobile()
@@ -136,6 +138,11 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   }
 
   const handleAddToCart = () => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('customer_id')) {
+      setShowGuestPrompt(true)
+      return
+    }
+
     const missingGroup = getFirstUnsatisfiedRequiredGroup(selections, optionGroups)
     if (missingGroup) {
       setValidationMessage(`Lütfen ${missingGroup.name} seçiminizi yapınız`)
@@ -157,11 +164,19 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   }
 
   const handleUpsellAdd = (p: Product) => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('customer_id')) {
+      setShowGuestPrompt(true)
+      return
+    }
     addToCart(p, 1)
     setUpsellProducts((prev) => prev.filter((item) => item.id !== p.id))
   }
 
   return (
+    <>
+    {showGuestPrompt && (
+      <GuestLoginPrompt onClose={() => setShowGuestPrompt(false)} />
+    )}
     <div
       className={`fixed inset-0 bg-black/50 flex ${mobile ? 'items-end' : 'items-center'} justify-center z-50 ${mobile ? '' : 'p-4'}`}
       onClick={onClose}
@@ -486,5 +501,6 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
         </div>
       </div>
     </div>
+    </>
   )
 }

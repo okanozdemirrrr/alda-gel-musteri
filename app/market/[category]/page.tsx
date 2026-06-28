@@ -193,68 +193,73 @@ export default function CategoryPage() {
               return (
                 <div
                   key={product.id}
-                  className="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all relative"
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-all relative flex flex-col"
                 >
                   {/* İndirim Badge */}
                   {product.discount_percentage && (
-                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
+                    <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">
                       %{product.discount_percentage}
                     </div>
                   )}
 
-                  {/* Ürün Görseli */}
-                  <StableImage
-                    src={product.image_url}
-                    alt={product.name}
-                    aspectRatio="1/1"
-                    containerClassName="w-full rounded-lg mb-3"
-                    fallback={<span className="text-5xl">{product.emoji}</span>}
-                  />
-
-                  {/* Ürün Bilgileri */}
-                  <h5 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]">
-                    {product.name}
-                  </h5>
-                  <p className="text-xs text-gray-500 mb-2">{product.unit}</p>
-
-                  {/* Fiyat */}
-                  <div className="mb-3">
-                    {product.discount_price ? (
-                      <div>
-                        <p className="text-xs text-gray-400 line-through">₺{product.price.toFixed(2)}</p>
-                        <p className="text-lg font-bold text-orange-600">₺{finalPrice.toFixed(2)}</p>
-                      </div>
-                    ) : (
-                      <p className="text-lg font-bold text-orange-600">₺{product.price.toFixed(2)}</p>
-                    )}
+                  {/* Ürün Görseli — sabit oran, asla yamulmaz */}
+                  <div className="overflow-hidden bg-gray-100">
+                    <StableImage
+                      src={product.image_url}
+                      alt={product.name}
+                      aspectRatio="1/1"
+                      containerClassName="w-full"
+                      objectFit="cover"
+                      fallback={<span className="text-5xl">{product.emoji}</span>}
+                    />
                   </div>
 
-                  {/* Sepet Kontrolleri */}
-                  {quantity === 0 ? (
-                    <button
-                      onClick={() => addToCart(product.id.toString())}
-                      className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Plus size={18} />
-                      Sepete Ekle
-                    </button>
-                  ) : (
-                    <div className="flex items-center justify-between bg-orange-50 rounded-lg p-2">
-                      <button
-                        onClick={() => removeFromCart(product.id.toString())}
-                        className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors"
-                      >
-                        <Minus size={16} />
-                      </button>
-                      <span className="font-bold text-gray-900">{quantity}</span>
+                  {/* Ürün Bilgileri */}
+                  <div className="p-3 flex flex-col flex-1">
+                    <h5 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 min-h-[40px]">
+                      {product.name}
+                    </h5>
+                    <p className="text-xs text-gray-500 mb-2 truncate">{product.unit}</p>
+
+                    {/* Fiyat */}
+                    <div className="mb-3 mt-auto">
+                      {product.discount_price ? (
+                        <div>
+                          <p className="text-xs text-gray-400 line-through">₺{product.price.toFixed(2)}</p>
+                          <p className="text-lg font-bold text-orange-600">₺{finalPrice.toFixed(2)}</p>
+                        </div>
+                      ) : (
+                        <p className="text-lg font-bold text-orange-600">₺{product.price.toFixed(2)}</p>
+                      )}
+                    </div>
+
+                    {/* Sepet Kontrolleri */}
+                    {quantity === 0 ? (
                       <button
                         onClick={() => addToCart(product.id.toString())}
-                        className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors"
+                        className="w-full bg-orange-500 text-white py-2 rounded-lg font-semibold hover:bg-orange-600 transition-colors flex items-center justify-center gap-2"
                       >
-                        <Plus size={16} />
+                        <Plus size={18} />
+                        Sepete Ekle
                       </button>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="flex items-center justify-between bg-orange-50 rounded-lg p-2">
+                        <button
+                          onClick={() => removeFromCart(product.id.toString())}
+                          className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors"
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <span className="font-bold text-gray-900">{quantity}</span>
+                        <button
+                          onClick={() => addToCart(product.id.toString())}
+                          className="w-8 h-8 bg-orange-500 text-white rounded-lg flex items-center justify-center hover:bg-orange-600 transition-colors"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )
             })}

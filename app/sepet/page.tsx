@@ -3,13 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, Trash2, Plus, Minus, MessageSquare, ShoppingBag, MapPin, CreditCard, Banknote } from 'lucide-react'
+import { ArrowLeft, Trash2, Plus, Minus, MessageSquare, ShoppingBag, MapPin, CreditCard, Banknote, Phone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/app/context/CartContext'
 import { supabase } from '@/app/lib/supabase'
 import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { isMobile } from '@/app/lib/platform'
 import StableImage from '@/app/components/StableImage'
+import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
 
 const shouldAnimate = !isMobile()
 
@@ -25,10 +26,20 @@ export default function SepetPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash')
   const [checkoutError, setCheckoutError] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
 
-  // Adresi yükle
+  // Teslimat bilgisi toplama modal state'leri
+  const [showInfoModal, setShowInfoModal] = useState(false)
+  const [infoPhone, setInfoPhone] = useState('')
+  const [infoPhoneError, setInfoPhoneError] = useState('')
+  const [infoAddress, setInfoAddress] = useState('')
+  const [isSavingInfo, setIsSavingInfo] = useState(false)
+  const [infoError, setInfoError] = useState('')
+  // Kullanıcı ve adres bilgilerini yükle
   useEffect(() => {
     if (typeof window !== 'undefined') {
+      const customerId = localStorage.getItem('customer_id')
+      setIsLoggedIn(!!customerId)
       setCustomerAddress(localStorage.getItem('customer_address') || '')
     }
   }, [])
@@ -61,6 +72,85 @@ export default function SepetPage() {
     } else {
       updateQuantity(productId, newQty)
     }
+  }
+
+  // ─── TELSEFİN DOĞRULAMA ────────────────────────────────────────
+  const validateInfoPhone = (value: string): boolean => {
+    if (!value) { setInfoPhoneError('Telefon numarası zorunludur'); return false }
+    if (!/^\d+$/.test(value)) { setInfoPhoneError('Sadece rakam girebilirsiniz'); return false }
+    if (value.startsWith('0')) { setInfoPhoneError('Başında 0 olmadan yazın'); return false }
+    if (value.length !== 10) { setInfoPhoneError('10 hane olmalıdır'); return false }
+    if (!value.startsWith('5')) { setInfoPhoneError('5 ile başlamalıdır'); return false }
+    setInfoPhoneError('')
+    return true
+  }
+
+  // ─── TESLİMAT BİLGİSİ KAYDET + SİPARİŞ BAŞLAT ───────────────
+  const handleSaveInfoAndCheckout = async () => {
+    const currentNeedsPhone = !localStorage.getItem('customer_phone')
+    const currentNeedsAddress = !localStorage.getItem('customer_address')
+
+    if (currentNeedsPhone && !validateInfoPhone(infoPhone)) return
+    if (currentNeedsAddress && !infoAddress.trim()) {
+      setInfoError('Teslimat adresi zorunludur')
+      return
+    }
+
+    setIsSavingInfo(true)
+    setInfoError('')
+
+    try {
+      const customerId = localStorage.getItem('customer_id')
+
+      // Telefonu customers tablosuna kaydet
+      if (currentNeedsPhone && infoPhone && customerId) {
+        await supabase
+          .from('customers')
+          .update({ phone: infoPhone })
+          .eq('id', customerId)
+        localStorage.setItem('customer_phone', infoPhone)
+      }
+
+      // Adresi user_addresses tablosuna kaydet
+      if (currentNeedsAddress && infoAddress.trim()) {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('user_addresses').insert([{
+            user_id: user.id,
+            title: 'Teslimat Adresim',
+            full_address: infoAddress.trim(),
+            latitude: 41.492892,
+            longitude: 36.081592,
+          }])
+        }
+        localStorage.setItem('customer_address', infoAddress.trim())
+        setCustomerAddress(infoAddress.trim())
+      }
+
+      setShowInfoModal(false)
+      await handleCheckout()
+    } catch (err: any) {
+      setInfoError('Bilgiler kaydedilemedi: ' + (err.message || 'Hata oluştu'))
+    } finally {
+      setIsSavingInfo(false)
+    }
+  }
+
+  // ─── SİPARİŞ BUTONU BASIN ─────────────────────────────────────
+  const handleOrderButtonClick = () => {
+    const phone = localStorage.getItem('customer_phone') || ''
+    const address = localStorage.getItem('customer_address') || ''
+
+    if (!phone || !address) {
+      setInfoPhone(phone)
+      setInfoAddress(address)
+      setInfoPhoneError('')
+      setInfoError('')
+      setShowInfoModal(true)
+      return
+    }
+
+    handleCheckout()
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -167,6 +257,11 @@ export default function SepetPage() {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  // ─── MİSAFİR KULLANICI ──────────────────────────────────────
+  if (!isLoggedIn && !showCheckoutSuccess) {
+    return <GuestLoginPrompt onClose={() => router.push('/restoranlar')} />
   }
 
   // ─── BOŞ SEPET ──────────────────────────────────────────────
@@ -393,7 +488,7 @@ export default function SepetPage() {
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-footer">
           <div className="max-w-4xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4">
             <button
-              onClick={handleCheckout}
+              onClick={handleOrderButtonClick}
               disabled={cart.length === 0 || isProcessing}
               className="group w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 disabled:opacity-50 disabled:cursor-not-allowed text-white min-h-[48px] py-3 sm:py-4 rounded-xl font-black text-base sm:text-lg transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
@@ -418,6 +513,111 @@ export default function SepetPage() {
           </div>
         </div>
       </div>
+
+      {/* Teslimat Bilgileri Modalı */}
+      <AnimatePresence>
+        {showInfoModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+          >
+            <motion.div
+              initial={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
+              animate={shouldAnimate ? { scale: 1, opacity: 1 } : {}}
+              exit={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
+              className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+            >
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4">
+                <h2 className="text-[17px] font-bold text-white">Teslimat Bilgileri</h2>
+                <p className="text-[12px] text-white/80 mt-0.5">
+                  Siparişinizi tamamlamak için lütfen bilgilerinizi girin
+                </p>
+              </div>
+
+              <div className="p-5 space-y-4">
+                {/* Telefon Alanı */}
+                {!localStorage.getItem('customer_phone') && (
+                  <div>
+                    <label className="flex items-center gap-2 text-[13px] font-semibold text-stone-700 mb-2">
+                      <Phone size={14} className="text-amber-500" />
+                      Telefon Numarası <span className="text-red-500">*</span>
+                    </label>
+                    <p className="text-[11px] text-stone-400 mb-2">Başında 0 olmadan 10 hane (ör: 5551234567)</p>
+                    <input
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="5551234567"
+                      value={infoPhone}
+                      onChange={(e) => {
+                        const cleaned = e.target.value.replace(/\D/g, '')
+                        setInfoPhone(cleaned)
+                        if (cleaned.length > 0) validateInfoPhone(cleaned)
+                        else setInfoPhoneError('')
+                      }}
+                      className={`w-full h-[48px] px-4 border rounded-xl text-[14px] focus:outline-none transition-colors ${
+                        infoPhoneError
+                          ? 'border-red-400 bg-red-50'
+                          : infoPhone.length === 10 && !infoPhoneError
+                          ? 'border-green-400 bg-green-50'
+                          : 'border-stone-200 focus:border-amber-400'
+                      }`}
+                    />
+                    {infoPhoneError && (
+                      <p className="text-[11px] text-red-500 mt-1">⚠️ {infoPhoneError}</p>
+                    )}
+                    {infoPhone.length === 10 && !infoPhoneError && (
+                      <p className="text-[11px] text-green-600 mt-1">✓ Geçerli</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Adres Alanı */}
+                {!localStorage.getItem('customer_address') && (
+                  <div>
+                    <label className="flex items-center gap-2 text-[13px] font-semibold text-stone-700 mb-2">
+                      <MapPin size={14} className="text-amber-500" />
+                      Teslimat Adresi <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                      placeholder="Örn: 19 Mayıs KYK Yurdu, A Blok, Kat 3, No 12"
+                      value={infoAddress}
+                      onChange={(e) => { setInfoAddress(e.target.value); setInfoError('') }}
+                      rows={3}
+                      className="w-full px-4 py-3 border border-stone-200 focus:border-amber-400 rounded-xl text-[14px] focus:outline-none transition-colors resize-none"
+                    />
+                  </div>
+                )}
+
+                {infoError && (
+                  <p className="text-[12px] text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                    ⚠️ {infoError}
+                  </p>
+                )}
+
+                <div className="flex gap-3 pt-1">
+                  <button
+                    onClick={() => setShowInfoModal(false)}
+                    className="flex-1 min-h-[48px] border-2 border-stone-200 text-stone-600 rounded-xl font-semibold text-[14px] hover:bg-stone-50 transition-colors"
+                  >
+                    Vazgeç
+                  </button>
+                  <button
+                    onClick={handleSaveInfoAndCheckout}
+                    disabled={isSavingInfo}
+                    className="flex-1 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-[14px] transition-all disabled:opacity-50"
+                  >
+                    {isSavingInfo ? 'Kaydediliyor...' : 'Siparişi Tamamla'}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Not Modalı */}
       <AnimatePresence>
