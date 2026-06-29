@@ -225,18 +225,22 @@ export default function RestaurantMenuPage() {
       )}
 
       {/* Hero Section - Cover Image + Logo */}
-      <div className={`relative w-full gpu-layer overflow-hidden ${isMobile() ? 'h-[200px]' : 'h-[280px]'} bg-gradient-to-br from-[#fef3c7] to-[#fde68a]`}>
-        <StableImage
-          src={restaurant.cover_image_url}
-          alt={restaurant.name}
-          fixedHeight={isMobile() ? 200 : 280}
-          containerClassName="w-full"
-          fallback={<div className={`w-full h-full flex items-center justify-center ${isMobile() ? 'text-6xl' : 'text-8xl'}`}>🍽️</div>}
-          priority
-        />
+      {/* overflow-visible burada zorunlu: logo -bottom-N ile banner dışına taşıyor */}
+      <div className={`relative w-full gpu-layer overflow-visible ${isMobile() ? 'h-[200px]' : 'h-[280px]'} bg-gradient-to-br from-[#fef3c7] to-[#fde68a]`}>
+        {/* Cover görseli ayrı overflow-hidden container içinde */}
+        <div className="absolute inset-0 overflow-hidden">
+          <StableImage
+            src={restaurant.cover_image_url}
+            alt={restaurant.name}
+            fixedHeight={isMobile() ? 200 : 280}
+            containerClassName="w-full"
+            fallback={<div className={`w-full h-full flex items-center justify-center ${isMobile() ? 'text-6xl' : 'text-8xl'}`}>🍽️</div>}
+            priority
+          />
+        </div>{/* /cover overflow-hidden */}
         
         {/* Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
         
         {/* Kapalı Overlay */}
         {restaurant.is_active === false && (
