@@ -10,7 +10,7 @@ export async function generateStaticParams() {
 
   try {
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
-    const { data } = await supabase.from('restaurants').select('id')
+    const { data } = await supabase.from('restaurants').select('id').eq('is_active', true)
 
     if (data && data.length > 0) {
       return data.map((r) => ({ id: String(r.id) }))

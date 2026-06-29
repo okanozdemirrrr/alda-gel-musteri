@@ -141,6 +141,7 @@ export default function RestoranlarPage() {
       const { data, error } = await supabase
         .from('restaurants')
         .select('*')
+        .eq('is_active', true)
         .order('name')
 
       if (error) throw error
