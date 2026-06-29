@@ -49,6 +49,17 @@ export default function HesapSil() {
 
       if (deleteError) throw deleteError
 
+      // Supabase Auth kullanıcısını sil (RPC üzerinden)
+      try {
+        await supabase.rpc('delete_current_user')
+      } catch {
+        // RPC mevcut değilse sessizce geç
+      }
+
+      // Oturumu kapat ve localStorage'ı temizle
+      await supabase.auth.signOut()
+      localStorage.clear()
+
       setStep('done')
     } catch (err: any) {
       setError('Hesap silinirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.')
@@ -89,7 +100,10 @@ export default function HesapSil() {
               Hesabınız ve tüm kişisel verileriniz başarıyla silindi. Bizi tercih ettiğiniz için teşekkür ederiz.
             </p>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => {
+                localStorage.clear()
+                router.push('/')
+              }}
               className="bg-[#f59e0b] text-white font-semibold px-6 py-3 rounded-lg hover:bg-[#d97706] transition-colors min-h-[48px]"
             >
               Ana Sayfaya Dön
