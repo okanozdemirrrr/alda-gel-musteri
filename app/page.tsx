@@ -173,14 +173,14 @@ export default function MusteriAnaSayfa() {
             <div className="flex items-center gap-3 min-w-0">
               <button
                 onClick={() => router.push('/')}
-                className="flex-shrink-0 flex items-center"
+                className="flex-shrink-0 flex items-center w-[68px] md:w-24 lg:w-[108px]"
               >
                 <Image
                   src="/logo.png"
                   alt="Alda-Gel Logo"
-                  width={102}
-                  height={34}
-                  className="object-contain w-[68px] md:w-24 lg:w-[108px] h-auto"
+                  width={108}
+                  height={36}
+                  className="w-full h-auto"
                   priority
                 />
               </button>
