@@ -49,7 +49,14 @@ export async function saveUserAddress(input: {
   latitude: number
   longitude: number
 }): Promise<UserAddressRecord> {
-  const userId = await resolveAuthUserId()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Auth session yoksa sadece adres kaydını döndür, DB'ye yazma
+  if (!user) {
+    return buildUserAddressRecord({ userId: 'guest', ...input })
+  }
+
+  const userId = user.id
   const addressRecord = buildUserAddressRecord({ userId, ...input })
 
   const { data: existingAddresses, error: fetchError } = await supabase

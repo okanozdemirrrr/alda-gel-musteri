@@ -18,11 +18,12 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
   const [loginEmail, setLoginEmail] = useState('')
   const [loginPassword, setLoginPassword] = useState('')
 
-  // Register form — sadece Ad, Soyad, E-posta, Şifre
+  // Register form
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [registerEmail, setRegisterEmail] = useState('')
   const [registerPassword, setRegisterPassword] = useState('')
+  const [registerPhone, setRegisterPhone] = useState('')
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -91,6 +92,7 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
           surname: lastName.trim(),
           full_name: fullName,
           email: registerEmail.trim(),
+          phone: registerPhone.trim(),
           registration_source: 'app_user'
         }])
         .select()
@@ -228,6 +230,22 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
                   placeholder="ornek@email.com"
                   value={registerEmail}
                   onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="w-full h-[48px] px-4 bg-white border border-[#e8e8e8] rounded-lg text-[14px] focus:outline-none focus:border-[#f59e0b] transition-colors"
+                  style={{ fontFamily: 'Open Sans, sans-serif' }}
+                  required
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
+                  Telefon
+                </label>
+                <input
+                  type="tel"
+                  placeholder="05XX XXX XX XX"
+                  value={registerPhone}
+                  onChange={(e) => setRegisterPhone(e.target.value)}
                   className="w-full h-[48px] px-4 bg-white border border-[#e8e8e8] rounded-lg text-[14px] focus:outline-none focus:border-[#f59e0b] transition-colors"
                   style={{ fontFamily: 'Open Sans, sans-serif' }}
                   required
