@@ -38,13 +38,17 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
 
       if (authError) throw authError
 
-      const { data: customerData, error: customerError } = await supabase
+      const { data: customerRows, error: customerError } = await supabase
         .from('customers')
         .select('*')
         .eq('email', loginEmail.trim())
-        .single()
+        .order('created_at', { ascending: false })
 
       if (customerError) throw customerError
+
+      // app_user kaydını tercih et, yoksa en yeni kaydı al
+      const customerData = customerRows?.find(r => r.registration_source === 'app_user') ?? customerRows?.[0]
+      if (!customerData) throw new Error('Müşteri kaydı bulunamadı')
 
       localStorage.setItem('customer_id', customerData.id)
       localStorage.setItem('customer_name', customerData.full_name)
