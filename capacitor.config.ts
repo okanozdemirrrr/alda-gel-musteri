@@ -12,6 +12,9 @@ const config: CapacitorConfig = {
       '*.supabase.co',
     ],
   },
+  ios: {
+    scrollEnabled: false,
+  },
 };
 
 export default config;
