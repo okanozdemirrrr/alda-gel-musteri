@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
@@ -67,6 +67,27 @@ export default function RestoranlarPage() {
   const [showAddressModal, setShowAddressModal] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  // Geri dönüşte scroll pozisyonunu sıfırla (paint öncesi, beyaz boşluğu engeller)
+  useLayoutEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0
+    }
+  }, [])
+
+  // iOS WKWebView'u zorla repaint et (restore sonrası kalan render artefaktlarını temizler)
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const id = setTimeout(() => {
+      el.style.transform = 'translateZ(0)'
+      requestAnimationFrame(() => {
+        el.style.transform = ''
+      })
+    }, 30)
+    return () => clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     const name = localStorage.getItem('customer_name')
@@ -232,7 +253,7 @@ export default function RestoranlarPage() {
   }
 
   return (
-    <div className="app-page bg-white">
+    <div ref={scrollRef} className="page-scroll-container bg-white">
       {/* Header */}
       <header 
         className="bg-white border-b border-[#e8e8e8] sticky top-0 z-50"
