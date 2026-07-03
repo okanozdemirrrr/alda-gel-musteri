@@ -175,7 +175,12 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   return (
     <>
     {showGuestPrompt && (
-      <GuestLoginPrompt onClose={() => setShowGuestPrompt(false)} />
+      <GuestLoginPrompt
+        onClose={() => setShowGuestPrompt(false)}
+        onLoginSuccess={() => {
+          // Login sonrası localStorage güncellendi; kullanıcı artık sepete ekleyebilir
+        }}
+      />
     )}
     <div
       className={`fixed inset-0 bg-black/50 flex ${mobile ? 'items-end' : 'items-center'} justify-center z-50 ${mobile ? '' : 'p-4'}`}

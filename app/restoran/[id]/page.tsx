@@ -209,7 +209,12 @@ export default function RestaurantMenuPage() {
   return (
     <div className="app-page bg-[#f7f7f7] pb-32">
       {showGuestPrompt && (
-        <GuestLoginPrompt onClose={() => setShowGuestPrompt(false)} />
+        <GuestLoginPrompt
+          onClose={() => setShowGuestPrompt(false)}
+          onLoginSuccess={() => {
+            // Login sonrası localStorage güncellendi; sayfa yeniden render edilir
+          }}
+        />
       )}
       {addedToast && (
         <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] pointer-events-none">

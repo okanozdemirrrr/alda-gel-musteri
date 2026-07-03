@@ -130,11 +130,10 @@ export default function MusteriAnaSayfa() {
   }, [showMenu])
 
   const handleAddressClick = () => {
-    if (!isLoggedIn) {
-      setShowAuthModal(true)
-    } else {
+    if (isLoggedIn) {
       setShowAddressModal(true)
     }
+    // Misafir kullanıcılar için adres butonu pasif — giriş yapmaları gerekmez
   }
 
   const handleLoginSuccess = (name: string) => {
@@ -299,30 +298,46 @@ export default function MusteriAnaSayfa() {
 
           {/* İçerik */}
           <div className="relative z-10 max-w-6xl mx-auto px-4">
-            {!isLoggedIn || !selectedAddress ? (
-              /* ═══ GİRİŞ YAPMAMIŞ / ADRES SEÇMEMİŞ ═══ */
-              <div className="min-h-[60dvh] sm:min-h-[70dvh] flex items-center justify-center py-10 sm:py-16">
+            {isLoggedIn && selectedAddress ? (
+              /* ═══ GİRİŞ YAPMIŞ + ADRES SEÇMİŞ ═══ */
+              <div className="pt-10 pb-6">
+                <motion.div
+                  initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
+                  animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5 }}
+                  className="text-center mb-8"
+                >
+                  <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mb-2">
+                    Hoş Geldin, <span className="text-amber-300">{customerName}</span>
+                  </h1>
+                  <p className="text-white/80 text-base sm:text-lg font-medium drop-shadow">
+                    Bugün ne yemek istersin?
+                  </p>
+                </motion.div>
+
+                <SplitScreenSelector />
+              </div>
+            ) : (
+              /* ═══ MİSAFİR / ADRES YOK — Engelsiz keşif ═══ */
+              <div className="py-10 sm:py-16">
                 <motion.div
                   initial={shouldAnimate ? { opacity: 0, y: 30 } : {}}
                   animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.6, ease: 'easeOut' }}
-                  className="w-[90%] md:w-[600px] lg:w-[800px]"
+                  className="w-[90%] md:w-[600px] lg:w-[800px] mx-auto mb-8"
                 >
-                  {/* Yarı saydam panel — backdrop-blur ile metin arka plandan ayrılır */}
+                  {/* Yarı saydam panel */}
                   <div className="bg-white/85 backdrop-blur-xl rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl border border-white/30">
-                    {/* Başlık */}
                     <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#3E1F0C] mb-2 sm:mb-3 tracking-tight leading-tight">
                       Alda-Gel Yemek & Sanal Market
                     </h1>
-
-                    {/* Alt başlık */}
                     <p className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-500 mb-5 sm:mb-6 md:mb-8 font-medium leading-relaxed">
                       Samsun 19 Mayıs'ta lezzetli ve hızlı teslimat.
                     </p>
 
-                    {/* CTA Butonu — hover parlaması */}
+                    {/* CTA — direkt restoranlar sayfasına, giriş şart değil */}
                     <button
-                      onClick={handleAddressClick}
+                      onClick={() => router.push('/restoranlar')}
                       className="group w-full sm:w-auto px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 md:py-4 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-sm sm:text-base md:text-lg lg:text-xl font-black rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.5)] flex items-center justify-center gap-2 sm:gap-3"
                     >
                       <span>Keşfet ve Başla</span>
@@ -332,9 +347,8 @@ export default function MusteriAnaSayfa() {
                       />
                     </button>
 
-                    {/* Alt bilgi */}
                     <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-stone-400 font-medium">
-                      {!isLoggedIn ? 'Giriş yaparak başlayın' : 'Adresinizi seçerek başlayın'}
+                      Giriş yapmadan restoranları ve menüleri keşfedebilirsiniz
                     </p>
                   </div>
 
@@ -354,35 +368,16 @@ export default function MusteriAnaSayfa() {
                     </div>
                   </div>
                 </motion.div>
-              </div>
-            ) : (
-              /* ═══ GİRİŞ YAPMIŞ + ADRES SEÇMİŞ ═══ */
-              <>
-                {/* Karşılama + Split Screen */}
-                <div className="pt-10 pb-6">
-                  <motion.div
-                    initial={shouldAnimate ? { opacity: 0, y: 20 } : {}}
-                    animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.5 }}
-                    className="text-center mb-8"
-                  >
-                    <h1 className="text-3xl sm:text-4xl font-black text-white drop-shadow-lg mb-2">
-                      Hoş Geldin, <span className="text-amber-300">{customerName}</span>
-                    </h1>
-                    <p className="text-white/80 text-base sm:text-lg font-medium drop-shadow">
-                      Bugün ne yemek istersin?
-                    </p>
-                  </motion.div>
 
-                  <SplitScreenSelector />
-                </div>
-              </>
+                {/* Misafirler için de YEMEK / MARKET kartları */}
+                <SplitScreenSelector />
+              </div>
             )}
           </div>
         </main>
 
         {/* ═══ ALT BÖLÜM: ÖZELLİKLER ═══ */}
-        {!isLoggedIn || !selectedAddress ? (
+        {!(isLoggedIn && selectedAddress) ? (
           <section className="bg-stone-50 py-16 px-4 relative z-10">
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-12">

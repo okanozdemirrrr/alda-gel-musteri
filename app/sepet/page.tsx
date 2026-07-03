@@ -10,7 +10,7 @@ import { supabase } from '@/app/lib/supabase'
 import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { isMobile } from '@/app/lib/platform'
 import StableImage from '@/app/components/StableImage'
-import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
+import AuthModal from '@/app/components/AuthModal'
 
 const shouldAnimate = !isMobile()
 
@@ -27,6 +27,7 @@ export default function SepetPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash')
   const [checkoutError, setCheckoutError] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   // Teslimat bilgisi toplama modal state'leri
   const [showInfoModal, setShowInfoModal] = useState(false)
@@ -138,6 +139,11 @@ export default function SepetPage() {
 
   // ─── SİPARİŞ BUTONU BASIN ─────────────────────────────────────
   const handleOrderButtonClick = () => {
+    if (!isLoggedIn) {
+      setShowAuthModal(true)
+      return
+    }
+
     const phone = localStorage.getItem('customer_phone') || ''
     const address = localStorage.getItem('customer_address') || ''
 
@@ -257,11 +263,6 @@ export default function SepetPage() {
     } finally {
       setIsProcessing(false)
     }
-  }
-
-  // ─── MİSAFİR KULLANICI ──────────────────────────────────────
-  if (!isLoggedIn && !showCheckoutSuccess) {
-    return <GuestLoginPrompt onClose={() => router.push('/restoranlar')} />
   }
 
   // ─── BOŞ SEPET ──────────────────────────────────────────────
@@ -618,6 +619,18 @@ export default function SepetPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Giriş Modalı — sadece misafir "Siparişi Tamamla"ya bastığında */}
+      {showAuthModal && (
+        <AuthModal
+          onClose={() => setShowAuthModal(false)}
+          onLoginSuccess={(_name) => {
+            setIsLoggedIn(true)
+            setCustomerAddress(localStorage.getItem('customer_address') || '')
+            setShowAuthModal(false)
+          }}
+        />
+      )}
 
       {/* Not Modalı */}
       <AnimatePresence>

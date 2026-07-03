@@ -1,13 +1,30 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import AuthModal from './AuthModal'
 
 interface GuestLoginPromptProps {
   onClose: () => void
+  onLoginSuccess?: () => void
 }
 
-export default function GuestLoginPrompt({ onClose }: GuestLoginPromptProps) {
-  const router = useRouter()
+export default function GuestLoginPrompt({ onClose, onLoginSuccess }: GuestLoginPromptProps) {
+  const [showAuthModal, setShowAuthModal] = useState(false)
+
+  const handleLoginSuccess = (_name: string) => {
+    setShowAuthModal(false)
+    onLoginSuccess?.()
+    onClose()
+  }
+
+  if (showAuthModal) {
+    return (
+      <AuthModal
+        onClose={() => setShowAuthModal(false)}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    )
+  }
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
@@ -27,7 +44,7 @@ export default function GuestLoginPrompt({ onClose }: GuestLoginPromptProps) {
 
         <div className="p-5 space-y-3">
           <button
-            onClick={() => { router.push('/'); onClose() }}
+            onClick={() => setShowAuthModal(true)}
             className="w-full min-h-[48px] bg-[#f59e0b] text-white rounded-xl font-bold text-[14px] hover:bg-[#d97706] transition-colors shadow-md"
             style={{ fontFamily: 'Open Sans, sans-serif' }}
           >
