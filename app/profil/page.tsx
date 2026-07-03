@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { ArrowLeft, Edit2, Save, X, Trash2, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Portal from '@/app/components/Portal'
+import Portal from '../components/Portal'
 
 interface CustomerProfile {
   id: string

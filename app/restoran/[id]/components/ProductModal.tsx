@@ -13,7 +13,7 @@ import {
 } from '@/app/lib/productOptions'
 import { isMobile } from '@/app/lib/platform'
 import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
-import Portal from '@/app/components/Portal'
+import Portal from '../../../components/Portal'
 
 interface ProductModalProps {
   product: Product

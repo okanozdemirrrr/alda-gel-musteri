@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import StableImage from '@/app/components/StableImage'
-import Portal from '@/app/components/Portal'
+import Portal from '../../components/Portal'
 
 interface Product {
   id: number

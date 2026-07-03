@@ -7,7 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Banknote, CheckCircle } from 'lucide-react'
-import Portal from '@/app/components/Portal'
+import Portal from '../../../components/Portal'
 
 interface CartSidebarProps {
   restaurant: {

@@ -11,7 +11,7 @@ import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { isMobile } from '@/app/lib/platform'
 import StableImage from '@/app/components/StableImage'
 import AuthModal from '@/app/components/AuthModal'
-import Portal from '@/app/components/Portal'
+import Portal from '../components/Portal'
 
 const shouldAnimate = !isMobile()
 

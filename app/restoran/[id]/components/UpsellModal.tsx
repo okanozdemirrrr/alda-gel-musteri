@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Product } from '@/types/menu'
 import { useCart } from '@/app/context/CartContext'
 import { X, ShoppingBag } from 'lucide-react'
-import Portal from '@/app/components/Portal'
+import Portal from '../../../components/Portal'
 
 interface UpsellModalProps {
   mainProduct: Product

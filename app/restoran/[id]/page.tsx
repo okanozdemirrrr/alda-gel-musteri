@@ -15,7 +15,7 @@ import { Clock, Wallet } from 'lucide-react'
 import { isMobile } from '@/app/lib/platform'
 import { RestaurantMenuSkeleton } from '@/app/components/Skeleton'
 import StableImage from '@/app/components/StableImage'
-import Portal from '@/app/components/Portal'
+import Portal from '../../components/Portal'
 
 interface Restaurant {
   id: string

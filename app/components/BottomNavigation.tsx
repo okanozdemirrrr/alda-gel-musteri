@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, UtensilsCrossed, ClipboardList, ShoppingBag, User } from 'lucide-react'
 import { useCart } from '@/app/context/CartContext'
-import Portal from '@/app/components/Portal'
+import Portal from './Portal'
 
 const NAV_ITEMS = [
   { href: '/', label: 'Ana Sayfa', icon: Home, match: (p: string) => p === '/' },
