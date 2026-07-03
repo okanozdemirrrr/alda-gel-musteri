@@ -5,6 +5,7 @@ import { supabase } from '@/app/lib/supabase'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Truck, X } from 'lucide-react'
+import Portal from './Portal'
 
 interface ToastInfo {
   orderId: number
@@ -75,6 +76,7 @@ export default function DeliveryTracker() {
   }
 
   return (
+    <Portal>
     <AnimatePresence>
       {deliveryToast && (
         <motion.div
@@ -82,7 +84,7 @@ export default function DeliveryTracker() {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -120, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="fixed top-4 left-4 right-4 z-[100] flex justify-center pointer-events-none"
+          className="fixed top-4 left-4 right-4 z-[9999] flex justify-center pointer-events-none"
         >
           <div
             onClick={handleToastClick}
@@ -115,5 +117,6 @@ export default function DeliveryTracker() {
         </motion.div>
       )}
     </AnimatePresence>
+    </Portal>
   )
 }

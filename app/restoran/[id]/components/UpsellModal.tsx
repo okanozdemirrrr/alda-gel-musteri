@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Product } from '@/types/menu'
 import { useCart } from '@/app/context/CartContext'
 import { X, ShoppingBag } from 'lucide-react'
+import Portal from '@/app/components/Portal'
 
 interface UpsellModalProps {
   mainProduct: Product
@@ -53,12 +54,13 @@ export default function UpsellModal({
   }
 
   return (
+    <Portal>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/60 flex items-end justify-center z-[60]"
+        className="fixed inset-0 z-[9999] flex items-end justify-center h-[100dvh] w-screen bg-black/60"
         onClick={onClose}
       >
         <motion.div
@@ -197,5 +199,6 @@ export default function UpsellModal({
         </motion.div>
       </motion.div>
     </AnimatePresence>
+    </Portal>
   )
 }

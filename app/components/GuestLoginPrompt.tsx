@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import AuthModal from './AuthModal'
+import Portal from './Portal'
 
 interface GuestLoginPromptProps {
   onClose: () => void
@@ -27,7 +28,8 @@ export default function GuestLoginPrompt({ onClose, onLoginSuccess }: GuestLogin
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[70] p-4">
+    <Portal>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50 p-4">
       <div className="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
         <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-6 text-center">
           <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
@@ -60,5 +62,6 @@ export default function GuestLoginPrompt({ onClose, onLoginSuccess }: GuestLogin
         </div>
       </div>
     </div>
+    </Portal>
   )
 }

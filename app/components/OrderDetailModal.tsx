@@ -4,6 +4,7 @@ import { X, MapPin, User, Phone, CreditCard, Package } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { OrderDetail } from '@/types/order'
 import { formatOptionLine } from '@/app/lib/orderItems'
+import Portal from './Portal'
 
 interface OrderDetailModalProps {
   order: OrderDetail | null
@@ -21,9 +22,10 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
         : order.payment_method || '—'
 
   return (
+    <Portal>
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4"
+        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center h-[100dvh] w-screen bg-black/60 p-0 sm:p-4"
         onClick={onClose}
       >
         <motion.div
@@ -176,5 +178,6 @@ export default function OrderDetailModal({ order, onClose }: OrderDetailModalPro
         </motion.div>
       </div>
     </AnimatePresence>
+    </Portal>
   )
 }

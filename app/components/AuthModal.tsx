@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/app/lib/supabase'
 import { fetchUserAddressFullText } from '@/app/lib/addressService'
+import Portal from './Portal'
 
 interface AuthModalProps {
   onClose: () => void
@@ -116,7 +117,8 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+    <Portal>
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center h-[100dvh] w-screen bg-black/50 sm:p-4">
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[480px] max-h-[95dvh] sm:max-h-[90dvh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8]">
@@ -302,5 +304,6 @@ export default function AuthModal({ onClose, onLoginSuccess }: AuthModalProps) {
         </div>
       </div>
     </div>
+    </Portal>
   )
 }

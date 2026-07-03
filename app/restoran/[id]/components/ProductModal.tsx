@@ -13,6 +13,7 @@ import {
 } from '@/app/lib/productOptions'
 import { isMobile } from '@/app/lib/platform'
 import GuestLoginPrompt from '@/app/components/GuestLoginPrompt'
+import Portal from '@/app/components/Portal'
 
 interface ProductModalProps {
   product: Product
@@ -173,6 +174,7 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
   }
 
   return (
+    <Portal>
     <>
     {showGuestPrompt && (
       <GuestLoginPrompt
@@ -183,7 +185,7 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
       />
     )}
     <div
-      className={`fixed inset-0 bg-black/50 flex ${mobile ? 'items-end' : 'items-center'} justify-center z-50 ${mobile ? '' : 'p-4'}`}
+      className={`fixed inset-0 z-[9999] flex h-[100dvh] w-screen bg-black/50 ${mobile ? 'items-end' : 'items-center justify-center'} ${mobile ? '' : 'p-4'}`}
       onClick={onClose}
     >
       {validationMessage && (
@@ -507,5 +509,6 @@ export default function ProductModal({ product, allProducts, onClose }: ProductM
       </div>
     </div>
     </>
+    </Portal>
   )
 }

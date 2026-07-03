@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
+import Portal from './Portal'
 
 interface WelcomeSplashProps {
   name: string
@@ -19,12 +20,13 @@ export default function WelcomeSplash({ name, onComplete }: WelcomeSplashProps) 
   }, [onComplete])
 
   return (
+    <Portal>
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 bg-[#f59e0b] flex items-center justify-center z-[100]"
+      className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-[#f59e0b]"
       style={{
         // GPU hızlandırma
         transform: 'translateZ(0)',
@@ -71,6 +73,7 @@ export default function WelcomeSplash({ name, onComplete }: WelcomeSplashProps) 
         </h2>
       </motion.div>
     </motion.div>
+    </Portal>
   )
 }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Bell, X } from 'lucide-react'
+import Portal from './Portal'
 
 export default function PushNotificationPrompt() {
   const [showPrompt, setShowPrompt] = useState(false)
@@ -62,13 +63,14 @@ export default function PushNotificationPrompt() {
   }
 
   return (
+    <Portal>
     <AnimatePresence>
       {showPrompt && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50"
           onClick={dismissPrompt}
         >
           {/* Prompt Modal */}
@@ -153,6 +155,7 @@ export default function PushNotificationPrompt() {
         </motion.div>
       )}
     </AnimatePresence>
+    </Portal>
   )
 }
 

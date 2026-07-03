@@ -7,6 +7,7 @@ import { supabase } from '@/app/lib/supabase'
 import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CreditCard, Banknote, CheckCircle } from 'lucide-react'
+import Portal from '@/app/components/Portal'
 
 interface CartSidebarProps {
   restaurant: {
@@ -260,7 +261,8 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-end z-50">
+    <Portal>
+    <div className="fixed inset-0 z-[9999] flex justify-end h-[100dvh] w-screen bg-black/50">
       <div
         className="absolute inset-0"
         onClick={onClose}
@@ -429,7 +431,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 flex items-end justify-center z-[60]"
+              className="fixed inset-0 bg-black/60 flex items-end justify-center z-[10000]"
               onClick={() => !isProcessing && setShowPaymentModal(false)}
             >
               <motion.div
@@ -577,7 +579,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[70]"
+              className="fixed inset-0 bg-black/70 flex items-center justify-center z-[10000]"
             >
               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
@@ -624,7 +626,7 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 flex items-center justify-center z-[70] p-4"
+              className="fixed inset-0 bg-black/60 flex items-center justify-center z-[10000] p-4"
               onClick={() => {
                 setNoteModalOpen(false)
                 setSelectedItem(null)
@@ -712,5 +714,6 @@ export default function CartSidebar({ restaurant, onClose }: CartSidebarProps) {
         </AnimatePresence>
       </div>
     </div>
+    </Portal>
   )
 }

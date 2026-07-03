@@ -6,6 +6,7 @@ import { supabase } from '@/app/lib/supabase'
 import { ArrowLeft, Package, Clock, CheckCircle, XCircle, Star, ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import OrderDetailModal from '@/app/components/OrderDetailModal'
+import Portal from '@/app/components/Portal'
 import { OrderListSkeleton } from '@/app/components/Skeleton'
 import { normalizeOrderItems } from '@/app/lib/orderItems'
 import type { OrderDetail } from '@/types/order'
@@ -486,9 +487,10 @@ export default function SiparislerimPage() {
       <OrderDetailModal order={detailOrder} onClose={() => setDetailOrder(null)} />
 
       {/* Değerlendirme Modalı */}
+      <Portal>
       <AnimatePresence>
         {reviewingOrder && (
-          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-black/50">
+          <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center h-[100dvh] w-screen sm:p-4 bg-black/50">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -590,6 +592,7 @@ export default function SiparislerimPage() {
           </div>
         )}
       </AnimatePresence>
+      </Portal>
     </div>
   )
 }

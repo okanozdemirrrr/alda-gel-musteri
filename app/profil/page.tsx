@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/app/lib/supabase'
 import { ArrowLeft, Edit2, Save, X, Trash2, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Portal from '@/app/components/Portal'
 
 interface CustomerProfile {
   id: string
@@ -459,13 +460,14 @@ export default function ProfilPage() {
       </div>
 
       {/* Delete Confirmation Modal */}
+      <Portal>
       <AnimatePresence>
         {showDeleteModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50"
+            className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center h-[100dvh] w-screen p-4 bg-black/50"
             onClick={(e) => {
               if (e.target === e.currentTarget && !deleting) setShowDeleteModal(false)
             }}
@@ -533,6 +535,7 @@ export default function ProfilPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { saveUserAddress } from '@/app/lib/addressService'
 import dynamic from 'next/dynamic'
+import Portal from './Portal'
 
 const MapComponent = dynamic(() => import('./MapComponent'), { ssr: false })
 
@@ -206,7 +207,8 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4 px-safe">
+    <Portal>
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center h-[100dvh] w-screen bg-black/50 sm:p-4 px-safe">
       <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-[800px] max-h-[95dvh] sm:max-h-[90dvh] overflow-y-auto overflow-x-hidden pb-safe">
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[#e8e8e8] sticky top-0 bg-white z-10">
           <h2 className="text-[18px] sm:text-[20px] font-bold text-[#3c4043]" style={{ fontFamily: 'Open Sans, sans-serif' }}>
@@ -579,5 +581,6 @@ export default function AddressModal({ onClose, onAddressSelect }: AddressModalP
         </div>
       </div>
     </div>
+    </Portal>
   )
 }
