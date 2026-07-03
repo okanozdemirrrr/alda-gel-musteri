@@ -11,6 +11,7 @@ import { fetchUserAddressCoordinates } from '@/app/lib/addressService'
 import { isMobile } from '@/app/lib/platform'
 import StableImage from '@/app/components/StableImage'
 import AuthModal from '@/app/components/AuthModal'
+import Portal from '@/app/components/Portal'
 
 const shouldAnimate = !isMobile()
 
@@ -306,13 +307,14 @@ export default function SepetPage() {
   return (
     <>
       {/* Sipariş Başarı Modalı */}
+      <Portal>
       <AnimatePresence>
         {showCheckoutSuccess && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 px-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50 backdrop-blur-sm px-4"
           >
             <motion.div
               initial={shouldAnimate ? { scale: 0.8, opacity: 0 } : {}}
@@ -331,6 +333,7 @@ export default function SepetPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
 
       <div className="app-page bg-stone-50 pb-44">
         {/* Header */}
@@ -485,8 +488,8 @@ export default function SepetPage() {
           </div>
         </main>
 
-        {/* Alt Checkout Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-50 safe-area-footer">
+        {/* Alt Checkout Bar — Portal ile viewport'a sabitlendi */}
+        <Portal><div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)] z-[9998] safe-area-footer">
           <div className="max-w-4xl mx-auto px-3 sm:px-4 pt-3 sm:pt-4">
             <button
               onClick={handleOrderButtonClick}
@@ -512,17 +515,18 @@ export default function SepetPage() {
               💡 Not eklemek için ürünün üzerine tıklayın
             </p>
           </div>
-        </div>
+        </div></Portal>
       </div>
 
       {/* Teslimat Bilgileri Modalı */}
+      <Portal>
       <AnimatePresence>
         {showInfoModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50 backdrop-blur-sm p-4"
           >
             <motion.div
               initial={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
@@ -619,6 +623,7 @@ export default function SepetPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
 
       {/* Giriş Modalı — sadece misafir "Siparişi Tamamla"ya bastığında */}
       {showAuthModal && (
@@ -633,13 +638,14 @@ export default function SepetPage() {
       )}
 
       {/* Not Modalı */}
+      <Portal>
       <AnimatePresence>
         {noteModalOpen && selectedItem && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50 backdrop-blur-sm p-4"
           >
             <motion.div
               initial={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
@@ -711,6 +717,7 @@ export default function SepetPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
     </>
   )
 }

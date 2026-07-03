@@ -4,6 +4,20 @@
 
 :root {
   --bottom-nav-height: 3.5rem;
+
+  /*
+   * Z-index hiyerarşisi (tüm Portal içerikleri body'e render edilir):
+   *   9998 — Kalıcı fixed UI: BottomNavigation, checkout bar, floating butonlar
+   *   9999 — Modal/Popup/Dialog overlay (tüm sayfayı örter)
+   *  10000 — Modal içi ikinci katman (örn. CartSidebar iç modal)
+   *
+   * transform: translateZ(0) olan atalar (app-root, app-page, gpu-layer)
+   * position:fixed için yeni bir containing block oluşturur.
+   * createPortal(el, document.body) bu sorunun kökten çözümüdür.
+   */
+  --z-fixed-ui: 9998;
+  --z-modal: 9999;
+  --z-modal-inner: 10000;
 }
 
 @layer base {

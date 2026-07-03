@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation'
 import { ArrowLeft, ShoppingCart, Plus, Minus } from 'lucide-react'
 import { supabase } from '@/app/lib/supabase'
 import StableImage from '@/app/components/StableImage'
+import Portal from '@/app/components/Portal'
 
 interface Product {
   id: number
@@ -267,10 +268,11 @@ export default function CategoryPage() {
         )}
       </main>
 
-      {/* Floating Cart Summary */}
+      {/* Floating Cart Summary — Portal ile viewport'a sabitlendi */}
       {cartCount > 0 && (
+        <Portal>
         <div
-          className="fixed left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-40 safe-area-footer"
+          className="fixed left-0 right-0 bg-white border-t border-gray-200 shadow-2xl z-[9998] safe-area-footer"
           style={{ bottom: 'calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px))' }}
         >
           <div className="app-container px-4 py-3">
@@ -289,6 +291,7 @@ export default function CategoryPage() {
             </div>
           </div>
         </div>
+        </Portal>
       )}
     </div>
   )

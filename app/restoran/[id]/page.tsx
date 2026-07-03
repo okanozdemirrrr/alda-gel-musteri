@@ -15,6 +15,7 @@ import { Clock, Wallet } from 'lucide-react'
 import { isMobile } from '@/app/lib/platform'
 import { RestaurantMenuSkeleton } from '@/app/components/Skeleton'
 import StableImage from '@/app/components/StableImage'
+import Portal from '@/app/components/Portal'
 
 interface Restaurant {
   id: string
@@ -217,7 +218,8 @@ export default function RestaurantMenuPage() {
         />
       )}
       {addedToast && (
-        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[70] pointer-events-none">
+        <Portal>
+        <div className="fixed bottom-28 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none">
           <div className="flex items-center gap-2.5 bg-[#1f2937] text-white text-[13px] font-medium px-4 py-3 rounded-xl shadow-2xl">
             <span className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
@@ -227,6 +229,7 @@ export default function RestaurantMenuPage() {
             Sepete Eklendi
           </div>
         </div>
+        </Portal>
       )}
 
       {/* Hero Section - Cover Image + Logo */}
@@ -272,10 +275,11 @@ export default function RestaurantMenuPage() {
           </svg>
         </button>
         
-        {/* Cart Button - Fixed Floating */}
+        {/* Cart Button — Portal ile viewport'a sabitlendi */}
+        <Portal>
         <button
           onClick={() => setShowCart(true)}
-          className={`fixed lg:hidden ${isMobile() ? 'top-2 right-2 px-3 py-2.5 min-h-[44px] text-[12px]' : 'top-4 right-4 px-5 py-2.5 text-[14px]'} z-50 bg-[#f59e0b] text-white rounded-full font-bold hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-1.5`}
+          className={`fixed lg:hidden ${isMobile() ? 'top-2 right-2 px-3 py-2.5 min-h-[44px] text-[12px]' : 'top-4 right-4 px-5 py-2.5 text-[14px]'} z-[9998] bg-[#f59e0b] text-white rounded-full font-bold hover:bg-[#d97706] transition-all shadow-lg flex items-center gap-1.5`}
           style={{
             top: isMobile() ? 'max(8px, env(safe-area-inset-top))' : undefined,
             right: isMobile() ? 'max(8px, env(safe-area-inset-right))' : undefined,
@@ -292,6 +296,7 @@ export default function RestaurantMenuPage() {
             </span>
           )}
         </button>
+        </Portal>
         
         {/* Logo Overlap */}
         <div className={`absolute ${isMobile() ? '-bottom-8 left-4' : '-bottom-12 left-6'}`}>
