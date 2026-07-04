@@ -39,7 +39,7 @@ export default function YardimMerkezi() {
     },
     {
       question: 'İletişim bilgileriniz nedir?',
-      answer: 'Telefon: 0XXX XXX XX XX | E-posta: destek@aldagel.com | Çalışma Saatleri: 09:00 - 23:00'
+      answer: 'Telefon: 0505 059 16 29 | E-posta: okanozdemir4405@gmail.com | Çalışma Saatleri: 09:00 - 23:00'
     }
   ]
 
@@ -104,7 +104,7 @@ export default function YardimMerkezi() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <a
-              href="tel:0XXXXXXXXXX"
+              href="tel:+905050591629"
               className="flex items-center gap-3 p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors"
             >
               <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center text-white text-xl">
@@ -112,11 +112,11 @@ export default function YardimMerkezi() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">Telefon</p>
-                <p className="text-sm text-gray-600">0XXX XXX XX XX</p>
+                <p className="text-sm text-gray-600">0505 059 16 29</p>
               </div>
             </a>
             <a
-              href="mailto:destek@aldagel.com"
+              href="mailto:okanozdemir4405@gmail.com"
               className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
             >
               <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl">
@@ -124,7 +124,7 @@ export default function YardimMerkezi() {
               </div>
               <div>
                 <p className="font-semibold text-gray-900">E-posta</p>
-                <p className="text-sm text-gray-600">destek@aldagel.com</p>
+                <p className="text-sm text-gray-600">okanozdemir4405@gmail.com</p>
               </div>
             </a>
           </div>
