@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { ArrowLeft, Trash2, Plus, Minus, MessageSquare, ShoppingBag, MapPin, CreditCard, Banknote, Phone } from 'lucide-react'
+import { ArrowLeft, Trash2, Plus, Minus, MessageSquare, ShoppingBag, MapPin, CreditCard, Banknote } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useCart } from '@/app/context/CartContext'
 import { supabase } from '@/app/lib/supabase'
@@ -25,18 +25,16 @@ export default function SepetPage() {
   const [customerAddress, setCustomerAddress] = useState('')
   const [showCheckoutSuccess, setShowCheckoutSuccess] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card'>('cash')
   const [checkoutError, setCheckoutError] = useState('')
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
-  // Teslimat bilgisi toplama modal state'leri
-  const [showInfoModal, setShowInfoModal] = useState(false)
-  const [infoPhone, setInfoPhone] = useState('')
-  const [infoPhoneError, setInfoPhoneError] = useState('')
-  const [infoAddress, setInfoAddress] = useState('')
-  const [isSavingInfo, setIsSavingInfo] = useState(false)
-  const [infoError, setInfoError] = useState('')
+  // Ödeme modalı — sipariş öncesi telefon teyidi + ödeme yöntemi seçimi
+  const [showPaymentModal, setShowPaymentModal] = useState(false)
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [phoneError, setPhoneError] = useState('')
+  const [paymentAddressInput, setPaymentAddressInput] = useState('')
+  const [paymentAddressError, setPaymentAddressError] = useState('')
   // Kullanıcı ve adres bilgilerini yükle
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -76,67 +74,27 @@ export default function SepetPage() {
     }
   }
 
-  // ─── TELSEFİN DOĞRULAMA ────────────────────────────────────────
-  const validateInfoPhone = (value: string): boolean => {
-    if (!value) { setInfoPhoneError('Telefon numarası zorunludur'); return false }
-    if (!/^\d+$/.test(value)) { setInfoPhoneError('Sadece rakam girebilirsiniz'); return false }
-    if (value.startsWith('0')) { setInfoPhoneError('Başında 0 olmadan yazın'); return false }
-    if (value.length !== 10) { setInfoPhoneError('10 hane olmalıdır'); return false }
-    if (!value.startsWith('5')) { setInfoPhoneError('5 ile başlamalıdır'); return false }
-    setInfoPhoneError('')
+  // ─── TELEFON DOĞRULAMA (sipariş öncesi son teyit) ───────────────
+  const validatePhoneNumber = (phone: string): boolean => {
+    if (!phone) { setPhoneError('Telefon numarası zorunludur'); return false }
+    if (!/^\d+$/.test(phone)) { setPhoneError('Sadece rakam girebilirsiniz'); return false }
+    if (phone.startsWith('0')) { setPhoneError('Numarayı başında 0 olmadan yazın (örn: 5551234567)'); return false }
+    if (phone.length !== 10) { setPhoneError('Telefon numarası 10 hane olmalıdır'); return false }
+    if (!phone.startsWith('5')) { setPhoneError('Cep telefonu numarası 5 ile başlamalıdır'); return false }
+    setPhoneError('')
     return true
   }
 
-  // ─── TESLİMAT BİLGİSİ KAYDET + SİPARİŞ BAŞLAT ───────────────
-  const handleSaveInfoAndCheckout = async () => {
-    const currentNeedsPhone = !localStorage.getItem('customer_phone')
-    const currentNeedsAddress = !localStorage.getItem('customer_address')
-
-    if (currentNeedsPhone && !validateInfoPhone(infoPhone)) return
-    if (currentNeedsAddress && !infoAddress.trim()) {
-      setInfoError('Teslimat adresi zorunludur')
-      return
-    }
-
-    setIsSavingInfo(true)
-    setInfoError('')
-
-    try {
-      const customerId = localStorage.getItem('customer_id')
-
-      // Telefonu customers tablosuna kaydet
-      if (currentNeedsPhone && infoPhone && customerId) {
-        await supabase
-          .from('customers')
-          .update({ phone: infoPhone })
-          .eq('id', customerId)
-        localStorage.setItem('customer_phone', infoPhone)
-      }
-
-      // Adresi user_addresses tablosuna kaydet
-      if (currentNeedsAddress && infoAddress.trim()) {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (user) {
-          await supabase.from('user_addresses').insert([{
-            user_id: user.id,
-            title: 'Teslimat Adresim',
-            full_address: infoAddress.trim(),
-            latitude: 41.492892,
-            longitude: 36.081592,
-          }])
-        }
-        localStorage.setItem('customer_address', infoAddress.trim())
-        setCustomerAddress(infoAddress.trim())
-      }
-
-      setShowInfoModal(false)
-      await handleCheckout()
-    } catch (err: any) {
-      setInfoError('Bilgiler kaydedilemedi: ' + (err.message || 'Hata oluştu'))
-    } finally {
-      setIsSavingInfo(false)
-    }
+  const handlePhoneChange = (value: string) => {
+    const cleaned = value.replace(/\D/g, '')
+    setPhoneNumber(cleaned)
+    if (cleaned.length > 0) validatePhoneNumber(cleaned)
+    else setPhoneError('')
   }
+
+  const isPhoneValid = phoneNumber.length === 10 && phoneNumber.startsWith('5') && !phoneNumber.startsWith('0')
+
+  const isPaymentAddressValid = !!(customerAddress || paymentAddressInput.trim())
 
   // ─── SİPARİŞ BUTONU BASIN ─────────────────────────────────────
   const handleOrderButtonClick = () => {
@@ -145,33 +103,74 @@ export default function SepetPage() {
       return
     }
 
-    const phone = localStorage.getItem('customer_phone') || ''
-    const address = localStorage.getItem('customer_address') || ''
+    const storedPhone = localStorage.getItem('customer_phone') || ''
+    const storedAddress = localStorage.getItem('customer_address') || ''
+    setPhoneNumber(storedPhone)
+    setPhoneError('')
+    setPaymentAddressInput(storedAddress)
+    setPaymentAddressError('')
+    setCheckoutError('')
+    setShowPaymentModal(true)
+  }
 
-    if (!phone || !address) {
-      setInfoPhone(phone)
-      setInfoAddress(address)
-      setInfoPhoneError('')
-      setInfoError('')
-      setShowInfoModal(true)
+  const handlePaymentSelect = async (paymentMethod: 'cash' | 'card') => {
+    if (!validatePhoneNumber(phoneNumber)) return
+
+    const effectiveAddress = customerAddress || paymentAddressInput.trim()
+    if (!effectiveAddress) {
+      setPaymentAddressError('Teslimat adresi zorunludur')
       return
     }
+    setPaymentAddressError('')
 
-    handleCheckout()
+    setIsProcessing(true)
+    setCheckoutError('')
+
+    try {
+      const customerId = localStorage.getItem('customer_id')
+
+      // Telefonu teyit edilmiş numara ile güncelle
+      localStorage.setItem('customer_phone', phoneNumber)
+      if (customerId) {
+        await supabase.from('customers').update({ phone: phoneNumber }).eq('id', customerId)
+      }
+
+      // Adres henüz kayıtlı değilse kaydet
+      if (!customerAddress && paymentAddressInput.trim()) {
+        localStorage.setItem('customer_address', paymentAddressInput.trim())
+        setCustomerAddress(paymentAddressInput.trim())
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          await supabase.from('user_addresses').insert([{
+            user_id: user.id,
+            title: 'Teslimat Adresim',
+            full_address: paymentAddressInput.trim(),
+            latitude: 41.492892,
+            longitude: 36.081592,
+          }])
+        }
+      }
+
+      setShowPaymentModal(false)
+      await handleCheckout(paymentMethod, phoneNumber)
+    } catch (err: any) {
+      setCheckoutError('Sipariş oluşturulurken hata: ' + (err.message || 'Bilinmeyen hata'))
+      setShowPaymentModal(true)
+    } finally {
+      setIsProcessing(false)
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════
   // GERÇEK SİPARİŞ OLUŞTURMA — DB'ye INSERT
   // ═══════════════════════════════════════════════════════════════
-  const handleCheckout = async () => {
+  const handleCheckout = async (paymentMethod: 'cash' | 'card', customerPhone: string) => {
     if (cart.length === 0) return
     setCheckoutError('')
 
-    // 1) Kullanıcı bilgilerini localStorage'dan çek
     const customerId = localStorage.getItem('customer_id')
     const customerName = localStorage.getItem('customer_name')
     const storedAddress = localStorage.getItem('customer_address')
-    const customerPhone = localStorage.getItem('customer_phone') || ''
 
     if (!customerId) {
       setCheckoutError('Lütfen giriş yapın.')
@@ -450,35 +449,6 @@ export default function SepetPage() {
               </p>
             </div>
 
-            {/* Ödeme Yöntemi */}
-            <div className="mb-2">
-              <p className="text-sm font-bold text-stone-800 mb-3">Ödeme Yöntemi</p>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => setPaymentMethod('cash')}
-                  className={`border-2 rounded-xl p-3 min-h-[72px] text-center transition-all ${
-                    paymentMethod === 'cash'
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'border-stone-200 hover:border-stone-300'
-                  }`}
-                >
-                  <Banknote size={24} className={`mx-auto mb-1 ${paymentMethod === 'cash' ? 'text-amber-600' : 'text-stone-400'}`} />
-                  <span className={`text-sm font-bold ${paymentMethod === 'cash' ? 'text-amber-900' : 'text-stone-700'}`}>Nakit</span>
-                </button>
-                <button
-                  onClick={() => setPaymentMethod('card')}
-                  className={`border-2 rounded-xl p-3 min-h-[72px] text-center transition-all ${
-                    paymentMethod === 'card'
-                      ? 'border-amber-500 bg-amber-50'
-                      : 'border-stone-200 hover:border-stone-300'
-                  }`}
-                >
-                  <CreditCard size={24} className={`mx-auto mb-1 ${paymentMethod === 'card' ? 'text-amber-600' : 'text-stone-400'}`} />
-                  <span className={`text-sm font-bold ${paymentMethod === 'card' ? 'text-amber-900' : 'text-stone-700'}`}>Kart</span>
-                </button>
-              </div>
-            </div>
-
             {/* Hata mesajı */}
             {checkoutError && (
               <div className="mt-4 bg-red-50 border border-red-200 rounded-xl p-3 text-sm text-red-700 font-medium">
@@ -518,107 +488,146 @@ export default function SepetPage() {
         </div></Portal>
       </div>
 
-      {/* Teslimat Bilgileri Modalı */}
+      {/* Ödeme Yöntemi Modalı — telefon teyidi + Nakit / Kapıda Kredi Kartı */}
       <Portal>
       <AnimatePresence>
-        {showInfoModal && (
+        {showPaymentModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center h-[100dvh] w-screen bg-black/50 backdrop-blur-sm p-4"
+            className="fixed inset-0 bg-black/60 flex items-end justify-center z-[10000]"
+            onClick={() => !isProcessing && setShowPaymentModal(false)}
           >
             <motion.div
-              initial={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
-              animate={shouldAnimate ? { scale: 1, opacity: 1 } : {}}
-              exit={shouldAnimate ? { scale: 0.9, opacity: 0 } : {}}
-              className="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="bg-white w-full sm:max-w-[450px] rounded-t-3xl p-4 sm:p-6 safe-area-footer"
+              onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
-              <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4">
-                <h2 className="text-[17px] font-bold text-white">Teslimat Bilgileri</h2>
-                <p className="text-[12px] text-white/80 mt-0.5">
-                  Siparişinizi tamamlamak için lütfen bilgilerinizi girin
+              <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6" />
+
+              <h3 className="text-[22px] font-bold text-[#3c4043] mb-2 text-center">
+                Ödeme Yöntemi Seçin
+              </h3>
+              <p className="text-[14px] text-[#6f6f6f] mb-6 text-center">
+                Toplam: <span className="font-bold text-[#f59e0b]">{total.toFixed(2)}₺</span>
+              </p>
+
+              <div className="mb-4">
+                <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
+                  Telefon Numarası <span className="text-red-500">*</span>
+                </label>
+                <p className="text-[11px] text-[#6f6f6f] mb-2">
+                  (başında 0 olmadan 10 hane)
                 </p>
-              </div>
-
-              <div className="p-5 space-y-4">
-                {/* Telefon Alanı */}
-                {!localStorage.getItem('customer_phone') && (
-                  <div>
-                    <label className="flex items-center gap-2 text-[13px] font-semibold text-stone-700 mb-2">
-                      <Phone size={14} className="text-amber-500" />
-                      Telefon Numarası <span className="text-red-500">*</span>
-                    </label>
-                    <p className="text-[11px] text-stone-400 mb-2">Başında 0 olmadan 10 hane (ör: 5551234567)</p>
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      placeholder="5551234567"
-                      value={infoPhone}
-                      onChange={(e) => {
-                        const cleaned = e.target.value.replace(/\D/g, '')
-                        setInfoPhone(cleaned)
-                        if (cleaned.length > 0) validateInfoPhone(cleaned)
-                        else setInfoPhoneError('')
-                      }}
-                      className={`w-full h-[48px] px-4 border rounded-xl text-[14px] focus:outline-none transition-colors ${
-                        infoPhoneError
-                          ? 'border-red-400 bg-red-50'
-                          : infoPhone.length === 10 && !infoPhoneError
-                          ? 'border-green-400 bg-green-50'
-                          : 'border-stone-200 focus:border-amber-400'
-                      }`}
-                    />
-                    {infoPhoneError && (
-                      <p className="text-[11px] text-red-500 mt-1">⚠️ {infoPhoneError}</p>
-                    )}
-                    {infoPhone.length === 10 && !infoPhoneError && (
-                      <p className="text-[11px] text-green-600 mt-1">✓ Geçerli</p>
-                    )}
-                  </div>
-                )}
-
-                {/* Adres Alanı */}
-                {!localStorage.getItem('customer_address') && (
-                  <div>
-                    <label className="flex items-center gap-2 text-[13px] font-semibold text-stone-700 mb-2">
-                      <MapPin size={14} className="text-amber-500" />
-                      Teslimat Adresi <span className="text-red-500">*</span>
-                    </label>
-                    <textarea
-                      placeholder="Örn: 19 Mayıs KYK Yurdu, A Blok, Kat 3, No 12"
-                      value={infoAddress}
-                      onChange={(e) => { setInfoAddress(e.target.value); setInfoError('') }}
-                      rows={3}
-                      className="w-full px-4 py-3 border border-stone-200 focus:border-amber-400 rounded-xl text-[14px] focus:outline-none transition-colors resize-none"
-                    />
-                  </div>
-                )}
-
-                {infoError && (
-                  <p className="text-[12px] text-red-500 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                    ⚠️ {infoError}
+                <input
+                  type="tel"
+                  inputMode="numeric"
+                  maxLength={10}
+                  value={phoneNumber}
+                  onChange={(e) => handlePhoneChange(e.target.value)}
+                  placeholder="5675551122"
+                  className={`w-full bg-slate-100 rounded-lg p-3 text-[16px] border-2 transition-colors outline-none ${
+                    phoneError
+                      ? 'border-red-500'
+                      : phoneNumber.length > 0 && isPhoneValid
+                      ? 'border-green-500'
+                      : 'border-transparent focus:border-orange-500'
+                  }`}
+                  disabled={isProcessing}
+                />
+                {phoneError && (
+                  <p className="text-[12px] text-red-500 mt-1 flex items-center gap-1">
+                    <span>⚠️</span>
+                    {phoneError}
                   </p>
                 )}
-
-                <div className="flex gap-3 pt-1">
-                  <button
-                    onClick={() => setShowInfoModal(false)}
-                    className="flex-1 min-h-[48px] border-2 border-stone-200 text-stone-600 rounded-xl font-semibold text-[14px] hover:bg-stone-50 transition-colors"
-                  >
-                    Vazgeç
-                  </button>
-                  <button
-                    onClick={handleSaveInfoAndCheckout}
-                    disabled={isSavingInfo}
-                    className="flex-1 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold text-[14px] transition-all disabled:opacity-50"
-                  >
-                    {isSavingInfo ? 'Kaydediliyor...' : 'Siparişi Tamamla'}
-                  </button>
-                </div>
+                {phoneNumber.length > 0 && isPhoneValid && (
+                  <p className="text-[12px] text-green-600 mt-1 flex items-center gap-1">
+                    <span>✓</span>
+                    Telefon numarası geçerli
+                  </p>
+                )}
               </div>
+
+              {!customerAddress && (
+                <div className="mb-6">
+                  <label className="block text-[13px] font-semibold text-[#3c4043] mb-2">
+                    Teslimat Adresi <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    placeholder="Örn: 19 Mayıs KYK Yurdu, A Blok, Kat 3, No 12"
+                    value={paymentAddressInput}
+                    onChange={(e) => { setPaymentAddressInput(e.target.value); setPaymentAddressError('') }}
+                    rows={3}
+                    className={`w-full bg-slate-100 rounded-lg p-3 text-[14px] border-2 transition-colors outline-none resize-none ${
+                      paymentAddressError ? 'border-red-500' : 'border-transparent focus:border-orange-500'
+                    }`}
+                    disabled={isProcessing}
+                  />
+                  {paymentAddressError && (
+                    <p className="text-[12px] text-red-500 mt-1">⚠️ {paymentAddressError}</p>
+                  )}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <button
+                  onClick={() => handlePaymentSelect('cash')}
+                  disabled={isProcessing || !isPhoneValid || !isPaymentAddressValid}
+                  className={`w-full h-[72px] rounded-2xl flex items-center justify-center gap-4 transition-all shadow-lg ${
+                    isPhoneValid && isPaymentAddressValid && !isProcessing
+                      ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                      : 'bg-gray-300 cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  <Banknote size={32} strokeWidth={2.5} className={isPhoneValid && isPaymentAddressValid ? 'text-white' : 'text-gray-500'} />
+                  <div className="text-left">
+                    <div className={`text-[18px] font-bold ${isPhoneValid && isPaymentAddressValid ? 'text-white' : 'text-gray-500'}`}>
+                      Nakit
+                    </div>
+                    <div className={`text-[13px] ${isPhoneValid && isPaymentAddressValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
+                      Kapıda nakit ödeme
+                    </div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => handlePaymentSelect('card')}
+                  disabled={isProcessing || !isPhoneValid || !isPaymentAddressValid}
+                  className={`w-full h-[72px] rounded-2xl flex items-center justify-center gap-4 transition-all shadow-lg ${
+                    isPhoneValid && isPaymentAddressValid && !isProcessing
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
+                      : 'bg-gray-300 cursor-not-allowed opacity-60'
+                  }`}
+                >
+                  <CreditCard size={32} strokeWidth={2.5} className={isPhoneValid && isPaymentAddressValid ? 'text-white' : 'text-gray-500'} />
+                  <div className="text-left">
+                    <div className={`text-[18px] font-bold ${isPhoneValid && isPaymentAddressValid ? 'text-white' : 'text-gray-500'}`}>
+                      Kapıda Kredi Kartı
+                    </div>
+                    <div className={`text-[13px] ${isPhoneValid && isPaymentAddressValid ? 'text-white opacity-90' : 'text-gray-500'}`}>
+                      Kartla ödeme yapın
+                    </div>
+                  </div>
+                </button>
+              </div>
+
+              {(!isPhoneValid || !isPaymentAddressValid) && (
+                <p className="text-[12px] text-center text-[#6f6f6f] mt-3">
+                  Devam etmek için {!isPhoneValid ? 'telefon numaranızı' : 'teslimat adresinizi'} girin
+                </p>
+              )}
+
+              {isProcessing && (
+                <div className="mt-4 text-center">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[#f59e0b] border-t-transparent" />
+                  <p className="text-[13px] text-[#6f6f6f] mt-2">Sipariş oluşturuluyor...</p>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}

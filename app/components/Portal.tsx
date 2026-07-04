@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
@@ -12,18 +13,30 @@ import { createPortal } from 'react-dom'
  * Portal, modal içeriğini body'e taşıyarak bu sorunun kökten önüne geçer.
  *
  * Render zamanlaması:
- * Eski sürüm useState(false) + useEffect ile mount'u bekliyordu; bu, hydration
- * tamamlanana kadar BottomNavigation gibi kalıcı UI'ın DOM'da hiç olmamasına ve
- * ilk tıklamaların boşa gitmesine yol açıyordu. Artık document mevcutsa
- * (yani client'ta) ilk render'da portal anında oluşturulur. Portal içeriği
- * server HTML'inin parçası olmadığı için hydration uyuşmazlığı üretmez;
- * SSG/build aşamasında ise document tanımsız olduğundan null döner.
+ * Hydration geçişinde client render'ın sunucu HTML'iyle birebir eşleşmesi gerekir;
+ * sunucu portal içeriğini üretemediği için ilk client render'da da null dönmek
+ * zorunludur (aksi halde "Hydration failed" hatası oluşur). Gecikmeyi sıfırlamak
+ * için mount bayrağı useEffect yerine useLayoutEffect ile set edilir: DOM commit
+ * edilir edilmez, tarayıcı EKRANA ÇİZMEDEN ÖNCE senkron olarak yeniden render
+ * tetiklenir. Böylece BottomNavigation gibi kalıcı UI ilk boyamada ekranda olur
+ * ve ilk dokunuşlar kaybolmaz.
  */
 interface PortalProps {
   children: React.ReactNode
 }
 
+// SSR/SSG sırasında useLayoutEffect uyarısını önlemek için izomorfik sürüm
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
+
 export default function Portal({ children }: PortalProps) {
-  if (typeof document === 'undefined') return null
+  const [mounted, setMounted] = useState(false)
+
+  useIsomorphicLayoutEffect(() => {
+    setMounted(true)
+    return () => setMounted(false)
+  }, [])
+
+  if (!mounted) return null
   return createPortal(children, document.body)
 }

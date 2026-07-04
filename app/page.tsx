@@ -45,7 +45,7 @@ function SplitScreenSelector() {
   ]
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 pt-6 pb-12">
+    <div className="w-full max-w-5xl mx-auto px-4 py-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {cards.map((card) => {
           const Icon = card.icon
@@ -318,58 +318,9 @@ export default function MusteriAnaSayfa() {
                 <SplitScreenSelector />
               </div>
             ) : (
-              /* ═══ MİSAFİR / ADRES YOK — Engelsiz keşif ═══ */
-              <div className="py-10 sm:py-16">
-                <motion.div
-                  initial={shouldAnimate ? { opacity: 0, y: 30 } : {}}
-                  animate={shouldAnimate ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.6, ease: 'easeOut' }}
-                  className="w-[90%] md:w-[600px] lg:w-[800px] mx-auto mb-8"
-                >
-                  {/* Yarı saydam panel */}
-                  <div className="bg-white/85 backdrop-blur-xl rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl border border-white/30">
-                    <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-[#3E1F0C] mb-2 sm:mb-3 tracking-tight leading-tight">
-                      Alda-Gel Yemek & Sanal Market
-                    </h1>
-                    <p className="text-xs sm:text-sm md:text-base lg:text-lg text-stone-500 mb-5 sm:mb-6 md:mb-8 font-medium leading-relaxed">
-                      Samsun 19 Mayıs'ta lezzetli ve hızlı teslimat.
-                    </p>
-
-                    {/* CTA — direkt restoranlar sayfasına, giriş şart değil */}
-                    <button
-                      onClick={() => router.push('/restoranlar')}
-                      className="group w-full sm:w-auto px-5 sm:px-6 md:px-8 py-3 sm:py-3.5 md:py-4 min-h-[48px] bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white text-sm sm:text-base md:text-lg lg:text-xl font-black rounded-2xl transition-all duration-300 shadow-[0_4px_20px_rgba(245,158,11,0.3)] hover:shadow-[0_8px_40px_rgba(245,158,11,0.5)] flex items-center justify-center gap-2 sm:gap-3"
-                    >
-                      <span>Keşfet ve Başla</span>
-                      <ChevronRight
-                        size={20}
-                        className="group-hover:translate-x-1 transition-transform sm:w-6 sm:h-6"
-                      />
-                    </button>
-
-                    <p className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-stone-400 font-medium">
-                      Giriş yapmadan restoranları ve menüleri keşfedebilirsiniz
-                    </p>
-                  </div>
-
-                  {/* Trust badges */}
-                  <div className="mt-6 flex items-center justify-center gap-3 sm:gap-6 text-white/80 text-xs sm:text-sm flex-wrap">
-                    <div className="flex items-center gap-1.5">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                      <span className="font-medium">Komisyon Yok</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      <span className="font-medium">Hızlı Teslimat</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                      <span className="font-medium">Yerel Lezzetler</span>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* Misafirler için de YEMEK / MARKET kartları */}
+              /* ═══ MİSAFİR / ADRES YOK — YEMEK/MARKET kartları ekranın tam ortasında.
+                   100dvh − header (4rem) − bottom nav yüksekliği = kullanılabilir alan */
+              <div className="min-h-[calc(100dvh-4rem-var(--bottom-nav-height))] flex flex-col items-center justify-center py-6">
                 <SplitScreenSelector />
               </div>
             )}
