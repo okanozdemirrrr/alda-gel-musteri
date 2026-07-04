@@ -41,6 +41,22 @@
     -webkit-user-select: none;
     user-select: none;
     -webkit-text-size-adjust: 100%;
+    /* iOS WKWebView 300ms tap delay'i kaldırır: double-tap-to-zoom beklemesi yapılmaz,
+       pan/pinch korunur. Tıklamalar anında click event üretir. */
+    touch-action: manipulation;
+  }
+
+  /* Tüm etkileşimli elementler: tap delay yok + iOS'ta :active state'in
+     güvenilir tetiklenmesi için cursor: pointer şart. */
+  button,
+  a,
+  [role='button'],
+  .touch-press,
+  label,
+  select,
+  summary {
+    touch-action: manipulation;
+    cursor: pointer;
   }
 
   body {
@@ -80,7 +96,10 @@
     transform: translateZ(0) scale(0.98);
     -webkit-transform: translateZ(0) scale(0.98);
     opacity: 0.92;
-    transition: transform 0.1s ease, opacity 0.1s ease;
+    /* Basma anında geri bildirim GECİKMESİZ olmalı; transition sadece
+       bırakınca (release) çalışır. Aksi halde kullanıcı tıklamanın
+       algılanmadığını sanıp tekrar dokunuyor. */
+    transition: none;
   }
 
   @media (hover: hover) and (pointer: fine) {

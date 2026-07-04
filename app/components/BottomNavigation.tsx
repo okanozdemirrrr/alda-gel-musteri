@@ -48,9 +48,10 @@ export default function BottomNavigation() {
               <Link
                 key={href}
                 href={href}
-                className={`touch-press flex flex-col items-center justify-center flex-1 min-w-0 gap-0.5 transition-colors ${
+                className={`touch-press cursor-pointer select-none flex flex-col items-center justify-center flex-1 min-w-0 gap-0.5 active:text-amber-600 ${
                   active ? 'text-amber-600' : 'text-stone-400'
                 }`}
+                style={{ touchAction: 'manipulation', WebkitTapHighlightColor: 'transparent' }}
               >
                 <span className="relative">
                   <Icon size={22} strokeWidth={active ? 2.5 : 2} />

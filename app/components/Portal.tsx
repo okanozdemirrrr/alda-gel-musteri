@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 /**
@@ -11,19 +10,20 @@ import { createPortal } from 'react-dom'
  * kullanır. CSS stacking context kuralı gereği, transform'lu bir ancestor içindeki
  * `position: fixed` elemanlar viewport yerine o ancestor'a göre konumlanır.
  * Portal, modal içeriğini body'e taşıyarak bu sorunun kökten önüne geçer.
+ *
+ * Render zamanlaması:
+ * Eski sürüm useState(false) + useEffect ile mount'u bekliyordu; bu, hydration
+ * tamamlanana kadar BottomNavigation gibi kalıcı UI'ın DOM'da hiç olmamasına ve
+ * ilk tıklamaların boşa gitmesine yol açıyordu. Artık document mevcutsa
+ * (yani client'ta) ilk render'da portal anında oluşturulur. Portal içeriği
+ * server HTML'inin parçası olmadığı için hydration uyuşmazlığı üretmez;
+ * SSG/build aşamasında ise document tanımsız olduğundan null döner.
  */
 interface PortalProps {
   children: React.ReactNode
 }
 
 export default function Portal({ children }: PortalProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-
-  if (!mounted) return null
+  if (typeof document === 'undefined') return null
   return createPortal(children, document.body)
 }
