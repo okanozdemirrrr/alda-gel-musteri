@@ -160,7 +160,7 @@ export default function BildirimlerPage() {
   return (
     <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
-      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
+      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10 safe-area-header">
         <div className="app-content-narrow px-4 py-4">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">

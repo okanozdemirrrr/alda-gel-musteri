@@ -72,7 +72,7 @@ export default function HesapSil() {
   return (
     <div className="app-page bg-[#f7f7f7]">
       {/* Header */}
-      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10">
+      <div className="bg-white border-b border-[#e8e8e8] sticky top-0 z-10 safe-area-header">
         <div className="app-content-narrow px-3 sm:px-4 py-3 sm:py-4 flex items-center gap-3 sm:gap-4">
           <button
             onClick={() => router.back()}

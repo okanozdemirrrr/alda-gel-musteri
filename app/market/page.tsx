@@ -37,7 +37,7 @@ export default function MarketPage() {
   return (
     <div className="app-page bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm safe-area-header">
         <div className="max-w-7xl mx-auto px-4 h-[64px] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button

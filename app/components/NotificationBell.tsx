@@ -5,6 +5,7 @@ import { supabase } from '@/app/lib/supabase'
 import { Bell, X, CheckCheck } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import Portal from './Portal'
 
 interface Notification {
   id: string
@@ -23,15 +24,23 @@ export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  // Panel fixed konumu — çan butonunun viewport'taki yerinden hesaplanır
+  const [panelPos, setPanelPos] = useState({ top: 0, right: 0 })
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadNotifications()
     subscribeToNotifications()
 
-    // Dışarı tıklandığında kapat
+    // Dışarı tıklandığında kapat.
+    // Panel Portal ile body'e taşındığı için dropdownRef.contains() paneli
+    // kapsamaz; hem çan butonu hem panel ref'i birlikte denetlenir.
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      const insideBell = dropdownRef.current?.contains(target)
+      const insidePanel = panelRef.current?.contains(target)
+      if (!insideBell && !insidePanel) {
         setIsOpen(false)
       }
     }
@@ -39,6 +48,26 @@ export default function NotificationBell() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
+
+  // Panel açıkken viewport değişirse (döndürme, resize) konumu güncelle
+  useEffect(() => {
+    if (!isOpen) return
+    const updatePosition = () => {
+      const rect = dropdownRef.current?.getBoundingClientRect()
+      if (!rect) return
+      setPanelPos({
+        top: rect.bottom + 8,
+        right: Math.max(window.innerWidth - rect.right, 12),
+      })
+    }
+    updatePosition()
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('orientationchange', updatePosition)
+    return () => {
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('orientationchange', updatePosition)
+    }
+  }, [isOpen])
 
   const loadNotifications = async () => {
     try {
@@ -227,7 +256,19 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       {/* Bell Icon */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => {
+          if (!isOpen) {
+            // Konumu açılmadan ÖNCE hesapla — panel ilk frame'de doğru yerde belirir
+            const rect = dropdownRef.current?.getBoundingClientRect()
+            if (rect) {
+              setPanelPos({
+                top: rect.bottom + 8,
+                right: Math.max(window.innerWidth - rect.right, 12),
+              })
+            }
+          }
+          setIsOpen(!isOpen)
+        }}
         className="relative p-2 hover:bg-[#f7f7f7] rounded-lg transition-colors"
       >
         <Bell size={22} className="text-[#3c4043]" />
@@ -244,15 +285,20 @@ export default function NotificationBell() {
         )}
       </button>
 
-      {/* Dropdown Panel */}
+      {/* Dropdown Panel — Portal ile body'e render edilir:
+          transform'lu (gpu-layer) ve overflow'lu (.page-scroll-container)
+          ataların stacking context / clipping etkisinden tamamen kurtulur. */}
+      <Portal>
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            ref={panelRef}
             initial={{ opacity: 0, y: -10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute top-full right-0 z-[60] mt-2 w-[min(380px,calc(100%-24px))] max-w-full bg-white rounded-xl shadow-2xl border border-[#e8e8e8] overflow-hidden"
+            className="fixed z-[9999] w-[min(380px,calc(100vw-24px))] bg-white rounded-xl shadow-2xl border border-[#e8e8e8] overflow-hidden"
+            style={{ top: panelPos.top, right: panelPos.right }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[#e8e8e8] bg-gradient-to-r from-orange-50 to-orange-100">
@@ -352,6 +398,7 @@ export default function NotificationBell() {
           </motion.div>
         )}
       </AnimatePresence>
+      </Portal>
     </div>
   )
 }
