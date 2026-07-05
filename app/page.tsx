@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, FileText, User, ShoppingCart, UtensilsCrossed, ChevronRight, MapPin } from 'lucide-react'
+import { Menu, FileText, User, UtensilsCrossed, ChevronRight, MapPin } from 'lucide-react'
 import AuthModal from './components/AuthModal'
 import AddressModal from './components/AddressModal'
 import WelcomeSplash from './components/WelcomeSplash'
@@ -15,79 +15,37 @@ import { isMobile } from './lib/platform'
 // Mobil için animasyon devre dışı
 const shouldAnimate = !isMobile()
 
-// ─── YEMEK / MARKET SEÇİM KARTLARI ──────────────────────────────
-function SplitScreenSelector() {
+// ─── YEMEK SEÇİM KARTI ──────────────────────────────────────────
+function FoodSelectorCard() {
   const router = useRouter()
 
-  const cards = [
-    {
-      label: 'YEMEK',
-      sub: 'Restoranlardan sipariş ver',
-      icon: UtensilsCrossed,
-      route: '/restoranlar',
-      image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80',
-      from: 'from-amber-500',
-      to: 'to-orange-600',
-      hoverFrom: 'group-hover:from-amber-400',
-      hoverTo: 'group-hover:to-orange-500',
-    },
-    {
-      label: 'MARKET',
-      sub: 'Marketlerden alışveriş yap',
-      icon: ShoppingCart,
-      route: '/market',
-      image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&q=80',
-      from: 'from-emerald-500',
-      to: 'to-teal-600',
-      hoverFrom: 'group-hover:from-emerald-400',
-      hoverTo: 'group-hover:to-teal-500',
-    },
-  ]
-
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {cards.map((card) => {
-          const Icon = card.icon
-          return (
-            <motion.button
-              key={card.label}
-              onClick={() => router.push(card.route)}
-              whileHover={shouldAnimate ? { scale: 1.02 } : {}}
-              whileTap={shouldAnimate ? { scale: 0.98 } : {}}
-              className="relative overflow-hidden rounded-3xl h-64 md:h-72 group cursor-pointer shadow-lg"
-            >
-              {/* Arka plan fotoğraf */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url(${card.image})` }}
-              />
-
-              {/* Gradient overlay */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${card.from}/80 ${card.to}/90 transition-all duration-300 ${card.hoverFrom} ${card.hoverTo}`}
-              />
-
-              {/* İçerik */}
-              <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
-                <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl mb-4 group-hover:bg-white/30 transition-colors">
-                  <Icon size={36} strokeWidth={1.5} />
-                </div>
-                <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-2">
-                  {card.label}
-                </h2>
-                <p className="text-sm md:text-base font-medium opacity-90 mb-4">
-                  {card.sub}
-                </p>
-                <div className="flex items-center gap-1 text-sm font-bold bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
-                  Keşfet
-                  <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                </div>
-              </div>
-            </motion.button>
-          )
-        })}
-      </div>
+    <div className="w-full max-w-md mx-auto px-4 py-6 flex justify-center">
+      <motion.button
+        onClick={() => router.push('/restoranlar')}
+        whileHover={shouldAnimate ? { scale: 1.02 } : {}}
+        whileTap={shouldAnimate ? { scale: 0.98 } : {}}
+        className="relative overflow-hidden rounded-3xl w-full h-64 md:h-72 group cursor-pointer shadow-lg"
+      >
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+          style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=800&q=80)' }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-500/80 to-orange-600/90 transition-all duration-300 group-hover:from-amber-400 group-hover:to-orange-500" />
+        <div className="relative h-full flex flex-col items-center justify-center text-white p-6">
+          <div className="bg-white/20 backdrop-blur-sm p-3 rounded-2xl mb-4 group-hover:bg-white/30 transition-colors">
+            <UtensilsCrossed size={36} strokeWidth={1.5} />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-2">YEMEK</h2>
+          <p className="text-sm md:text-base font-medium opacity-90 mb-4">
+            Restoranlardan sipariş ver
+          </p>
+          <div className="flex items-center gap-1 text-sm font-bold bg-white/20 px-4 py-2 rounded-full backdrop-blur-sm group-hover:bg-white/30 transition-colors">
+            Keşfet
+            <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+      </motion.button>
     </div>
   )
 }
@@ -315,13 +273,12 @@ export default function MusteriAnaSayfa() {
                   </p>
                 </motion.div>
 
-                <SplitScreenSelector />
+                <FoodSelectorCard />
               </div>
             ) : (
-              /* ═══ MİSAFİR / ADRES YOK — YEMEK/MARKET kartları ekranın tam ortasında.
-                   100dvh − header (4rem) − bottom nav yüksekliği = kullanılabilir alan */
+              /* ═══ MİSAFİR / ADRES YOK — Yemek kartı ekranın tam ortasında */
               <div className="min-h-[calc(100dvh-4rem-var(--bottom-nav-height))] flex flex-col items-center justify-center py-6">
-                <SplitScreenSelector />
+                <FoodSelectorCard />
               </div>
             )}
           </div>

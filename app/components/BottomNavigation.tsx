@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Home, UtensilsCrossed, Store, ClipboardList, ShoppingBag, User } from 'lucide-react'
+import { Home, UtensilsCrossed, ClipboardList, ShoppingBag, User } from 'lucide-react'
 import { useCart } from '@/app/context/CartContext'
 import Portal from './Portal'
 import GuestLoginPrompt from './GuestLoginPrompt'
@@ -20,7 +20,6 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: '/', label: 'Ana Sayfa', icon: Home, match: (p) => p === '/', requiresAuth: false },
   { href: '/restoranlar', label: 'Yemek', icon: UtensilsCrossed, match: (p) => p.startsWith('/restoranlar') || p.startsWith('/restoran/'), requiresAuth: false },
-  { href: '/market', label: 'Market', icon: Store, match: (p) => p.startsWith('/market'), requiresAuth: false },
   { href: '/siparislerim', label: 'Siparişlerim', icon: ClipboardList, match: (p) => p.startsWith('/siparislerim'), requiresAuth: true },
   { href: '/sepet', label: 'Sepet', icon: ShoppingBag, match: (p) => p === '/sepet', requiresAuth: false },
   { href: '/profil', label: 'Profil', icon: User, match: (p) => p.startsWith('/profil') || p.startsWith('/bildirimler') || p.startsWith('/yardim'), requiresAuth: true },
@@ -82,7 +81,7 @@ export default function BottomNavigation() {
             paddingRight: 'env(safe-area-inset-right, 0px)',
           }}
         >
-          <div className="w-full max-w-full mx-auto flex items-stretch justify-around h-[var(--bottom-nav-height)]">
+          <div className="w-full max-w-lg mx-auto flex items-stretch justify-between h-[var(--bottom-nav-height)] px-1">
             {NAV_ITEMS.map((item) => {
               const { href, label, icon: Icon, match } = item
               const active = match(pathname)
